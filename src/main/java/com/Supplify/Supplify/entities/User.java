@@ -1,13 +1,13 @@
 package com.Supplify.Supplify.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -15,12 +15,36 @@ import lombok.Setter;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "first_name", nullable = false, length = 50) // Maps to first_name column
+    @Column(name = "first_name", nullable = false, length = 50)
+    @NonNull
     private String firstName;
 
-    @Column(name = "last_name", nullable = false, length = 50) // Maps to last_name column
+    @Column(name = "last_name", nullable = false, length = 50)
+    @NonNull
     private String lastName;
+
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    @NonNull
+    private String username;
+
+    @Column(name = "password", nullable = false, length = 50)
+    @NonNull
+    private String password;
+
+    @Column(name = "email", nullable = false, unique = true, length = 50)
+    @NonNull
+    private String email;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @org.hibernate.annotations.CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    @org.hibernate.annotations.UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
