@@ -4,7 +4,6 @@ import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.repositories.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
