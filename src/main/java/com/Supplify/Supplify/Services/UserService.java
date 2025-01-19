@@ -14,6 +14,7 @@ public class UserService {
 
     public void createUser(User user) {
         userRepo.save(user);
+
     }
 
     public Optional<User> findUserByID(int id) {
