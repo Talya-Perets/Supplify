@@ -15,29 +15,42 @@ public class SupplierController {
 
     private final SupplierService supplierService;
 
-    // הוספת ספק חדש לעסק (Add new supplier to business)
     @PostMapping("/business/{businessId}")
-    public ResponseEntity<Supplier> createSupplier(
+    public ResponseEntity<?> createSupplier(
             @RequestBody Supplier supplier,
             @PathVariable Integer businessId) {
 
-        // Call the service to create the supplier and trigger the API call
-        Supplier createdSupplier = supplierService.createSupplier(supplier, businessId);
+        // Log the incoming supplier data (for debugging)
+        System.out.println("Received supplier: " + supplier);
 
-        // Return the created supplier along with the status
-        return ResponseEntity.ok(createdSupplier);
-    }
+        try {
+            // Manual validation of the supplier object
+            if (supplier.getCompanyName() == null || supplier.getCompanyName().isEmpty()) {
+                return ResponseEntity.status(400).body("Supplier company name is required");
+            }
 
-    // קבלת כל הספקים (Get all suppliers)
-    @GetMapping
-    public ResponseEntity<List<Supplier>> getAllSuppliers() {
-        List<Supplier> suppliers = supplierService.getAllSuppliers();
-        return ResponseEntity.ok(suppliers);
-    }
+            if (supplier.getContactPerson() == null || supplier.getContactPerson().isEmpty()) {
+                return ResponseEntity.status(400).body("Contact person is required");
+            }
 
-    // קבלת ספק לפי ID (Get supplier by ID)
-    @GetMapping("/{id}")
-    public ResponseEntity<Supplier> getSupplierById(@PathVariable Integer id) {
-        return ResponseEntity.ok(supplierService.getSupplierById(id));
+            if (supplier.getEmail() == null || supplier.getEmail().isEmpty() || !supplier.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                return ResponseEntity.status(400).body("Valid email is required");
+            }
+
+            if (supplier.getPhone() == null || supplier.getPhone().isEmpty()) {
+                return ResponseEntity.status(400).body("Phone number is required");
+            }
+
+            // Call the service to create the supplier
+            Supplier createdSupplier = supplierService.createSupplier(supplier, businessId);
+
+            // Return the created supplier along with the status
+            return ResponseEntity.status(201).body(createdSupplier);  // HTTP 201 Created
+
+        } catch (Exception e) {
+            // Log the error
+            e.printStackTrace();  // Print stack trace for debugging purposes
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+        }
     }
 }
