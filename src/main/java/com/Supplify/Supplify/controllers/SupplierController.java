@@ -12,24 +12,30 @@ import java.util.List;
 @RequestMapping("/api/suppliers")
 @AllArgsConstructor
 public class SupplierController {
+
     private final SupplierService supplierService;
 
-    // הוספת ספק חדש לעסק
+    // הוספת ספק חדש לעסק (Add new supplier to business)
     @PostMapping("/business/{businessId}")
     public ResponseEntity<Supplier> createSupplier(
             @RequestBody Supplier supplier,
             @PathVariable Integer businessId) {
-        return ResponseEntity.ok(supplierService.createSupplier(supplier, businessId));
+
+        // Call the service to create the supplier and trigger the API call
+        Supplier createdSupplier = supplierService.createSupplier(supplier, businessId);
+
+        // Return the created supplier along with the status
+        return ResponseEntity.ok(createdSupplier);
     }
 
-    // קבלת כל הספקים
+    // קבלת כל הספקים (Get all suppliers)
     @GetMapping
     public ResponseEntity<List<Supplier>> getAllSuppliers() {
         List<Supplier> suppliers = supplierService.getAllSuppliers();
         return ResponseEntity.ok(suppliers);
     }
 
-    // קבלת ספק לפי ID
+    // קבלת ספק לפי ID (Get supplier by ID)
     @GetMapping("/{id}")
     public ResponseEntity<Supplier> getSupplierById(@PathVariable Integer id) {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
