@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import { RootStackParamList } from '../../../App';
 import axios from 'axios';
+import { Alert } from 'react-native';
 
 type SuppliersListScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SuppliersList'>;
 
@@ -30,8 +31,9 @@ const SuppliersListScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]); // הוספת state לספקים
   const [isLoading, setIsLoading] = useState(false); // הוספת state לטעינה
-  
-  useEffect(() => {
+
+
+useEffect(() => {
     const fetchSuppliers = async () => {
         setIsLoading(true);
         try {
@@ -39,19 +41,29 @@ const SuppliersListScreen = () => {
             const response = await axios.get('http://10.9.15.52:8080/api/suppliers/business/20');
             console.log('Response:', response.data);
             setSuppliers(response.data);
+                   
         } catch (error: any) {
             console.error('Error fetching suppliers:', {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status
             });
-        } finally {
+            
+            // הצג הודעת שגיאה
+            Alert.alert(
+                "שגיאה",
+                "אירעה שגיאה בטעינת רשימת הספקים",
+                [{ text: "אישור" }]
+            );
+            
+        } 
+        finally {
             setIsLoading(false);
         }
     };
 
     fetchSuppliers();
-}, []);
+}, []); // הפונקציה תרוץ פעם אחת כשהקומפוננטה נטענת
   const handleEditSupplier = (supplier: Supplier) => {
     // Navigate to edit screen with supplier data
     console.log('עריכת ספק:', supplier);

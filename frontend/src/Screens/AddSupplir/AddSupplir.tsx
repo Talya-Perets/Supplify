@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import { RootStackParamList } from '../../../App'; 
 import axios from 'axios';
+import { Alert } from 'react-native';
 type AddSupplierScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddSupplier'>;
 
 const AddSupplierScreen = () => {
@@ -36,17 +37,42 @@ const AddSupplierScreen = () => {
         supplierData,
         {
           headers: {
-            'Content-Type': 'application/json', // Only the Content-Type is needed
+            'Content-Type': 'application/json',
           },
         }
       );
-
+  
       console.log('Supplier added successfully:', response.data);
+      
+      Alert.alert(
+        "הודעה",
+        "הספק נוסף בהצלחה",
+        [
+          { 
+            text: "אישור",
+            onPress: () => {
+              // איפוס הטופס עם השדות הנכונים
+              setSupplierData({
+                companyName: '',
+                contactPerson: '',
+                email: '',
+                phone: ''
+              });
+            }
+          }
+        ]
+      );
+  
     } catch (error) {
       console.error('Error adding supplier:', error);
+      Alert.alert(
+        "שגיאה",
+        "אירעה שגיאה בהוספת הספק",
+        [{ text: "אישור" }]
+      );
     }
   };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
