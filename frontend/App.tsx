@@ -3,12 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import LoginScreen from './src/components/login/login';
-import RegisterScreen from './src/components/registration/registration';
+
+import LoginScreen from './src/Screens/login/login';
+import RegisterScreen from './src/Screens/registration/registration';
 // import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
-// import HomeScreen from './src/screens/HomeScreen';  
-// import AddSupplierScreen from './src/screens/add-supplier-screen';
-// import AddProductScreen from './src/screens/AddProductScreen';
+ import HomeScreen from './src/Screens/Home/Home'
+ import AddSupplierScreen from './src/Screens/AddSupplir/AddSupplir';
+import AddProductScreen from './src/Screens/AddProduct/AddProductScreen';
+import SuppliersListScreen from './src/Screens/SuppliersList/SuppliersList';
 
 
 export type RootStackParamList = {
@@ -18,6 +20,7 @@ export type RootStackParamList = {
   Home:undefined;
   AddSupplier:undefined;
   AddProduct: undefined;
+  SuppliersList:undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -32,14 +35,11 @@ const App = () => {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        {<Stack.Screen name="Register" component={RegisterScreen} />
-        /*<Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-        <Stack.Screen name="AddProduct" component={AddProductScreen} /> */}
-        
-
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
+      <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>
