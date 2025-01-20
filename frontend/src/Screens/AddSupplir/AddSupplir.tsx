@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
+//import { doPost } from '../../path/to/your/axiosUtils';
+
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
   ScrollView,
   SafeAreaView
 } from 'react-native';
@@ -12,7 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList } from '../../../App'; 
+import { RootStackParamList } from '../../../App';
+import axios from 'axios';
 
 type AddSupplierScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddSupplier'>;
 
@@ -22,22 +25,38 @@ const AddSupplierScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const [supplierData, setSupplierData] = useState({
-    name: '',
+    companyName: '',
     contactPerson: '',
-    phone: '',
-    email: ''
+    email: '',
+    phone: ''
   });
 
-  const handleAddSupplier = () => {
-    console.log('הוספת ספק:', supplierData);
+
+  const handleAddSupplier = async () => {
+    try {
+      const response = await axios.post(
+        ' http://10.9.18.46:8080/api/suppliers/business/12',
+        supplierData,
+        {
+          headers: {
+            'Content-Type': 'application/json', // Only the Content-Type is needed
+          },
+        }
+      );
+
+      console.log('Supplier added successfully:', response.data);
+    } catch (error) {
+      console.error('Error adding supplier:', error);
+    }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-           <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
             <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>הוספת ספק חדש</Text>
@@ -47,8 +66,8 @@ const AddSupplierScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="שם ספק"
-              value={supplierData.name}
-              onChangeText={(text) => setSupplierData({ ...supplierData, name: text })}
+              value={supplierData.companyName}
+              onChangeText={(text) => setSupplierData({ ...supplierData, companyName: text })}
             />
             <TextInput
               style={styles.input}
@@ -58,17 +77,17 @@ const AddSupplierScreen = () => {
             />
             <TextInput
               style={styles.input}
-              placeholder="טלפון"
-              value={supplierData.phone}
-              onChangeText={(text) => setSupplierData({ ...supplierData, phone: text })}
-              keyboardType="phone-pad"
-            />
-            <TextInput
-              style={styles.input}
               placeholder="מייל"
               value={supplierData.email}
               onChangeText={(text) => setSupplierData({ ...supplierData, email: text })}
               keyboardType="email-address"
+            />
+            <TextInput   
+              style={styles.input}
+              placeholder="טלפון"
+              value={supplierData.phone}
+              onChangeText={(text) => setSupplierData({ ...supplierData, phone: text })}
+              keyboardType="phone-pad"
             />
           </View>
           <TouchableOpacity style={styles.button} onPress={handleAddSupplier}>
