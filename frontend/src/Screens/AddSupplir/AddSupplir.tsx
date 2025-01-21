@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-//import { doPost } from '../../path/to/your/axiosUtils';
-
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
   ScrollView,
   SafeAreaView
 } from 'react-native';
@@ -14,9 +12,9 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList } from '../../../App';
+import { RootStackParamList } from '../../../App'; 
 import axios from 'axios';
-
+import { Alert } from 'react-native';
 type AddSupplierScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddSupplier'>;
 
 const AddSupplierScreen = () => {
@@ -25,38 +23,62 @@ const AddSupplierScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const [supplierData, setSupplierData] = useState({
-    companyName: '',
+     companyName:'',
     contactPerson: '',
     email: '',
-    phone: ''
-  });
-
+    phone:''
+  }
+  );
 
   const handleAddSupplier = async () => {
     try {
       const response = await axios.post(
-        ' http://10.9.18.46:8080/api/suppliers/business/12',
+        'http://10.9.15.52:8080/api/suppliers/business/20',
         supplierData,
         {
           headers: {
-            'Content-Type': 'application/json', // Only the Content-Type is needed
+            'Content-Type': 'application/json',
           },
         }
       );
-
+  
       console.log('Supplier added successfully:', response.data);
+      
+      Alert.alert(
+        "הודעה",
+        "הספק נוסף בהצלחה",
+        [
+          { 
+            text: "אישור",
+            onPress: () => {
+              // איפוס הטופס עם השדות הנכונים
+              setSupplierData({
+                companyName: '',
+                contactPerson: '',
+                email: '',
+                phone: ''
+              });
+            }
+          }
+        ]
+      );
+  
     } catch (error) {
       console.error('Error adding supplier:', error);
+      Alert.alert(
+        "שגיאה",
+        "אירעה שגיאה בהוספת הספק",
+        [{ text: "אישור" }]
+      );
     }
   };
-
-
+  
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+           <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
             <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>הוספת ספק חדש</Text>
@@ -82,7 +104,7 @@ const AddSupplierScreen = () => {
               onChangeText={(text) => setSupplierData({ ...supplierData, email: text })}
               keyboardType="email-address"
             />
-            <TextInput   
+             <TextInput
               style={styles.input}
               placeholder="טלפון"
               value={supplierData.phone}

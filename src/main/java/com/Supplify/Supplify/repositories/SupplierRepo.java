@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 public interface SupplierRepo  extends JpaRepository<Supplier, Integer> {
-    List<Supplier> findSupplierBySupplierId(Integer SupplierId);
+
+
 }

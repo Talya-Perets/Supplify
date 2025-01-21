@@ -13,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/suppliers")
 @RequiredArgsConstructor
@@ -105,4 +107,10 @@ public class SupplierController {
             super(message);
         }
     }
+    @GetMapping("/business/{businessId}")
+    public ResponseEntity<List<Supplier>> getSuppliersByBusinessId(@PathVariable Integer businessId) {
+        List<Supplier> suppliers = supplierService.getSuppliersByBusinessId(businessId);
+        return ResponseEntity.ok(suppliers);
+    }
+
 }

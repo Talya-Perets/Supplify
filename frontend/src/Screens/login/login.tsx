@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } fro
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import { RootStackParamList } from '../../../App'; 
+import { RootStackParamList } from '../../../App.tsx';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -24,7 +24,7 @@ const LoginScreen = () => {
           <Icon name="user" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="שם משתמש"
+            placeholder="email"
             value={username}
             onChangeText={setUsername}
             placeholderTextColor="#A0A0A0"

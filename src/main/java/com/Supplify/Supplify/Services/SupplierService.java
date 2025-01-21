@@ -5,8 +5,11 @@ import com.Supplify.Supplify.repositories.BusinessSupplierRepo;
 import com.Supplify.Supplify.repositories.SupplierRepo;
 import com.Supplify.Supplify.entities.Supplier;
 import lombok.AllArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
+
 
 import java.util.List;
 
@@ -34,4 +37,12 @@ public class SupplierService {
         return supplierRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
     }
+    public List<Supplier> getSuppliersByBusinessId(Integer businessId) {
+        List<Integer> supplierIds = businessSupplierRepo.findSupplierIdsByBusinessId(businessId);
+        return supplierIds.stream()
+                .map(supplierId -> supplierRepo.findById(supplierId)
+                        .orElseThrow(() -> new RuntimeException("Supplier not found")))
+                .collect(Collectors.toList());
+    }
+
 }
