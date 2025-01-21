@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import { RootStackParamList } from '../../../App.tsx';
+import { Alert } from 'react-native';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -13,8 +14,49 @@ const LoginScreen = () => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    
+    try {
+      const response = await fetch('http://localhost:8080/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Successful login
+        Alert.alert('Success', 'Login successful');
+        
+        // Optionally, save the token or user info in AsyncStorage
+        // For now, assuming that the response doesn't include a token
+        // You could save a token here, e.g., with AsyncStorage
+  
+        navigation.navigate('Home'); // Navigate to Home screen
+      } else {
+        // Login failed
+        Alert.alert('Error', data.message || 'Login failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please try again.');
+      console.error('Login error:', error);
+    } finally {
+      
+        }
+  };
+  
   return (
+    
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Supplify</Text>

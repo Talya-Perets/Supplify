@@ -1,5 +1,4 @@
 package com.Supplify.Supplify.Services;
-
 import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.repositories.UserRepo;
 import lombok.AllArgsConstructor;

@@ -2,7 +2,6 @@ package com.Supplify.Supplify.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -11,9 +10,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "USER")
-public class User {
 
+@Table(name = "USER")
+
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -42,4 +42,7 @@ public class User {
     @NonNull
     private int phone;
 
+    @Column(name = "role", nullable = false, unique = true, length = 50)
+    @NonNull
+    private String role;
 }

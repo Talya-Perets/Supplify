@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
+
 public class UserController {
     private final UserService userService;
 
@@ -20,7 +21,8 @@ public class UserController {
                 request.getUsername(),
                 request.getPassword(),
                 request.getBusiness_name(),
-                request.getPhone()
+                request.getPhone(),
+                request.getRole()
         );
         return ResponseEntity.ok(userService.createUser(user));
     }
@@ -53,6 +55,7 @@ class RegisterUserRequest {
     private String password;
     private String business_name;
     private int phone;
+    private String role;
 }
 
 @Data
