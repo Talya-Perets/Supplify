@@ -1,5 +1,4 @@
 package com.Supplify.Supplify.Services;
-
 import com.Supplify.Supplify.entities.BusinessSupplier;
 import com.Supplify.Supplify.repositories.BusinessSupplierRepo;
 import com.Supplify.Supplify.repositories.SupplierRepo;
@@ -30,9 +29,14 @@ public class SupplierService {
         businessSupplierRepo.save(businessSupplier);
         return savedSupplier;
     }
+
     public List<Supplier> getAllSuppliers() {
         return supplierRepo.findAll();
     }
+
+    //public List<Supplier> getAllSuppliersbyBusinessId(Integer businessId) {
+   // }
+
     public Supplier getSupplierById(Integer id) {
         return supplierRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));

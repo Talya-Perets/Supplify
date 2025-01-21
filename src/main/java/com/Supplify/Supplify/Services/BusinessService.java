@@ -12,7 +12,6 @@ import java.util.Optional;
 public class BusinessService {
     private final BusinessRepo businessRepo;
 
-
 }
 
 

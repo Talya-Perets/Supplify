@@ -34,17 +34,12 @@ public class User {
     @NonNull
     private String password;
 
-    @Column(name = "email", nullable = false, unique = true, length = 50)
+    @Column(name = "business_name", nullable = false, unique = true, length = 50)
     @NonNull
-    private String email;
+    private String business_name;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @org.hibernate.annotations.CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(name = "phone", nullable = false, unique = true, length = 50)
+    @NonNull
+    private int phone;
 
-    @Column(name = "updated_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    @org.hibernate.annotations.UpdateTimestamp
-    private LocalDateTime updatedAt;
 }
