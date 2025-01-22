@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, 
-  StyleSheet, SafeAreaView 
+  StyleSheet, SafeAreaView, Alert 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import Icon from 'react-native-vector-icons/Feather';
-import { RootStackParamList } from '../../../App.tsx';
+import { API_BASE_URL, RootStackParamList } from '../../../App.tsx';
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -15,24 +14,100 @@ const SignUpScreen = () => {
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = () => {
-    // כאן תבוצע לוגיקת הרשמה
-    console.log('הרשמה:', { 
-      firstName, 
-      lastName, 
-      businessName, 
-      phone, 
-      email 
-    });
+  const validateForm = () => {
+    if (!firstName.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם פרטי');
+      return false;
+    }
+    if (!lastName.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם משפחה');
+      return false;
+    }
+    if (!username.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם משתמש');
+      return false;
+    }
+    if (!businessName.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם עסק');
+      return false;
+    }
+    if (!phone.trim()) {
+      Alert.alert('שגיאה', 'נא להזין מספר טלפון');
+      return false;
+    }
+    // Validate phone number format
+   // const phoneRegex = /^[0-9]{10}$/;
+  //  if (!phoneRegex.test(phone)) {
+  //    Alert.alert('שגיאה', 'מספר טלפון לא תקין');
+  //    return false;
+  //  }
+    if (!role.trim()) {
+      Alert.alert('שגיאה', 'נא להזין תפקיד');
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert('שגיאה', 'סיסמה חייבת להכיל לפחות 6 תווים');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('שגיאה', 'סיסמאות לא תואמות');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          user_name: username,
+          password: password,
+          business_name: businessName,  
+          phone_number: phone,         
+          role: role,
+        }),
+      });
     
-    // לאחר הרשמה, עבור למסך ההתחברות
-    navigation.navigate('Login');
+      let data;
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Response text:', text);
+        throw new Error('Invalid JSON response from server');
+      }
+    
+      if (response.ok) {
+        Alert.alert('הצלחה', 'ההרשמה בוצעה בהצלחה', [
+          { text: 'OK', onPress: () => navigation.navigate('Login') }
+        ]);
+      } else {
+        Alert.alert('שגיאה', data?.message || 'אירעה שגיאה בתהליך ההרשמה');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('שגיאה', 'אירעה שגיאה בתהליך ההרשמה. נא לנסות שוב מאוחר יותר');
+    }
   };
 
   return (
@@ -48,7 +123,7 @@ const SignUpScreen = () => {
             onChangeText={setLastName}
             placeholderTextColor="#A0A0A0"
           />
-           <TextInput
+          <TextInput
             style={styles.halfInput}
             placeholder="שם פרטי"
             value={firstName}
@@ -56,6 +131,15 @@ const SignUpScreen = () => {
             placeholderTextColor="#A0A0A0"
           />
         </View>
+      
+        <TextInput
+          style={styles.input}
+          placeholder="שם משתמש"
+          value={username}
+          onChangeText={setUsername}
+          placeholderTextColor="#A0A0A0"
+        />
+
 
         <TextInput
           style={styles.input}
@@ -72,15 +156,7 @@ const SignUpScreen = () => {
           onChangeText={setPhone}
           keyboardType="phone-pad"
           placeholderTextColor="#A0A0A0"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="מייל"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          placeholderTextColor="#A0A0A0"
+          maxLength={10}
         />
 
         <TextInput
@@ -101,11 +177,22 @@ const SignUpScreen = () => {
           placeholderTextColor="#A0A0A0"
         />
 
+        <TextInput
+          style={styles.input}
+          placeholder="תפקיד"
+          value={role}
+          onChangeText={setRole}
+          placeholderTextColor="#A0A0A0"
+        />
+
         <TouchableOpacity 
-          style={styles.button}
+          style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleSignUp}
+          disabled={isLoading}
         >
-          <Text style={styles.buttonText}>הירשם</Text>
+          <Text style={styles.buttonText}>
+            {isLoading ? 'מבצע הרשמה...' : 'הירשם'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -150,6 +237,7 @@ const styles = StyleSheet.create({
     borderColor: '#D1D1D1',
     borderRadius: 8,
     paddingHorizontal: 16,
+    textAlign: 'right',
   },
   input: {
     height: 50,
@@ -158,6 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     marginBottom: 16,
+    textAlign: 'right',
   },
   button: {
     backgroundColor: '#4A90E2',
@@ -165,6 +254,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#A0A0A0',
   },
   buttonText: {
     color: 'white',

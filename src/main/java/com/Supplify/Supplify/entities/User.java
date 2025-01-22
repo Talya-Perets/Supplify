@@ -34,13 +34,13 @@ public class User {
     @NonNull
     private String password;
 
-    @Column(name = "business_name", nullable = false, unique = true, length = 50)
+    @Column(name = "business_name", nullable = false, unique = false, length = 50)
     @NonNull
-    private String business_name;
+    private String businessName;
 
     @Column(name = "phone", nullable = false, unique = true, length = 50)
     @NonNull
-    private int phone;
+    private String  phone;
 
     @Column(name = "role", nullable = false, unique = true, length = 50)
     @NonNull

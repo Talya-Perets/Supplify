@@ -13,7 +13,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import { API_BASE_URL, RootStackParamList } from '../../../App'; 
-import axios from 'axios';
 import { Alert } from 'react-native';
 type AddSupplierScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddSupplier'>;
 
