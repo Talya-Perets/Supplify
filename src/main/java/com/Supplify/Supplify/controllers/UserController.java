@@ -123,26 +123,26 @@ public class UserController {
         }
         return errors;
     }
-}
 
-@Data
-class RegisterUserRequest {
-    private String firstName;
-    private String lastName;
-    private String username;
-    private String password;
-    private String businessName;
-    private String phone;
-    private String role;
-}
+    @Data
+    public class RegisterUserRequest {
+        private String firstName;
+        private String lastName;
+        private String username;
+        private String password;
+        private String businessName;
+        private String phone;
+        private String role;
+    }
 
-@Data
-class LoginRequest {
-    private String username;
-    private String password;
-}
+    @Data
+    public static class LoginRequest {
+        private String username;
+        private String password;
+    }
 
-@Data
-class LoginResponse {
-    private final String message;
+    @Data
+    public class LoginResponse {
+        private final String message;
+    }
 }

@@ -16,7 +16,7 @@ public class Supplier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int supplierId;
 
-    @Column(name = "comapny_name", unique = true)
+    @Column(name = "comapny_name")
     private String companyName;
 
     @Column(name = "contact_person", nullable = false)

@@ -17,6 +17,13 @@ public class UserService {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
+        if (userRepo.existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        // Check if the phone number has a valid length (10 digits)
+        if (user.getPhone().length() != 10) {
+            throw new IllegalArgumentException("Phone number must be 10 digits long");
+        }
         // Encrypt password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepo.save(user);
