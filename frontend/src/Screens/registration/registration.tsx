@@ -68,9 +68,9 @@ const SignUpScreen = () => {
     if (!validateForm()) {
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/api/users/register`, {
         method: 'POST',
@@ -78,25 +78,18 @@ const SignUpScreen = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          user_name: username,
-          password: password,
-          business_name: businessName,  
-          phone_number: phone,         
-          role: role,
+          firstName,        // Corrected field names
+          lastName,
+          username,
+          password,
+          businessName,
+          phone,
+          role,
         }),
       });
-    
-      let data;
-      const text = await response.text();
-      try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('Response text:', text);
-        throw new Error('Invalid JSON response from server');
-      }
-    
+  
+      const data = await response.json();
+  
       if (response.ok) {
         Alert.alert('הצלחה', 'ההרשמה בוצעה בהצלחה', [
           { text: 'OK', onPress: () => navigation.navigate('Login') }
@@ -107,8 +100,11 @@ const SignUpScreen = () => {
     } catch (error) {
       console.error('Registration error:', error);
       Alert.alert('שגיאה', 'אירעה שגיאה בתהליך ההרשמה. נא לנסות שוב מאוחר יותר');
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
