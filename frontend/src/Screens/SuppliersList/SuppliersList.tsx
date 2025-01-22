@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList } from '../../../App';
+import { API_BASE_URL, RootStackParamList } from '../../../App';
 import axios from 'axios';
 import { Alert } from 'react-native';
 
@@ -33,37 +33,40 @@ const SuppliersListScreen = () => {
   const [isLoading, setIsLoading] = useState(false); // הוספת state לטעינה
 
 
-useEffect(() => {
+  useEffect(() => {
     const fetchSuppliers = async () => {
-        setIsLoading(true);
-        try {
-            console.log('Attempting to fetch suppliers for business ID: 20');
-            const response = await axios.get('http://10.9.15.52:8080/api/suppliers/business/20');
-            console.log('Response:', response.data);
-            setSuppliers(response.data);
-                   
-        } catch (error: any) {
-            console.error('Error fetching suppliers:', {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
-            
-            // הצג הודעת שגיאה
-            Alert.alert(
-                "שגיאה",
-                "אירעה שגיאה בטעינת רשימת הספקים",
-                [{ text: "אישור" }]
-            );
-            
-        } 
-        finally {
-            setIsLoading(false);
+      setIsLoading(true);
+      try {
+        console.log('Attempting to fetch suppliers for business ID: 20');
+        const response = await fetch(`${API_BASE_URL}/api/suppliers/business/20`); // Use the base URL here
+  
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Response:', data);
+          setSuppliers(data);
+        } else {
+          const errorData = await response.json();
+          console.error('Error fetching suppliers:', errorData);
+          Alert.alert(
+            "שגיאה",
+            errorData.message || "אירעה שגיאה בטעינת רשימת הספקים",
+            [{ text: "אישור" }]
+          );
         }
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        Alert.alert(
+          "שגיאה",
+          "אירעה שגיאה בטעינת רשימת הספקים",
+          [{ text: "אישור" }]
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
-
+  
     fetchSuppliers();
-}, []); // הפונקציה תרוץ פעם אחת כשהקומפוננטה נטענת
+  }, []); // הפונקציה תרוץ פעם אחת כשהקומפוננטה נטענת
   const handleEditSupplier = (supplier: Supplier) => {
     // Navigate to edit screen with supplier data
     console.log('עריכת ספק:', supplier);
@@ -71,10 +74,30 @@ useEffect(() => {
 
   const handleDeleteSupplier = async (supplierId: number) => {
     try {
-      await axios.delete(`http://localhost:8080/api/suppliers/${supplierId}`);
-      setSuppliers(suppliers.filter(supplier => supplier.supplierId !== supplierId));
+      const response = await fetch(`${API_BASE_URL}/api/suppliers/${supplierId}`, {
+        method: 'DELETE',  // Use DELETE method
+      });
+  
+      if (response.ok) {
+        // Filter the suppliers list to remove the deleted supplier
+        setSuppliers(suppliers.filter(supplier => supplier.supplierId !== supplierId));
+        console.log('Supplier deleted successfully');
+      } else {
+        const errorData = await response.json();
+        console.error('Error deleting supplier:', errorData);
+        Alert.alert(
+          "שגיאה",
+          errorData.message || "אירעה שגיאה במחיקת הספק",
+          [{ text: "אישור" }]
+        );
+      }
     } catch (error) {
       console.error('Error deleting supplier:', error);
+      Alert.alert(
+        "שגיאה",
+        "אירעה שגיאה במחיקת הספק",
+        [{ text: "אישור" }]
+      );
     }
   };
 

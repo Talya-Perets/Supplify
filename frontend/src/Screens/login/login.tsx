@@ -1,67 +1,58 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import { RootStackParamList } from '../../../App.tsx';
-import { Alert } from 'react-native';
-
+import { API_BASE_URL, RootStackParamList } from '../../../App.tsx';
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const handleLogin = async () => {
+    // Validate inputs first
     if (!username || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
+  
+    setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:8080/api/users/login', {
+      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        body: JSON.stringify({ username, password }),
       });
-  
+      
       const data = await response.json();
+      console.log(data); // Keep for debugging
   
       if (response.ok) {
         // Successful login
         Alert.alert('Success', 'Login successful');
-        
-        // Optionally, save the token or user info in AsyncStorage
-        // For now, assuming that the response doesn't include a token
-        // You could save a token here, e.g., with AsyncStorage
-  
-        navigation.navigate('Home'); // Navigate to Home screen
+        navigation.navigate('Home');
       } else {
-        // Login failed
-        Alert.alert('Error', data.message || 'Login failed');
+        // Failed login
+        Alert.alert('Error', data.message || 'Invalid username or password');
       }
     } catch (error) {
+      console.error(error);
       Alert.alert('Error', 'Network error. Please try again.');
-      console.error('Login error:', error);
     } finally {
-      
-        }
+      setIsLoading(false);
+    }
   };
   
   return (
-    
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Supplify</Text>
 
-        {/* שדה שם משתמש */}
         <View style={styles.inputContainer}>
           <Icon name="user" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
@@ -70,10 +61,11 @@ const LoginScreen = () => {
             value={username}
             onChangeText={setUsername}
             placeholderTextColor="#A0A0A0"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
         </View>
 
-        {/* שדה סיסמא */}
         <View style={styles.inputContainer}>
           <Icon name="lock" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
@@ -86,19 +78,18 @@ const LoginScreen = () => {
           />
         </View>
 
-        {/* כפתור התחברות */}
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={() => navigation.navigate('Home')} // ניווט למסך הבית
+         <TouchableOpacity 
+        style={[styles.button, isLoading && styles.buttonDisabled]} 
+        onPress={handleLogin} 
+        disabled={isLoading}
       >
-          <Icon name="log-in" size={20} color="white" style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>התחבר</Text>
-        </TouchableOpacity>
+        <Icon name="log-in" size={20} color="white" style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>{isLoading ? 'מתחבר...' : 'התחבר'}</Text>
+      </TouchableOpacity>
 
-        {/* קישורים לשכחת סיסמא וההרשמה */}
         <View style={styles.linkContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-        <Text style={styles.link}>שכחתי סיסמא</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.link}>שכחתי סיסמא</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={styles.link}>הירשם</Text>
@@ -167,6 +158,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginVertical: 16,
+  },
+  buttonDisabled: {
+    backgroundColor: '#A0A0A0',
   },
   buttonIcon: {
     marginRight: 10,

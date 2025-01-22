@@ -11,6 +11,7 @@ import RegisterScreen from './src/Screens/registration/registration';
  import AddSupplierScreen from './src/Screens/AddSupplir/AddSupplir';
 import AddProductScreen from './src/Screens/AddProduct/AddProductScreen';
 import SuppliersListScreen from './src/Screens/SuppliersList/SuppliersList';
+export const API_BASE_URL = 'http://10.9.9.12:8080';
 
 
 export type RootStackParamList = {

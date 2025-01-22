@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList } from '../../../App'; 
+import { API_BASE_URL, RootStackParamList } from '../../../App'; 
 import axios from 'axios';
 import { Alert } from 'react-native';
 type AddSupplierScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddSupplier'>;
@@ -32,42 +32,50 @@ const AddSupplierScreen = () => {
 
   const handleAddSupplier = async () => {
     try {
-      const response = await axios.post(
-        'http://10.9.15.52:8080/api/suppliers/business/20',
-        supplierData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/suppliers/business/20`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(supplierData),
+      });
   
-      console.log('Supplier added successfully:', response.data);
-      
-      Alert.alert(
-        "הודעה",
-        "הספק נוסף בהצלחה",
-        [
-          { 
-            text: "אישור",
-            onPress: () => {
-              // איפוס הטופס עם השדות הנכונים
-              setSupplierData({
-                companyName: '',
-                contactPerson: '',
-                email: '',
-                phone: ''
-              });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Supplier added successfully:', data);
+  
+        Alert.alert(
+          "הודעה",
+          "הספק נוסף בהצלחה",
+          [
+            { 
+              text: "אישור",
+              onPress: () => {
+                // Reset form with appropriate fields
+                setSupplierData({
+                  companyName: '',
+                  contactPerson: '',
+                  email: '',
+                  phone: ''
+                });
+              }
             }
-          }
-        ]
-      );
-  
+          ]
+        );
+      } else {
+        const errorData = await response.json();
+        console.error('Error adding supplier:', errorData);
+        Alert.alert(
+          "שגיאה",
+          errorData.message || "אירעה שגיאה בהוספת הספק",
+          [{ text: "אישור" }]
+        );
+      }
     } catch (error) {
       console.error('Error adding supplier:', error);
       Alert.alert(
         "שגיאה",
-        "אירעה שגיאה בהוספת הספק",
+        "שגיאת רשת, נסה שוב.",
         [{ text: "אישור" }]
       );
     }
