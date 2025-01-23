@@ -16,10 +16,9 @@ import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import { RootStackParamList, API_BASE_URL } from '../../../App';
 import { launchImageLibrary } from 'react-native-image-picker';
-
 type AddProductScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddProduct'>;
 
-const AddProduct = () => {
+const AddProductScreen = () => {
   const navigation = useNavigation<AddProductScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -254,4 +253,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddProduct;
+export default AddProductScreen;

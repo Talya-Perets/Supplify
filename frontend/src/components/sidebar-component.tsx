@@ -4,9 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App'; 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
-
-
 type SidebarNavigationProp = StackNavigationProp<RootStackParamList>;
 
 interface SidebarProps {

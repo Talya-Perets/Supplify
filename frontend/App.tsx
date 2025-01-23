@@ -9,7 +9,7 @@ import RegisterScreen from './src/Screens/registration/registration';
 // import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
  import HomeScreen from './src/Screens/Home/Home'
  import AddSupplierScreen from './src/Screens/AddSupplir/AddSupplir';
-import AddProductScreen from './src/Screens/AddProduct/AddProductScreen';
+import AddProductScreen from './src/Screens/AddProduct/AddProduct';
 import SuppliersListScreen from './src/Screens/SuppliersList/SuppliersList';
 export const API_BASE_URL = 'http://10.9.22.104:8080';
 
@@ -41,6 +41,7 @@ const App = () => {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
       <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
+      <Stack.Screen name="AddProduct" component={AddProductScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>
