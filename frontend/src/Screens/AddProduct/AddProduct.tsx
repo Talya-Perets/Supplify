@@ -14,12 +14,12 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList } from '../../../App'; 
+import { RootStackParamList, API_BASE_URL } from '../../../App';
 import { launchImageLibrary } from 'react-native-image-picker';
 
 type AddProductScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddProduct'>;
 
-const AddProductScreen = () => {
+const AddProduct = () => {
   const navigation = useNavigation<AddProductScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -27,17 +27,65 @@ const AddProductScreen = () => {
   const [productData, setProductData] = useState({
     barcode: '',
     name: '',
-    price: '',
     description: '',
     supplier: '',
+    cost: '',
     sellingPrice: '',
-    requestedStock: '',
-    image: null as string | null,
+    stockQuntity: '',
   });
 
-  const handleAddProduct = () => {
-    console.log('הוספת מוצר:', productData);
-    Alert.alert('הודעה', 'המוצר נוסף בהצלחה!');
+  const handleAddProduct = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/product`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Product added successfully:', data);
+
+        Alert.alert(
+          "הודעה",
+          "המוצר נוסף בהצלחה",
+          [
+            { 
+              text: "אישור",
+              onPress: () => {
+                // Reset form with appropriate fields
+                setProductData({
+                  barcode: '',
+                  name: '',
+                  cost: '',
+                  description: '',
+                  supplier: '',
+                  sellingPrice: '',
+                  stockQuntity: '',
+                });
+              }
+            }
+          ]
+        );
+      } else {
+        const errorData = await response.json();
+        console.error('Error adding product:', errorData);
+        Alert.alert(
+          "שגיאה",
+          errorData.message || "אירעה שגיאה בהוספת המוצר",
+          [{ text: "אישור" }]
+        );
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+      Alert.alert(
+        "שגיאה",
+        "שגיאת רשת, נסה שוב.",
+        [{ text: "אישור" }]
+      );
+    }
   };
 
   const handleImagePicker = () => {
@@ -47,7 +95,7 @@ const AddProductScreen = () => {
       } else if (response.errorMessage) {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else if (response.assets && response.assets[0].uri) {
-        setProductData({ ...productData, image: response.assets[0].uri });
+    //    setProductData({ ...productData, image: response.assets[0].uri });
       }
     });
   };
@@ -77,17 +125,12 @@ const AddProductScreen = () => {
               value={productData.name}
               onChangeText={(text) => setProductData({ ...productData, name: text })}
             />
-            <TouchableOpacity style={styles.imagePickerButton} onPress={handleImagePicker}>
-              <Text style={styles.imagePickerText}>העלה תמונה</Text>
-            </TouchableOpacity>
-            {productData.image && (
-              <Image source={{ uri: productData.image }} style={styles.productImage} />
-            )}
+        
             <TextInput
               style={styles.input}
               placeholder="מחיר (אופציונלי)"
-              value={productData.price}
-              onChangeText={(text) => setProductData({ ...productData, price: text })}
+              value={productData.cost}
+              onChangeText={(text) => setProductData({ ...productData, cost: text })}
               keyboardType="numeric"
             />
             <TextInput
@@ -114,8 +157,8 @@ const AddProductScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="מלאי מתבקש"
-                value={productData.requestedStock}
-                onChangeText={(text) => setProductData({ ...productData, requestedStock: text })}
+                value={productData.stockQuntity}
+                onChangeText={(text) => setProductData({ ...productData, stockQuntity: text })}
                 keyboardType="numeric"
               />
             )}
@@ -211,4 +254,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddProductScreen;
+export default AddProduct;
