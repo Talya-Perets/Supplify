@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/product")
 @RequiredArgsConstructor
 public class ProductController {
     private final Logger logger = LoggerFactory.getLogger(ProductController.class);
@@ -75,22 +75,4 @@ public class ProductController {
             return ResponseEntity.status(500).body("Error deleting product");
         }
     }
-
-    // Find all suppliers that provide a specific product
-    /*
-    @GetMapping("/suppliers/{productName}")
-    public ResponseEntity<List<Integer>> findSuppliersByProductName(@PathVariable String productName) {
-        try {
-            List<Integer> suppliers = productsService.findSuppliersByProductName(productName);
-            if (suppliers.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(suppliers);
-        } catch (Exception e) {
-            logger.error("Error finding suppliers for product '{}': {}", productName, e.getMessage(), e);
-            return ResponseEntity.status(500).body(null);
-        }
-    }
-
-     */
 }

@@ -1,6 +1,4 @@
 package com.Supplify.Supplify.entities;
-
-
 import jakarta.persistence.*;
 import lombok.*;
 

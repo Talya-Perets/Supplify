@@ -4,13 +4,11 @@ import com.Supplify.Supplify.utils.EmailValidator;
 import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.repositories.BusinessRepo;
 import com.Supplify.Supplify.utils.PhoneValidator;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@AllArgsConstructor
 @RequiredArgsConstructor
 @Service
 public class BusinessService {
@@ -44,7 +42,6 @@ public class BusinessService {
 
             Business business = businessRepo.saveAndFlush(new Business(name, email, address, phone));
             logger.info("Successfully created a new business with ID: {}", business.getId());
-
             return business;
         } catch (Exception e) {
             logger.error("Failed to create a new business: {}", e.getMessage(), e);

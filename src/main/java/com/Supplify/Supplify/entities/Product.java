@@ -9,28 +9,18 @@ import lombok.*;
 @Entity
 @Table(name = "products")
 public class Product {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "id", nullable = false, length = 45)
+    private String id;
 
     @Column(name = "supplier_id", nullable = false)
     private int supplierId;
 
-    @Column(name = "barcode", nullable = false, length = 50)
-    private String barcode;
-
-    @Column(name = "product_name", nullable = false, length = 50)
+    @Column(name = "product_name", nullable = false, length = 45)
     private String productName;
 
-    @Column(name = "description", nullable = false, length = 255)
+    @Column(name = "description", nullable = false, length = 45)
     private String description;
 
-    @Column(name = "cost", nullable = false)
-    private int basePrice;
-
-    @Column(name = "selling_price", nullable = false)
-    private int selling_price;
-
-    @Column(name = "stock_quantity", nullable = false)
-    private int stockQuantity;
 }

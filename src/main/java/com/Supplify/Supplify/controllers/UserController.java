@@ -15,47 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-        logger.info("Received user registration request");
-
-        if (request == null) {
-            logger.warn("Request body is null");
-            return ResponseEntity.badRequest().body(Map.of("error", "Request body cannot be null"));
-        }
-
-        try {
-            Map<String, String> errors = validateRequest(request);
-            if (!errors.isEmpty()) {
-                logger.warn("Validation errors: {}", errors);
-                return ResponseEntity.badRequest().body(errors);
-            }
-
-            User user = new User(
-                    request.getFirstName(),
-                    request.getLastName(),
-                    request.getUsername(),
-                    request.getPassword(),
-                    request.getBusinessName(),
-                    request.getPhone()
-            );
-
-            User createdUser = userService.createUser(user);
-            logger.info("User registered successfully: {}", createdUser.getUsername());
-            return ResponseEntity.status(201).body(createdUser);
-
-        } catch (Exception e) {
-            logger.error("Error processing user registration", e);
-            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
-        }
-    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {

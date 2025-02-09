@@ -38,8 +38,6 @@ public class ProductService {
                     product.setSupplierId(updatedProduct.getSupplierId());
                     product.setProductName(updatedProduct.getProductName());
                     product.setDescription(updatedProduct.getDescription());
-                    product.setBasePrice(updatedProduct.getBasePrice());
-                    product.setStockQuantity(updatedProduct.getStockQuantity());
                     return productRepository.save(product);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " not found"));
@@ -52,8 +50,4 @@ public class ProductService {
         }
         productRepository.deleteById(productId);
     }
-    // Find all suppliers that have a specific product
-  //  public List<Integer> findSuppliersByProductName(String productName) {
-       // return productsRepository.findSuppliersByProductName(productName);
-   // }
 }

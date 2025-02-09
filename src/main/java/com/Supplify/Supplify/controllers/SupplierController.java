@@ -16,14 +16,13 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/suppliers")
+@RequestMapping("/suppliers")
 @RequiredArgsConstructor
 public class SupplierController {
-    private final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
+    private final Logger logger = LoggerFactory.getLogger(SupplierController.class);
     private final SupplierService supplierService;
     private final RestTemplate restTemplate;
-
     @Value("${external.api.url}")
     private String externalApiUrl;
 
