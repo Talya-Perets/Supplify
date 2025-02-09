@@ -1,11 +1,13 @@
 package com.Supplify.Supplify.controllers;
 
+import com.Supplify.Supplify.DTO.LoginRequest;
+import com.Supplify.Supplify.DTO.RegisterRequest;
 import com.Supplify.Supplify.entities.User;
-import com.Supplify.Supplify.Services.UserService;
+import com.Supplify.Supplify.services.UserService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +19,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserController {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         logger.info("Received user registration request");
 
         if (request == null) {
@@ -42,8 +44,7 @@ public class UserController {
                     request.getUsername(),
                     request.getPassword(),
                     request.getBusinessName(),
-                    request.getPhone(),
-                    request.getRole()
+                    request.getPhone()
             );
 
             User createdUser = userService.createUser(user);
@@ -68,14 +69,14 @@ public class UserController {
 
             if (isAuthenticated) {
                 logger.info("User authenticated successfully: {}", loginRequest.getUsername());
-                return ResponseEntity.ok().body(new LoginResponse("Login successful"));
+                return new ResponseEntity<>(HttpStatus.OK);
             } else {
                 logger.warn("Authentication failed for username: {}", loginRequest.getUsername());
-                return ResponseEntity.badRequest().body(new LoginResponse("Invalid credentials"));
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
             logger.error("Error processing login request", e);
-            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -98,7 +99,7 @@ public class UserController {
         }
     }
 
-    private Map<String, String> validateRequest(RegisterUserRequest request) {
+    private Map<String, String> validateRequest(RegisterRequest request) {
         Map<String, String> errors = new HashMap<>();
         if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
             errors.put("firstName", "First name is required");
@@ -118,31 +119,6 @@ public class UserController {
         if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
             errors.put("phone", "Phone is required");
         }
-        if (request.getRole() == null || request.getRole().trim().isEmpty()) {
-            errors.put("role", "Role is required");
-        }
         return errors;
     }
-}
-
-@Data
-class RegisterUserRequest {
-    private String firstName;
-    private String lastName;
-    private String username;
-    private String password;
-    private String businessName;
-    private String phone;
-    private String role;
-}
-
-@Data
-class LoginRequest {
-    private String username;
-    private String password;
-}
-
-@Data
-class LoginResponse {
-    private final String message;
 }

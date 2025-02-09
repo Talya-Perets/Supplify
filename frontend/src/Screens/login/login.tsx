@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import { API_BASE_URL, RootStackParamList } from '../../../App.tsx';
+import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
+import { doPost } from '../../util/HTTPRequests.ts';
+
+
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const LoginScreen = () => {
@@ -11,6 +15,29 @@ const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const configureGoogleSignIn =  () => {
+    GoogleSignin.configure();
+  };
+
+  useEffect(() => {
+    configureGoogleSignIn();
+  });
+
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google Sign-In successful:', userInfo);
+      // Handle successful login and navigate to Home or handle user info
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+    }
+  };
+
+
   const handleLogin = async () => {
     // Validate inputs first
     if (!username || !password) {
@@ -21,24 +48,15 @@ const LoginScreen = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      
-      const data = await response.json();
-      console.log(data); // Keep for debugging
+      const response = await doPost(`${API_BASE_URL}/api/users/login`, { username, password });
   
-      if (response.ok) {
+      if (response.status === 200) {
         // Successful login
         Alert.alert('Success', 'Login successful');
         navigation.navigate('Home');
       } else {
         // Failed login
-        Alert.alert('Error', data.message || 'Invalid username or password');
+        Alert.alert('Error', response.data.message || 'Invalid username or password');
       }
     } catch (error) {
       console.error(error);
@@ -86,6 +104,16 @@ const LoginScreen = () => {
         <Icon name="log-in" size={20} color="white" style={styles.buttonIcon} />
         <Text style={styles.buttonText}>{isLoading ? 'מתחבר...' : 'התחבר'}</Text>
       </TouchableOpacity>
+
+      {/* Google Sign-In Button */}
+      <View style={styles.button}>
+          <GoogleSigninButton
+            style={{ width: 192, height: 48 }}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={handleGoogleSignIn}
+          />
+        </View>
 
         <View style={styles.linkContainer}>
           <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>

@@ -1,6 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
-import com.Supplify.Supplify.Services.ProductService;
+import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
 public class ProductController {
-    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+    private final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
 
     // Get all products

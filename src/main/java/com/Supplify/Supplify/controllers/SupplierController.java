@@ -1,6 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
-import com.Supplify.Supplify.Services.SupplierService;
+import com.Supplify.Supplify.services.SupplierService;
 import com.Supplify.Supplify.entities.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/suppliers")
 @RequiredArgsConstructor
 public class SupplierController {
-    private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+    private final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
     private final SupplierService supplierService;
     private final RestTemplate restTemplate;
@@ -102,11 +102,13 @@ public class SupplierController {
             logger.error("Failed to send supplier to external API: {}", e.getMessage(), e);
         }
     }
+
     private static class ValidationException extends Exception {
         public ValidationException(String message) {
             super(message);
         }
     }
+
     @GetMapping("/business/{businessId}")
     public ResponseEntity<List<Supplier>> getSuppliersByBusinessId(@PathVariable Integer businessId) {
         List<Supplier> suppliers = supplierService.getSuppliersByBusinessId(businessId);

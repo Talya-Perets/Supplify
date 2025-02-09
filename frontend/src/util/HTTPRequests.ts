@@ -13,7 +13,7 @@ export const doGet = async (url: string, params?: any) => {
 export const doPost = async (url: string, data: any, params?: any) => {
     try {
         const response = await axios.post(url, data, {params});
-        return response?.data;
+        return response;
     } catch (error) {
         console.error('Error fetching data:', error);
         throw error;
