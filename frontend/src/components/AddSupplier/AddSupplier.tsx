@@ -14,68 +14,74 @@ import Sidebar from '../sidebar-component';
 import {API_BASE_URL, RootStackParamList} from '../../../App';
 import {Alert} from 'react-native';
 import styles from './AddSupplier.styles';
+import { doPost } from '../../util/HTTPRequests';
+import { globals } from '../../util/Globals';
 
 type AddSupplierScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'AddSupplier'
 >;
-
 const AddSupplierScreen = () => {
   const navigation = useNavigation<AddSupplierScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const [supplierData, setSupplierData] = useState({
-    companyName: '',
+     companyName:'',
     contactPerson: '',
     email: '',
-    phone: '',
-  });
+    phone:''
+  }
+  );
 
   const handleAddSupplier = async () => {
+    // Validate input fields
+    if (!supplierData.companyName || !supplierData.contactPerson || !supplierData.email || !supplierData.phone) {
+      Alert.alert('Error', 'Please fill in all supplier details');
+      return;
+    }  
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/suppliers/business/20`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(supplierData),
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Supplier added successfully:', data);
-
-        Alert.alert('הודעה', 'הספק נוסף בהצלחה', [
-          {
-            text: 'אישור',
+      const response = await doPost(globals.SUPPLIERS.createSupplier, {
+        companyName: supplierData.companyName,
+        contactPerson: supplierData.contactPerson,
+        email: supplierData.email,
+        phone: supplierData.phone
+      });
+  
+      if (response.status === 200) {
+        Alert.alert(
+          'Success', 
+          'Supplier added successfully',
+          [{ 
+            text: 'OK', 
             onPress: () => {
-              // Reset form with appropriate fields
+              // Reset form fields
               setSupplierData({
                 companyName: '',
                 contactPerson: '',
                 email: '',
-                phone: '',
+                phone: ''
               });
-            },
-          },
-        ]);
+            } 
+          }]
+        );
       } else {
-        const errorData = await response.json();
-        console.error('Error adding supplier:', errorData);
-        Alert.alert('שגיאה', errorData.message || 'אירעה שגיאה בהוספת הספק', [
-          {text: 'אישור'},
-        ]);
+        Alert.alert(
+          'Error', 
+          response.data.message || 'Failed to add supplier'
+        );
       }
     } catch (error) {
       console.error('Error adding supplier:', error);
-      Alert.alert('שגיאה', 'שגיאת רשת, נסה שוב.', [{text: 'אישור'}]);
-    }
-  };
+      
+      Alert.alert(
+        'Error', 
+        'Network error. Please try again.'
+      );
+    } 
 
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
