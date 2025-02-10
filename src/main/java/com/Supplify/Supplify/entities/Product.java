@@ -14,8 +14,9 @@ public class Product {
     @Column(name = "id", nullable = false, length = 45)
     private String id;
 
-    @Column(name = "supplier_id", nullable = false)
-    private int supplierId;
+    @ManyToOne
+    @JoinColumn(name = "supplier_id", nullable = false, foreignKey = @ForeignKey(name = "supplierid"))
+    private Supplier supplier;
 
     @Column(name = "product_name", nullable = false, length = 45)
     private String productName;
@@ -23,10 +24,14 @@ public class Product {
     @Column(name = "description", nullable = false, length = 45)
     private String description;
 
-    public Product(String id,int supplierId, String productName, String description) {
+    @Column(name = "stock", nullable = false, length = 45)
+    private int stock;
+
+    public Product(String id,Supplier supplier, String productName, String description, int stock) {
         this.id = id;
-        this.supplierId = supplierId;
+        this.supplier = supplier;
         this.productName = productName;
         this.description = description;
+        this.stock = stock;
     }
 }

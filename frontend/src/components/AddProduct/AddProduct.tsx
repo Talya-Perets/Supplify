@@ -16,6 +16,8 @@ import Sidebar from '../../components/sidebar-component';
 import {RootStackParamList, API_BASE_URL} from '../../../App';
 import {launchImageLibrary} from 'react-native-image-picker';
 import styles from './AddProduct.styles';
+import { doPost } from '../../util/HTTPRequests';
+import { globals } from '../../util/Globals';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,71 +30,77 @@ const AddProductScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const [productData, setProductData] = useState({
-    barcode: '',
-    name: '',
-    description: '',
-    supplier: '',
-    cost: '',
-    sellingPrice: '',
-    stockQuntity: '',
+    id: '',
+    productName: '',
+    productDescription: '',
+    supplierId: '',
+    stock: '',
   });
 
   const handleAddProduct = async () => {
+    // Validate input fields
+    if (!productData.id || !productData.productName  || !productData.supplierId) {
+      Alert.alert('Error', 'Please fill in all required product details');
+      return;
+    }
+  
     try {
-      const response = await fetch(`${API_BASE_URL}/api/product`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
+      const response = await doPost(globals.PRODUCT.createProduct, {
+        id: productData.id,
+        productName: productData.productName,
+        productDescription: productData.productDescription || '',
+        supplierId: productData.supplierId,
+        stock: productData.stock || 0,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Product added successfully:', data);
-
-        Alert.alert('הודעה', 'המוצר נוסף בהצלחה', [
-          {
-            text: 'אישור',
-            onPress: () => {
-              // Reset form with appropriate fields
-              setProductData({
-                barcode: '',
-                name: '',
-                cost: '',
-                description: '',
-                supplier: '',
-                sellingPrice: '',
-                stockQuntity: '',
-              });
+  
+      if (response.status === 201) {
+        Alert.alert(
+          'Success',
+          'Product added successfully',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Reset form fields
+                setProductData({
+                  id: '',
+                  productName: '',
+                  productDescription: '',
+                  supplierId: '',
+                  stock: ''
+                });
+              },
             },
-          },
-        ]);
+          ]
+        );
       } else {
-        const errorData = await response.json();
-        console.error('Error adding product:', errorData);
-        Alert.alert('שגיאה', errorData.message || 'אירעה שגיאה בהוספת המוצר', [
-          {text: 'אישור'},
-        ]);
+        Alert.alert(
+          'Error',
+          response.data?.message || 'Failed to add product'
+        );
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      Alert.alert('שגיאה', 'שגיאת רשת, נסה שוב.', [{text: 'אישור'}]);
+  
+      Alert.alert(
+        'Error',
+        'Network error. Please try again.'
+      );
     }
   };
-
+  
   const handleImagePicker = () => {
-    launchImageLibrary({mediaType: 'photo'}, response => {
+    launchImageLibrary({ mediaType: 'photo' }, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorMessage) {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else if (response.assets && response.assets[0].uri) {
-        //    setProductData({ ...productData, image: response.assets[0].uri });
+        // setProductData({ ...productData, image: response.assets[0].uri });
       }
     });
   };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
@@ -113,63 +121,47 @@ const AddProductScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="ברקוד"
-              value={productData.barcode}
+              value={productData.id}
               onChangeText={text =>
-                setProductData({...productData, barcode: text})
+                setProductData({...productData, id: text})
               }
               keyboardType="numeric"
             />
             <TextInput
               style={styles.input}
               placeholder="שם מוצר"
-              value={productData.name}
+              value={productData.productName}
               onChangeText={text =>
-                setProductData({...productData, name: text})
+                setProductData({...productData, productName: text})
               }
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="מחיר (אופציונלי)"
-              value={productData.cost}
-              onChangeText={text =>
-                setProductData({...productData, cost: text})
-              }
-              keyboardType="numeric"
-            />
+          
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="תיאור מוצר"
-              value={productData.description}
+              value={productData.productDescription}
               onChangeText={text =>
-                setProductData({...productData, description: text})
+                setProductData({...productData, productDescription: text})
               }
               multiline
             />
             <TextInput
               style={styles.input}
               placeholder="שם ספק"
-              value={productData.supplier}
+              value={productData.supplierId}
               onChangeText={text =>
-                setProductData({...productData, supplier: text})
+                setProductData({...productData, supplierId: text})
               }
             />
-            <TextInput
-              style={styles.input}
-              placeholder="מחיר מכירה"
-              value={productData.sellingPrice}
-              onChangeText={text =>
-                setProductData({...productData, sellingPrice: text})
-              }
-              keyboardType="numeric"
-            />
+        
             {userRole === 'manager' && (
               <TextInput
                 style={styles.input}
                 placeholder="מלאי מתבקש"
-                value={productData.stockQuntity}
+                value={productData.stock}
                 onChangeText={text =>
-                  setProductData({...productData, stockQuntity: text})
+                  setProductData({...productData, stock: text})
                 }
                 keyboardType="numeric"
               />

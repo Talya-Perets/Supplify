@@ -1,5 +1,4 @@
 package com.Supplify.Supplify.controllers;
-
 import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
@@ -34,10 +33,11 @@ public class ProductController {
     }
 
     // Add a new product
-    @PostMapping
+    @PostMapping("/createProduct")
     public ResponseEntity<Product> CreateProduct(@RequestBody CreateProductRequest request) {
         try {
             Product createdProduct = productService.addProduct(request);
+            logger.info("New Product has added");
             return ResponseEntity.status(201).body(createdProduct);
         } catch (Exception e) {
             logger.error("Error adding product: {}", e.getMessage(), e);
