@@ -10,6 +10,9 @@ import HomeScreen from './src/components/Home/Home';
 import AddSupplierScreen from './src/components/AddSupplier/AddSupplier';
 import AddProductScreen from './src/components/AddProduct/AddProduct';
 import SuppliersListScreen from './src/components/SuppliersList/SuppliersList';
+import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/EmployeeRegistration';
+import ProductListScreen from './src/components/ProductList/ProductList';
+import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
 export type RootStackParamList = {
@@ -20,6 +23,9 @@ export type RootStackParamList = {
   AddSupplier: undefined;
   AddProduct: undefined;
   SuppliersList: undefined;
+  ProductList:undefined;
+  ShoppingCart:undefined;
+  EmployeeRegistration:undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -38,6 +44,9 @@ const App = () => {
         <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
         <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
         <Stack.Screen name="AddProduct" component={AddProductScreen} />
+        <Stack.Screen name="ProductList" component={ProductListScreen} />
+        <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
+        <Stack.Screen name="EmployeeRegistration" component={EmployeeRegistrationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

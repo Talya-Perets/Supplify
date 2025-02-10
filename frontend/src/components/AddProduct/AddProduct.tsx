@@ -16,8 +16,7 @@ import Sidebar from '../../components/sidebar-component';
 import {RootStackParamList, API_BASE_URL} from '../../../App';
 import {launchImageLibrary} from 'react-native-image-picker';
 import styles from './AddProduct.styles';
-import { doPost } from '../../util/HTTPRequests';
-import { globals } from '../../util/Globals';
+import {doPost} from "../../util/HTTPRequests.ts";
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -43,7 +42,7 @@ const AddProductScreen = () => {
       Alert.alert('Error', 'Please fill in all required product details');
       return;
     }
-  
+
     try {
       const response = await doPost(globals.PRODUCT.createProduct, {
         id: productData.id,
@@ -52,7 +51,7 @@ const AddProductScreen = () => {
         supplierId: productData.supplierId,
         stock: productData.stock || 0,
       });
-  
+
       if (response.status === 201) {
         Alert.alert(
           'Success',
@@ -81,14 +80,14 @@ const AddProductScreen = () => {
       }
     } catch (error) {
       console.error('Error adding product:', error);
-  
+
       Alert.alert(
         'Error',
         'Network error. Please try again.'
       );
     }
   };
-  
+
   const handleImagePicker = () => {
     launchImageLibrary({ mediaType: 'photo' }, response => {
       if (response.didCancel) {
@@ -100,7 +99,7 @@ const AddProductScreen = () => {
       }
     });
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
@@ -136,7 +135,7 @@ const AddProductScreen = () => {
               }
             />
 
-          
+
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="תיאור מוצר"
@@ -154,7 +153,7 @@ const AddProductScreen = () => {
                 setProductData({...productData, supplierId: text})
               }
             />
-        
+
             {userRole === 'manager' && (
               <TextInput
                 style={styles.input}

@@ -15,14 +15,14 @@ const menuItems = [
   { id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus' },
   { id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o' },
   { id: 'orders', title: 'רשימת הזמנות', icon: 'list-alt' },
-  { id: 'products', title: 'רשימת מוצרים', icon: 'cube' },
+  { id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube' },
   { id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users' },
   { id: 'search', title: 'חיפוש מוצר', icon: 'search' },
-  { id: 'cart', title: 'סל קניות', icon: 'shopping-cart' },];
+  { id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart' },];
 
 const managerItems = [
   { id: 'Admin', title: 'מסך ניהול', icon: 'cog' },
-  { id: 'RegisterEmployee', title: 'הרשמת עובד', icon: 'user-plus' },
+  { id: 'EmployeeRegistration', title: 'הרשמת עובד', icon: 'user-plus' },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
