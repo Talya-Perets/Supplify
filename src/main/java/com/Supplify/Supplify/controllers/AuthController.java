@@ -57,6 +57,9 @@ public class AuthController {
                 business,
                 roleService.getRoleById(UserRoleEnum.MANAGER)
         );
+
+        logger.info("Registered new business successfully");
+
         return new ResponseEntity<>("""
                 New business created successfully.
                 Your login details are:
@@ -92,16 +95,32 @@ public class AuthController {
     public ResponseEntity<?> google(@RequestBody GoogleRequest googleRequest) {
         logger.info("Received google request for username: {}", googleRequest.getUsername());
 
-        try {
-            if (userService.isEmailAlreadyUsed(googleRequest.getUsername())) {
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            if (EmailValidator.isValidEmail(googleRequest.getUsername())) {
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            logger.error("Error processing google request", e);
+
+        if (userService.isEmailAlreadyUsed(googleRequest.getUsername())) {
+            logger.info("User authenticated successfully: {}", googleRequest.getUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return null;
+        logger.info("Registering new business from google sign in");
+
+        Business business = businessService.createBusiness(null, googleRequest.getUsername(), null, null);
+
+        User user = userService.createUser(
+                null,
+                null,
+                googleRequest.getUsername(),
+                null,
+                null,
+                business,
+                roleService.getRoleById(UserRoleEnum.MANAGER)
+        );
+
+        logger.info("Registered new business through google sign in successfully");
+
+        return new ResponseEntity<>("""
+                New business created successfully.
+                Your details are:
+                Username: %s
+                """.formatted(user.getUsername()), HttpStatus.CREATED);
+
     }
 }

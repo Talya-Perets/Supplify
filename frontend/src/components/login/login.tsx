@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   Alert,
 } from 'react-native';
@@ -19,6 +18,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import {doPost} from '../../util/HTTPRequests.ts';
 import {globals} from '../../util/Globals.ts';
+import styles from './login.styles';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -42,10 +42,25 @@ const LoginScreen = () => {
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+
       const userInfo = await GoogleSignin.signIn();
-      console.log('Google Sign-In successful:', userInfo);
-      // Handle successful login and navigate to Home or handle user info
-      navigation.navigate('Home');
+
+      if (userInfo && userInfo.type === 'success') {
+        console.log('Google Sign-In successful:', userInfo);
+
+        try {
+          const response = await doPost(globals.AUTH.google, {
+            username: userInfo.data.user.email,
+          });
+
+          Alert.alert('Success', response.data);
+          navigation.navigate('Home');
+        } catch (error) {
+          console.error('Failed to login via Google Sign-In:', error);
+        }
+      } else {
+        console.log('Google Sign-In failed:', userInfo);
+      }
     } catch (error) {
       console.error('Google Sign-In error:', error);
     }
@@ -153,86 +168,5 @@ const LoginScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E6F1FB',
-    padding: 16,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: 'white',
-    padding: 32,
-    borderRadius: 16,
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    borderTopWidth: 4,
-    borderTopColor: '#4A90E2',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  inputContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  icon: {
-    position: 'absolute',
-    top: '50%',
-    left: 10,
-    transform: [{translateY: -12}],
-  },
-  input: {
-    width: '100%',
-    paddingHorizontal: 40,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#D1D1D1',
-    backgroundColor: '#F9F9F9',
-    fontSize: 16,
-    color: '#333',
-  },
-  button: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 16,
-  },
-  buttonDisabled: {
-    backgroundColor: '#A0A0A0',
-  },
-  buttonIcon: {
-    marginRight: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  link: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
 
 export default LoginScreen;
