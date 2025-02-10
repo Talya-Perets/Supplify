@@ -33,7 +33,7 @@ const AddProductScreen = () => {
     description: '',
     supplier: '',
     cost: '',
-    sellingPrice: '',
+    // מכיוון שאין צורך במחיר מכירה, נמחק את השדה הזה
     stockQuntity: '',
   });
 
@@ -51,46 +51,43 @@ const AddProductScreen = () => {
         const data = await response.json();
         console.log('Product added successfully:', data);
 
-        Alert.alert('הודעה', 'המוצר נוסף בהצלחה', [
-          {
-            text: 'אישור',
-            onPress: () => {
-              // Reset form with appropriate fields
-              setProductData({
-                barcode: '',
-                name: '',
-                cost: '',
-                description: '',
-                supplier: '',
-                sellingPrice: '',
-                stockQuntity: '',
-              });
-            },
-          },
-        ]);
+        Alert.alert(
+          "הודעה",
+          "המוצר נוסף בהצלחה",
+          [
+            { 
+              text: "אישור",
+              onPress: () => {
+                // Reset form with appropriate fields
+                setProductData({
+                  barcode: '',
+                  name: '',
+                  cost: '',
+                  description: '',
+                  supplier: '',
+                  stockQuntity: '',
+                });
+              }
+            }
+          ]
+        );
       } else {
         const errorData = await response.json();
         console.error('Error adding product:', errorData);
-        Alert.alert('שגיאה', errorData.message || 'אירעה שגיאה בהוספת המוצר', [
-          {text: 'אישור'},
-        ]);
+        Alert.alert(
+          "שגיאה",
+          errorData.message || "אירעה שגיאה בהוספת המוצר",
+          [{ text: "אישור" }]
+        );
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      Alert.alert('שגיאה', 'שגיאת רשת, נסה שוב.', [{text: 'אישור'}]);
+      Alert.alert(
+        "שגיאה",
+        "שגיאת רשת, נסה שוב.",
+        [{ text: "אישור" }]
+      );
     }
-  };
-
-  const handleImagePicker = () => {
-    launchImageLibrary({mediaType: 'photo'}, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets[0].uri) {
-        //    setProductData({ ...productData, image: response.assets[0].uri });
-      }
-    });
   };
 
   return (
@@ -98,13 +95,8 @@ const AddProductScreen = () => {
       {isSidebarVisible && <Sidebar userRole={userRole} />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon
-              name={isSidebarVisible ? 'x' : 'menu'}
-              size={24}
-              color="#4A90E2"
-            />
+          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>הוספת מוצר חדש</Text>
         </View>
@@ -114,63 +106,41 @@ const AddProductScreen = () => {
               style={styles.input}
               placeholder="ברקוד"
               value={productData.barcode}
-              onChangeText={text =>
-                setProductData({...productData, barcode: text})
-              }
+              onChangeText={(text) => setProductData({ ...productData, barcode: text })}
               keyboardType="numeric"
             />
             <TextInput
               style={styles.input}
               placeholder="שם מוצר"
               value={productData.name}
-              onChangeText={text =>
-                setProductData({...productData, name: text})
-              }
+              onChangeText={(text) => setProductData({ ...productData, name: text })}
             />
-
             <TextInput
               style={styles.input}
               placeholder="מחיר (אופציונלי)"
               value={productData.cost}
-              onChangeText={text =>
-                setProductData({...productData, cost: text})
-              }
+              onChangeText={(text) => setProductData({ ...productData, cost: text })}
               keyboardType="numeric"
             />
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="תיאור מוצר"
               value={productData.description}
-              onChangeText={text =>
-                setProductData({...productData, description: text})
-              }
+              onChangeText={(text) => setProductData({ ...productData, description: text })}
               multiline
             />
             <TextInput
               style={styles.input}
               placeholder="שם ספק"
               value={productData.supplier}
-              onChangeText={text =>
-                setProductData({...productData, supplier: text})
-              }
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="מחיר מכירה"
-              value={productData.sellingPrice}
-              onChangeText={text =>
-                setProductData({...productData, sellingPrice: text})
-              }
-              keyboardType="numeric"
+              onChangeText={(text) => setProductData({ ...productData, supplier: text })}
             />
             {userRole === 'manager' && (
               <TextInput
                 style={styles.input}
                 placeholder="מלאי מתבקש"
                 value={productData.stockQuntity}
-                onChangeText={text =>
-                  setProductData({...productData, stockQuntity: text})
-                }
+                onChangeText={(text) => setProductData({ ...productData, stockQuntity: text })}
                 keyboardType="numeric"
               />
             )}
