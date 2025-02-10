@@ -17,6 +17,7 @@ import {RootStackParamList, API_BASE_URL} from '../../../App';
 import {launchImageLibrary} from 'react-native-image-picker';
 import styles from './AddProduct.styles';
 import {doPost} from "../../util/HTTPRequests.ts";
+import { globals } from '../../util/Globals.ts';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
