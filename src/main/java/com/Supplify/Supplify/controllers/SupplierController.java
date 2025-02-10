@@ -1,5 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
+import com.Supplify.Supplify.DTO.CreateSupplierRequest;
 import com.Supplify.Supplify.services.SupplierService;
 import com.Supplify.Supplify.entities.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -23,95 +24,79 @@ public class SupplierController {
     private final Logger logger = LoggerFactory.getLogger(SupplierController.class);
     private final SupplierService supplierService;
     private final RestTemplate restTemplate;
+
     @Value("${external.api.url}")
     private String externalApiUrl;
 
     @Value("${external.api.token}")
     private String apiToken;
 
-    @PostMapping("/business/{businessId}")
-    public ResponseEntity<?> createSupplier(
-            @RequestBody Supplier supplier,
-            @PathVariable Integer businessId) {
-
-        logger.info("Received supplier creation request for business ID: {}", businessId);
+    @PostMapping("/createSupplier")
+    public ResponseEntity<?> createSupplier(@RequestBody CreateSupplierRequest request) {
+        logger.info("Received supplier creation request for business ID: {}", request.getBusinessId());
 
         try {
-            validateSupplier(supplier);
-            Supplier createdSupplier = supplierService.createSupplier(supplier, businessId);
-
-            // Only attempt to send to external API if URL is configured
-            if (externalApiUrl != null && !externalApiUrl.isEmpty()) {
-                sendToExternalApi(createdSupplier);
-            } else {
-                logger.warn("External API URL not configured. Skipping external API sync.");
-            }
-
+            Supplier createdSupplier = supplierService.createSupplier(request);
             return ResponseEntity.status(201).body(createdSupplier);
-
-        } catch (ValidationException e) {
-            logger.warn("Validation failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error processing supplier creation", e);
-            return ResponseEntity.status(500)
-                    .body("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
         }
     }
 
-    private void validateSupplier(Supplier supplier) throws ValidationException {
-        if (supplier.getCompanyName() == null || supplier.getCompanyName().isEmpty()) {
-            throw new ValidationException("Supplier company name is required");
-        }
-        if (supplier.getContactPerson() == null || supplier.getContactPerson().isEmpty()) {
-            throw new ValidationException("Contact person is required");
-        }
-        if (supplier.getEmail() == null || supplier.getEmail().isEmpty()
-                || !supplier.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new ValidationException("Valid email is required");
-        }
-        if (supplier.getPhone() == null || supplier.getPhone().isEmpty()) {
-            throw new ValidationException("Phone number is required");
-        }
-    }
-
-    private void sendToExternalApi(Supplier supplier) {
-        // Skip if URL is still the placeholder
-        if (externalApiUrl.contains("your-real-api-endpoint")) {
-            logger.info("Skipping external API call - placeholder URL detected");
-            return;
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + apiToken);
-        headers.set("Content-Type", "application/json");
-
-        HttpEntity<Supplier> requestEntity = new HttpEntity<>(supplier, headers);
+    @GetMapping
+    public ResponseEntity<List<Supplier>> getAllSuppliers() {
+        logger.info("Fetching all suppliers");
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    externalApiUrl,
-                    HttpMethod.POST,
-                    requestEntity,
-                    String.class
-            );
-            logger.info("Supplier sent to external API. Response status: {}",
-                    response.getStatusCode());
+            List<Supplier> suppliers = supplierService.getAllSuppliers();
+            return ResponseEntity.ok(suppliers);
         } catch (Exception e) {
-            logger.error("Failed to send supplier to external API: {}", e.getMessage(), e);
+            logger.error("Error fetching suppliers", e);
+            return ResponseEntity.status(500).body(null);
         }
     }
 
-    private static class ValidationException extends Exception {
-        public ValidationException(String message) {
-            super(message);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getSupplierById(@PathVariable int id) {
+        logger.info("Fetching supplier with ID: {}", id);
+
+        try {
+            Supplier supplier = supplierService.getSupplierById(id);
+            return supplier != null ? ResponseEntity.ok(supplier) : ResponseEntity.status(404).body("Supplier not found");
+        } catch (Exception e) {
+            logger.error("Error fetching supplier", e);
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
         }
     }
 
-    @GetMapping("/business/{businessId}")
-    public ResponseEntity<List<Supplier>> getSuppliersByBusinessId(@PathVariable Integer businessId) {
-        List<Supplier> suppliers = supplierService.getSuppliersByBusinessId(businessId);
-        return ResponseEntity.ok(suppliers);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteSupplier(@PathVariable int id) {
+        logger.info("Deleting supplier with ID: {}", id);
+
+        try {
+            supplierService.deleteSupplier(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            logger.error("Error deleting supplier", e);
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+        }
     }
 
+    @GetMapping("/external")
+    public ResponseEntity<String> fetchFromExternalApi() {
+        logger.info("Fetching data from external API");
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + apiToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(externalApiUrl, HttpMethod.GET, entity, String.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            logger.error("Error fetching data from external API", e);
+            return ResponseEntity.status(500).body("Failed to fetch external data");
+        }
+    }
 }

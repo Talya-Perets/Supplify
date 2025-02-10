@@ -1,12 +1,15 @@
 package com.Supplify.Supplify.services;
+
+import com.Supplify.Supplify.DTO.CreateSupplierRequest;
 import com.Supplify.Supplify.entities.BusinessSupplier;
 import com.Supplify.Supplify.repositories.BusinessSupplierRepo;
 import com.Supplify.Supplify.repositories.SupplierRepo;
 import com.Supplify.Supplify.entities.Supplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.stream.Collectors;
 
 
@@ -20,12 +23,12 @@ public class SupplierService {
     private final BusinessSupplierRepo businessSupplierRepo;
 
     @Transactional
-    public Supplier createSupplier(Supplier supplier, Integer businessId) {
+    public Supplier createSupplier(CreateSupplierRequest request) {
         // Step 1: Save the supplier locally
-        Supplier savedSupplier = supplierRepo.save(supplier);
+        Supplier savedSupplier = supplierRepo.saveAndFlush(new Supplier(request.getSupplierName()));
 
         // Step 2: Link the supplier to the business
-        BusinessSupplier businessSupplier = new BusinessSupplier(businessId, savedSupplier.getSupplierId());
+        BusinessSupplier businessSupplier = new BusinessSupplier(request.getBusinessId(), savedSupplier.getSupplierId());
         businessSupplierRepo.save(businessSupplier);
         return savedSupplier;
     }
@@ -35,12 +38,13 @@ public class SupplierService {
     }
 
     //public List<Supplier> getAllSuppliersbyBusinessId(Integer businessId) {
-   // }
+    // }
 
     public Supplier getSupplierById(Integer id) {
         return supplierRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
     }
+
     public List<Supplier> getSuppliersByBusinessId(Integer businessId) {
         List<Integer> supplierIds = businessSupplierRepo.findSupplierIdsByBusinessId(businessId);
         return supplierIds.stream()
@@ -49,4 +53,12 @@ public class SupplierService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteSupplier(int id) {
+        if (supplierRepo.existsById(id)) {
+            supplierRepo.deleteById(id);
+            System.out.println("Deleted supplier with ID: " + id); // Replace with logger if needed
+        } else {
+            throw new EntityNotFoundException("Supplier not found with ID: " + id);
+        }
+    }
 }

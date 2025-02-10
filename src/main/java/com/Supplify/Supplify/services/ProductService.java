@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.services;
+import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.entities.Product;
 import com.Supplify.Supplify.repositories.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,12 @@ public class ProductService {
     }
 
     // Add a new product
-    public Product addProduct(Product product) {
-        return productRepository.save(product);
+    public Product addProduct(CreateProductRequest request) {
+        return productRepository.saveAndFlush(new Product(
+                request.getId(),
+                request.getSupplierId(),
+                request.getProductName(),
+                request.getProductDescription()));
     }
 
     // Update an existing product

@@ -1,5 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
+import com.Supplify.Supplify.DTO.CreateUserRequest;
 import com.Supplify.Supplify.DTO.LoginRequest;
 import com.Supplify.Supplify.DTO.RegisterRequest;
 import com.Supplify.Supplify.entities.User;
@@ -22,9 +23,8 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/getUser")
     public ResponseEntity<?> getUser(@PathVariable int id) {
-        logger.info("Fetching user with ID: {}", id);
 
         try {
             User user = userService.findUserByID(id);

@@ -4,7 +4,6 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -18,15 +17,7 @@ public class Supplier {
     @Column(name = "comapny_name")
     private String companyName;
 
-    @Column(name = "contact_person", nullable = false)
-    @NonNull
-    private String contactPerson;
-
-    @Column(nullable = false)
-    @NonNull
-    private String email;
-
-    @Column(nullable = false)
-    @NonNull
-    private String phone;
+    public Supplier(String supplierName) {
+        this.companyName = supplierName;
+    }
 }

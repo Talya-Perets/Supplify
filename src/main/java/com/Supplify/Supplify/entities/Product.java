@@ -2,11 +2,11 @@ package com.Supplify.Supplify.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
+
 @Table(name = "products")
 public class Product {
 
@@ -23,4 +23,10 @@ public class Product {
     @Column(name = "description", nullable = false, length = 45)
     private String description;
 
+    public Product(String id,int supplierId, String productName, String description) {
+        this.id = id;
+        this.supplierId = supplierId;
+        this.productName = productName;
+        this.description = description;
+    }
 }

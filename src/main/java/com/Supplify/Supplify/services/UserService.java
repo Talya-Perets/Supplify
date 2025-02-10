@@ -23,7 +23,7 @@ public class UserService {
     public User createUser(String firstName, String lastName, String username, String password, String phone, Business business, Role role) {
 
         logger.info("Creating new user");
-        return userRepo.save(new User(
+        return userRepo.saveAndFlush(new User(
                 firstName,
                 lastName,
                 username,

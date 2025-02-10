@@ -1,5 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
+import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class ProductController {
     }
 
     // Get product by ID
-    @GetMapping("/{productId}")
+    @GetMapping("/getProductById")
     public ResponseEntity<Product> getProductById(@PathVariable int productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)
@@ -34,9 +35,9 @@ public class ProductController {
 
     // Add a new product
     @PostMapping
-    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> CreateProduct(@RequestBody CreateProductRequest request) {
         try {
-            Product createdProduct = productService.addProduct(product);
+            Product createdProduct = productService.addProduct(request);
             return ResponseEntity.status(201).body(createdProduct);
         } catch (Exception e) {
             logger.error("Error adding product: {}", e.getMessage(), e);
@@ -45,7 +46,7 @@ public class ProductController {
     }
 
     // Update a product
-    @PutMapping("/{productId}")
+    @PutMapping("/updateProductById")
     public ResponseEntity<?> updateProduct(
             @PathVariable int productId,
             @RequestBody Product updatedProduct) {
@@ -62,7 +63,7 @@ public class ProductController {
     }
 
     // Delete a product
-    @DeleteMapping("/{productId}")
+    @DeleteMapping("/DeleteProduct")
     public ResponseEntity<?> deleteProduct(@PathVariable int productId) {
         try {
             productService.deleteProduct(productId);
