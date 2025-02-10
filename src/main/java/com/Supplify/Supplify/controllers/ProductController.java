@@ -18,9 +18,10 @@ public class ProductController {
     private final ProductService productService;
 
     // Get all products
-    @GetMapping
+    @GetMapping("/displayProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+        logger.info("Fetching all products");
+         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
