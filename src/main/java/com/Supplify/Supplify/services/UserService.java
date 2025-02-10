@@ -47,12 +47,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User with ID " + id + " not found"));
     }
 
-    public List<User> findUserByFirstNameAndLastName(String firstName, String lastName) {
-        return userRepo.findUsersByFirstNameAndLastName(firstName, lastName);
-    }
-
     public boolean authenticateUser(String username, String password) {
         User user = findUserByUsername(username);
-        return passwordEncoder.matches(password, user.getPassword());
+        if (user == null) return false;
+
+        return password.equals(user.getPassword());
     }
 }

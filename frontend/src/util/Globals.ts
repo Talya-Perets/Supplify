@@ -1,14 +1,15 @@
 // Server URL
-const PRODUCTION_URL = "http://localhost:8080"; // Replace with your actual server address
+const PRODUCTION_URL = "http://10.0.2.2:8080"; // Replace with your actual server address
 
 // Controller Endpoints
-const ACCOUNT = "/register";
+const AUTH = "/auth";
 const PRODUCT = "/product";
 
 // Globals Object
 export const globals = {
-    account: {
-        register: `${PRODUCTION_URL}${ACCOUNT}/createNewAccount`,
-        login: `${PRODUCTION_URL}${ACCOUNT}/login`,
+    AUTH: {
+        register: `${PRODUCTION_URL}${AUTH}/register`,
+        login: `${PRODUCTION_URL}${AUTH}/login`,
+        google: `${PRODUCTION_URL}${AUTH}/google`,
     },
 };

@@ -22,30 +22,6 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        logger.info("Received login request for username: {}", loginRequest.getUsername());
-
-        try {
-            boolean isAuthenticated = userService.authenticateUser(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-            );
-
-            if (isAuthenticated) {
-                logger.info("User authenticated successfully: {}", loginRequest.getUsername());
-                return new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                logger.warn("Authentication failed for username: {}", loginRequest.getUsername());
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            }
-        } catch (Exception e) {
-            logger.error("Error processing login request", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable int id) {
         logger.info("Fetching user with ID: {}", id);

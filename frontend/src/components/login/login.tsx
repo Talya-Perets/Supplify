@@ -1,14 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import { API_BASE_URL, RootStackParamList } from '../../../App.tsx';
-import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
-import { doPost } from '../../util/HTTPRequests.ts';
+import {API_BASE_URL, RootStackParamList} from '../../../App.tsx';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {doPost} from '../../util/HTTPRequests.ts';
+import {globals} from '../../util/Globals.ts';
 
-
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Login'
+>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -16,14 +31,13 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const configureGoogleSignIn =  () => {
+  const configureGoogleSignIn = () => {
     GoogleSignin.configure();
   };
 
   useEffect(() => {
     configureGoogleSignIn();
   });
-
 
   const handleGoogleSignIn = async () => {
     try {
@@ -37,26 +51,31 @@ const LoginScreen = () => {
     }
   };
 
-
   const handleLogin = async () => {
     // Validate inputs first
     if (!username || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-  
+
     setIsLoading(true);
-    
+
     try {
-      const response = await doPost(`${API_BASE_URL}/api/users/login`, { username, password });
-  
+      const response = await doPost(globals.AUTH.login, {
+        username,
+        password,
+      });
+
       if (response.status === 200) {
         // Successful login
         Alert.alert('Success', 'Login successful');
         navigation.navigate('Home');
       } else {
         // Failed login
-        Alert.alert('Error', response.data.message || 'Invalid username or password');
+        Alert.alert(
+          'Error',
+          response.data.message || 'Invalid username or password',
+        );
       }
     } catch (error) {
       console.error(error);
@@ -65,7 +84,7 @@ const LoginScreen = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
@@ -96,19 +115,25 @@ const LoginScreen = () => {
           />
         </View>
 
-         <TouchableOpacity 
-        style={[styles.button, isLoading && styles.buttonDisabled]} 
-        onPress={handleLogin} 
-        disabled={isLoading}
-      >
-        <Icon name="log-in" size={20} color="white" style={styles.buttonIcon} />
-        <Text style={styles.buttonText}>{isLoading ? 'מתחבר...' : 'התחבר'}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={isLoading}>
+          <Icon
+            name="log-in"
+            size={20}
+            color="white"
+            style={styles.buttonIcon}
+          />
+          <Text style={styles.buttonText}>
+            {isLoading ? 'מתחבר...' : 'התחבר'}
+          </Text>
+        </TouchableOpacity>
 
-      {/* Google Sign-In Button */}
-      <View style={styles.button}>
+        {/* Google Sign-In Button */}
+        <View style={styles.button}>
           <GoogleSigninButton
-            style={{ width: 192, height: 48 }}
+            style={{width: 192, height: 48}}
             size={GoogleSigninButton.Size.Wide}
             color={GoogleSigninButton.Color.Dark}
             onPress={handleGoogleSignIn}
@@ -116,7 +141,8 @@ const LoginScreen = () => {
         </View>
 
         <View style={styles.linkContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}>
             <Text style={styles.link}>שכחתי סיסמא</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -133,7 +159,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#E6F1FB', 
+    backgroundColor: '#E6F1FB',
     padding: 16,
   },
   card: {
@@ -143,7 +169,7 @@ const styles = StyleSheet.create({
     padding: 32,
     borderRadius: 16,
     shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
@@ -165,7 +191,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: 10,
-    transform: [{ translateY: -12 }],
+    transform: [{translateY: -12}],
   },
   input: {
     width: '100%',

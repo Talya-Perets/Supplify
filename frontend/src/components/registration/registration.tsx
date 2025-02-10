@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
-import { 
-  View, Text, TextInput, TouchableOpacity, 
-  StyleSheet, SafeAreaView, Alert 
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { API_BASE_URL, RootStackParamList } from '../../../App.tsx';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../../App.tsx';
+import {doPost} from '../../util/HTTPRequests.ts';
+import {globals} from '../../util/Globals.ts';
 
-type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+type RegisterScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Register'
+>;
 
 const SignUpScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState(''); 
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('');
+  const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
@@ -43,14 +53,8 @@ const SignUpScreen = () => {
       Alert.alert('שגיאה', 'נא להזין מספר טלפון');
       return false;
     }
-    // Validate phone number format
-   // const phoneRegex = /^[0-9]{10}$/;
-  //  if (!phoneRegex.test(phone)) {
-  //    Alert.alert('שגיאה', 'מספר טלפון לא תקין');
-  //    return false;
-  //  }
-    if (!role.trim()) {
-      Alert.alert('שגיאה', 'נא להזין תפקיד');
+    if (!address.trim()) {
+      Alert.alert('שגיאה', 'נא להזין כתובת');
       return false;
     }
     if (password.length < 6) {
@@ -68,49 +72,43 @@ const SignUpScreen = () => {
     if (!validateForm()) {
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName,        // Corrected field names
-          lastName,
-          username,
-          password,
-          businessName,
-          phone,
-          role,
-        }),
+      const response = await doPost(globals.AUTH.register, {
+        username,
+        password,
+        firstName,
+        lastName,
+        businessName,
+        phone,
+        address,
       });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        Alert.alert('הצלחה', 'ההרשמה בוצעה בהצלחה', [
-          { text: 'OK', onPress: () => navigation.navigate('Login') }
+      const data = response?.data;
+      if (response.status === 201) {
+        Alert.alert('הצלחה', data, [
+          {text: 'OK', onPress: () => navigation.navigate('Login')},
         ]);
       } else {
-        Alert.alert('שגיאה', data?.message || 'אירעה שגיאה בתהליך ההרשמה');
+        Alert.alert('שגיאה', data || 'אירעה שגיאה בתהליך ההרשמה');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      Alert.alert('שגיאה', 'אירעה שגיאה בתהליך ההרשמה. נא לנסות שוב מאוחר יותר');
+      Alert.alert(
+        'שגיאה',
+        'אירעה שגיאה בתהליך ההרשמה. נא לנסות שוב מאוחר יותר',
+      );
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Supplify</Text>
-        
+
         <View style={styles.inputRow}>
           <TextInput
             style={styles.halfInput}
@@ -127,7 +125,7 @@ const SignUpScreen = () => {
             placeholderTextColor="#A0A0A0"
           />
         </View>
-      
+
         <TextInput
           style={styles.input}
           placeholder="שם משתמש"
@@ -135,7 +133,6 @@ const SignUpScreen = () => {
           onChangeText={setUsername}
           placeholderTextColor="#A0A0A0"
         />
-
 
         <TextInput
           style={styles.input}
@@ -157,6 +154,14 @@ const SignUpScreen = () => {
 
         <TextInput
           style={styles.input}
+          placeholder="כתובת"
+          value={address}
+          onChangeText={setAddress}
+          placeholderTextColor="#A0A0A0"
+        />
+
+        <TextInput
+          style={styles.input}
           placeholder="סיסמא"
           value={password}
           onChangeText={setPassword}
@@ -173,19 +178,10 @@ const SignUpScreen = () => {
           placeholderTextColor="#A0A0A0"
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="תפקיד"
-          value={role}
-          onChangeText={setRole}
-          placeholderTextColor="#A0A0A0"
-        />
-
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleSignUp}
-          disabled={isLoading}
-        >
+          disabled={isLoading}>
           <Text style={styles.buttonText}>
             {isLoading ? 'מבצע הרשמה...' : 'הירשם'}
           </Text>
@@ -209,7 +205,7 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
