@@ -7,7 +7,7 @@ import LoginScreen from './src/components/login/login';
 import RegisterScreen from './src/components/registration/registration';
 // import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import HomeScreen from './src/components/Home/Home';
-import AddSupplierScreen from './src/components/AddSupplir/AddSupplir';
+import AddSupplierScreen from './src/components/AddSupplier/AddSupplier';
 import AddProductScreen from './src/components/AddProduct/AddProduct';
 import SuppliersListScreen from './src/components/SuppliersList/SuppliersList';
 export const API_BASE_URL = 'http://10.0.2.2:8080';
