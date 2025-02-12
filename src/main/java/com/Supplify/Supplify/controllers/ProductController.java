@@ -1,5 +1,4 @@
 package com.Supplify.Supplify.controllers;
-
 import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
@@ -19,14 +18,15 @@ public class ProductController {
     private final ProductService productService;
 
     // Get all products
-    @GetMapping
+    @GetMapping("/displayProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+        logger.info("Fetching all products");
+         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
     // Get product by ID
-    @GetMapping("/getProductById")
+    @GetMapping("/getProductById/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<Product> getProductById(@PathVariable int productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)
@@ -34,10 +34,11 @@ public class ProductController {
     }
 
     // Add a new product
-    @PostMapping
+    @PostMapping("/createProduct")
     public ResponseEntity<Product> CreateProduct(@RequestBody CreateProductRequest request) {
         try {
             Product createdProduct = productService.addProduct(request);
+            logger.info("New Product has added");
             return ResponseEntity.status(201).body(createdProduct);
         } catch (Exception e) {
             logger.error("Error adding product: {}", e.getMessage(), e);
@@ -46,10 +47,8 @@ public class ProductController {
     }
 
     // Update a product
-    @PutMapping("/updateProductById")
-    public ResponseEntity<?> updateProduct(
-            @PathVariable int productId,
-            @RequestBody Product updatedProduct) {
+    @PutMapping("/updateProductById/{productId}") // Added {productId} to match the path variable
+    public ResponseEntity<?> updateProduct(@PathVariable int productId, @RequestBody Product updatedProduct) {
         try {
             Product product = productService.updateProduct(productId, updatedProduct);
             return ResponseEntity.ok(product);
@@ -61,9 +60,8 @@ public class ProductController {
             return ResponseEntity.status(500).body("Error updating product");
         }
     }
-
     // Delete a product
-    @DeleteMapping("/DeleteProduct")
+    @DeleteMapping("/deleteProduct/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<?> deleteProduct(@PathVariable int productId) {
         try {
             productService.deleteProduct(productId);

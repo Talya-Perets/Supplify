@@ -9,4 +9,5 @@ public class CreateProductRequest {
     int supplierId;
     String productName;
     String productDescription;
+    int stock;
 }

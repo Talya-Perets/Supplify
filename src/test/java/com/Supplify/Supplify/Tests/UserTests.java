@@ -1,141 +1,134 @@
 package com.Supplify.Supplify.Tests;
 
-import com.Supplify.Supplify.services.UserService;
-
-import com.Supplify.Supplify.controllers.UserController;
-import com.Supplify.Supplify.entities.User;
-import com.Supplify.Supplify.repositories.UserRepo;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.http.ResponseEntity;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.Supplify.Supplify.entities.Business;
+import com.Supplify.Supplify.entities.Role;
+import com.Supplify.Supplify.entities.User;
+import com.Supplify.Supplify.repositories.UserRepo;
+import com.Supplify.Supplify.services.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.Optional;
 
 public class UserTests {
 
-//    @Test
-//    public void testUserGettersAndSetters() {
-//        // Setting up the conditions
-//        User user = new User();
-//        user.setFirstName("Jane");
-//        user.setLastName("Smith");
-//        user.setUsername("jane_smith");
-//        user.setPassword("securePass!456");
-//        user.setBusinessName("Smith's Fuel Co.");
-//        user.setPhone("987-654-3210");
-//        user.setRole("EMPLOYEE");
-//
-//        // Assertions to verify getters and setters
-//        assertEquals("Jane", user.getFirstName());
-//        assertEquals("Smith", user.getLastName());
-//        assertEquals("jane_smith", user.getUsername());
-//        assertEquals("securePass!456", user.getPassword());
-//        assertEquals("Smith's Fuel Co.", user.getBusinessName());
-//        assertEquals("987-654-3210", user.getPhone());
-//        assertEquals("EMPLOYEE", user.getRole());
-//    }
-//
-//    @Test
-//    public void testDuplicateUsernameNotAllowed() {
-//        // Setting up the mock object
-//        UserRepo mockRepo = Mockito.mock(UserRepo.class);
-//        when(mockRepo.existsByUsername("duplicate_user")).thenReturn(true);
-//
-//        // Create the UserService with the mocked repository
-//        UserService userService = new UserService(mockRepo, null); // PasswordEncoder is not needed for this test
-//
-//        // Create a new User object with the same username
-//        User user = new User();
-//        user.setFirstName("Duplicate");
-//        user.setLastName("User");
-//        user.setUsername("duplicate_user");
-//        user.setPassword("password123"); // No need to encode password for this test
-//        user.setBusinessName("Duplicate Inc.");
-//        user.setPhone("123-123-1234");
-//        user.setRole("EMPLOYEE");
-//
-//        // Attempt to create a user with a duplicate username
-//        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//            userService.createUser(user);
-//        });
-//
-//        // Assertions to verify the expected exception
-//        assertEquals("Username already exists", exception.getMessage());
-//        verify(mockRepo, times(1)).existsByUsername("duplicate_user");
-//    }
-//    @Test
-//    public void testPhoneNumberLengthValidation() {
-//        // Setting up the mock object
-//        UserRepo mockRepo = Mockito.mock(UserRepo.class);
-//        when(mockRepo.existsByUsername("valid_user")).thenReturn(false);  // No duplicate username for this test
-//
-//        // Create the UserService with the mocked repository
-//        UserService userService = new UserService(mockRepo, null); // PasswordEncoder is not needed for this test
-//
-//        // Create a User object with an invalid phone number (length is not 10)
-//        User user = new User();
-//        user.setFirstName("John");
-//        user.setLastName("Doe");
-//        user.setUsername("valid_user");
-//        user.setPassword("password123");
-//        user.setBusinessName("John's Business");
-//        user.setPhone("12345");  // Invalid phone number (length 5)
-//        user.setRole("EMPLOYEE");
-//
-//        // Attempt to create a user with an invalid phone number
-//        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//            userService.createUser(user);
-//        });
-//
-//        // Assertions to verify the expected exception
-//        assertEquals("Phone number must be 10 digits long", exception.getMessage());
-//        verify(mockRepo, times(0)).save(user);  // Ensure save is not called
-//    }
-    /*
-    @Test
-    public void testUserLoginSuccess() {
-        // Mock the UserService
-        UserService mockUserService = Mockito.mock(UserService.class);
-        Mockito.when(mockUserService.authenticateUser("testuser", "password123")).thenReturn(true);
+    private UserRepo mockUserRepo;
+    private PasswordEncoder mockPasswordEncoder;
+    private UserService userService;
 
-        // Create an instance of the controller with the mocked service
-        UserController userController = new UserController(mockUserService);
-
-        // Create and set up the login request (using nested class)
-        UserController.LoginRequest loginRequest = new UserController.LoginRequest();
-        loginRequest.setUsername("testuser");
-        loginRequest.setPassword("password123");
-
-        // Call the login method
-        ResponseEntity<?> response = userController.login(loginRequest);
-
-        // Assert that the login was successful
-        assertEquals(200, response.getStatusCodeValue());  // Check for successful response
-        assertEquals("Login successful", ((UserController.LoginResponse) response.getBody()).getMessage());
+    @BeforeEach
+    void setUp() {
+        mockUserRepo = Mockito.mock(UserRepo.class);
+        mockPasswordEncoder = Mockito.mock(PasswordEncoder.class);
+        userService = new UserService(mockUserRepo, mockPasswordEncoder);
     }
 
     @Test
-    public void testUserLoginFailure() {
-        // Mock the UserService
-        UserService mockUserService = Mockito.mock(UserService.class);
-        Mockito.when(mockUserService.authenticateUser("testuser", "wrongpassword")).thenReturn(false);
+    public void testCreateUserSuccess() {
+        // Mock user data
+        User user = new User("John", "Doe", "john.doe@example.com", "securepassword", "1234567890", new Business(), new Role());
 
-        // Create an instance of the controller with the mocked service
-        UserController userController = new UserController(mockUserService);
+        when(mockUserRepo.saveAndFlush(any(User.class))).thenReturn(user);
 
-        // Create and set up the login request (using nested class)
-        UserController.LoginRequest loginRequest = new UserController.LoginRequest();
-        loginRequest.setUsername("testuser");
-        loginRequest.setPassword("wrongpassword");
+        // Call createUser
+        User createdUser = userService.createUser(
+                "John", "Doe", "john.doe@example.com", "securepassword", "1234567890", new Business(), new Role()
+        );
 
-        // Call the login method
-        ResponseEntity<?> response = userController.login(loginRequest);
-
-        // Assert that the login failed
-        assertEquals(400, response.getStatusCodeValue());  // Check for failed response
-        assertEquals("Invalid credentials", ((UserController.LoginResponse) response.getBody()).getMessage());
+        // Assertions
+        assertNotNull(createdUser);
+        assertEquals("john.doe@example.com", createdUser.getUsername());
+        verify(mockUserRepo, times(1)).saveAndFlush(any(User.class));
     }
 
-     */
+    @Test
+    public void testFindUserByUsername() {
+        // Mock user
+        User user = new User("Alice", "Smith", "alice.smith@example.com", "password123", "9876543210", new Business(), new Role());
+
+        when(mockUserRepo.findUserByUsername("alice.smith@example.com")).thenReturn(user);
+
+        // Call service method
+        User foundUser = userService.findUserByUsername("alice.smith@example.com");
+
+        // Assertions
+        assertNotNull(foundUser);
+        assertEquals("Alice", foundUser.getFirstName());
+        assertEquals("alice.smith@example.com", foundUser.getUsername());
+    }
+
+    @Test
+    public void testFindUserByIDSuccess() {
+        // Mock user
+        User user = new User("Bob", "Brown", "bob.brown@example.com", "pass1234", "5555555555", new Business(), new Role());
+
+        when(mockUserRepo.findById(1)).thenReturn(Optional.of(user));
+
+        // Call service method
+        User foundUser = userService.findUserByID(1);
+
+        // Assertions
+        assertNotNull(foundUser);
+        assertEquals("Bob", foundUser.getFirstName());
+    }
+
+    @Test
+    public void testFindUserByIDNotFound() {
+        // Mock repository returning empty
+        when(mockUserRepo.findById(99)).thenReturn(Optional.empty());
+
+        // Expect an exception
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userService.findUserByID(99);
+        });
+
+        assertTrue(exception.getMessage().contains("User with ID 99 not found"));
+    }
+
+    @Test
+    public void testIsEmailAlreadyUsedTrue() {
+        // Mock user existing
+        when(mockUserRepo.findUserByUsername("existing@example.com")).thenReturn(new User());
+
+        assertTrue(userService.isEmailAlreadyUsed("existing@example.com"));
+    }
+
+    @Test
+    public void testIsEmailAlreadyUsedFalse() {
+        // Mock user not found
+        when(mockUserRepo.findUserByUsername("newuser@example.com")).thenReturn(null);
+
+        assertFalse(userService.isEmailAlreadyUsed("newuser@example.com"));
+    }
+
+    @Test
+    public void testAuthenticateUserSuccess() {
+        // Mock user
+        User user = new User("Tom", "Hanks", "tom.hanks@example.com", "hashedpassword", "1231231234", new Business(), new Role());
+
+        when(mockUserRepo.findUserByUsername("tom.hanks@example.com")).thenReturn(user);
+        when(mockPasswordEncoder.matches("correctpassword", "hashedpassword")).thenReturn(true);
+
+        assertTrue(userService.authenticateUser("tom.hanks@example.com", "hashedpassword"));
+    }
+
+    @Test
+    public void testAuthenticateUserWrongPassword() {
+        // Mock user
+        User user = new User("Emma", "Stone", "emma.stone@example.com", "hashedpassword", "3213213210", new Business(), new Role());
+        when(mockUserRepo.findUserByUsername("emma.stone@example.com")).thenReturn(user);
+        when(mockPasswordEncoder.matches("wrongpassword", "hashedpassword")).thenReturn(false);
+
+        assertFalse(userService.authenticateUser("emma.stone@example.com", "wrongpassword"));
+    }
+
+    @Test
+    public void testAuthenticateUserUserNotFound() {
+        when(mockUserRepo.findUserByUsername("nonexistent@example.com")).thenReturn(null);
+
+        assertFalse(userService.authenticateUser("nonexistent@example.com", "password"));
+    }
 }
