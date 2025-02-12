@@ -21,7 +21,7 @@ const menuItems = [
   { id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart' },];
 
 const managerItems = [
-  { id: 'Admin', title: 'מסך ניהול', icon: 'cog' },
+  { id: 'ManagerApproval', title: 'מסך ניהול', icon: 'cog' },
   { id: 'EmployeeRegistration', title: 'הרשמת עובד', icon: 'user-plus' },
 ];
 

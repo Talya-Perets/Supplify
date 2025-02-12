@@ -29,7 +29,7 @@ const EmployeeRegistrationScreen = () => {
           <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
             <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>רישום משתמש חדש</Text>
+          <Text style={styles.headerTitle}>רישום עובד חדש</Text>
         </View>
 
         <View style={styles.formContainer}>
