@@ -4,7 +4,8 @@ const PRODUCTION_URL = "http://10.0.2.2:8080";
 // Controller Endpoints
 const AUTH = "/auth";
 const PRODUCT = "/product";
-const SUPPLIERS = "/suppliers"
+const SUPPLIERS = "/suppliers";
+
 // Globals Object
 export const globals = {
 
@@ -19,5 +20,7 @@ export const globals = {
     },
     PRODUCT:{
     createProduct: `${PRODUCTION_URL}${PRODUCT}/createProduct`,
+    displayProducts: `${PRODUCTION_URL}${PRODUCT}/displayProducts`,
+
     }
 };
