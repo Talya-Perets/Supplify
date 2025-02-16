@@ -101,20 +101,21 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.card}>
+    <SafeAreaView style={styles.container} accessible={false}>
+      <View style={styles.card} accessible={false}>
         <Text style={styles.title}>Supplify</Text>
 
         <View style={styles.inputContainer}>
           <Icon name="user" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="email"
+            placeholder="Email"
             value={username}
             onChangeText={setUsername}
             placeholderTextColor="#A0A0A0"
             autoCapitalize="none"
             keyboardType="email-address"
+            testID="email-input"
           />
         </View>
 
@@ -122,18 +123,20 @@ const LoginScreen = () => {
           <Icon name="lock" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="סיסמא"
+            placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             placeholderTextColor="#A0A0A0"
+            testID="password-input"
           />
         </View>
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleLogin}
-          disabled={isLoading}>
+          disabled={isLoading}
+          testID="login-button">
           <Icon
             name="log-in"
             size={20}
@@ -141,7 +144,7 @@ const LoginScreen = () => {
             style={styles.buttonIcon}
           />
           <Text style={styles.buttonText}>
-            {isLoading ? 'מתחבר...' : 'התחבר'}
+            {isLoading ? 'Login...' : 'Login'}
           </Text>
         </TouchableOpacity>
 
@@ -158,10 +161,12 @@ const LoginScreen = () => {
         <View style={styles.linkContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={styles.link}>שכחתי סיסמא</Text>
+            <Text style={styles.link}>Forgot password</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.link}>הירשם</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Register')}
+            testID="register-link">
+            <Text style={styles.link}>Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>

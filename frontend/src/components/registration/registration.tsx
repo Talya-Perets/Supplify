@@ -112,78 +112,87 @@ const SignUpScreen = () => {
         <View style={styles.inputRow}>
           <TextInput
             style={styles.halfInput}
-            placeholder="שם משפחה"
+            placeholder="Last Name"
             value={lastName}
             onChangeText={setLastName}
             placeholderTextColor="#A0A0A0"
+            testID="lastName-input"
           />
           <TextInput
             style={styles.halfInput}
-            placeholder="שם פרטי"
+            placeholder="First Name"
             value={firstName}
             onChangeText={setFirstName}
             placeholderTextColor="#A0A0A0"
+            testID="firstName-input"
           />
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="שם משתמש"
+          placeholder="Email"
           value={username}
           onChangeText={setUsername}
           placeholderTextColor="#A0A0A0"
+          testID="email-input"
         />
 
         <TextInput
           style={styles.input}
-          placeholder="שם העסק"
+          placeholder="Business Name"
           value={businessName}
           onChangeText={setBusinessName}
           placeholderTextColor="#A0A0A0"
+          testID="businessName-input"
         />
 
         <TextInput
           style={styles.input}
-          placeholder="טלפון"
+          placeholder="Phone Number"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
           placeholderTextColor="#A0A0A0"
           maxLength={10}
+          testID="phone-input"
         />
 
         <TextInput
           style={styles.input}
-          placeholder="כתובת"
+          placeholder="Address"
           value={address}
           onChangeText={setAddress}
           placeholderTextColor="#A0A0A0"
+          testID="address-input"
         />
 
         <TextInput
           style={styles.input}
-          placeholder="סיסמא"
+          placeholder="Password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           placeholderTextColor="#A0A0A0"
+          testID="password-input"
         />
 
         <TextInput
           style={styles.input}
-          placeholder="אישור סיסמא"
+          placeholder="Confirm Password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
           placeholderTextColor="#A0A0A0"
+          testID="confirmPassword-input"
         />
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleSignUp}
-          disabled={isLoading}>
+          disabled={isLoading}
+          testID="signUp-button">
           <Text style={styles.buttonText}>
-            {isLoading ? 'מבצע הרשמה...' : 'הירשם'}
+            {isLoading ? 'Signing up...' : 'Sign up'}
           </Text>
         </TouchableOpacity>
       </View>
