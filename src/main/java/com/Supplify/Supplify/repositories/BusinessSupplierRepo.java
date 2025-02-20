@@ -11,5 +11,4 @@ public interface BusinessSupplierRepo extends JpaRepository<BusinessSupplier, Bu
 
     List<BusinessSupplier> findByBusinessId(int businessId);
 
-    List<BusinessSupplier> findBySupplierId(int supplierId);
 }

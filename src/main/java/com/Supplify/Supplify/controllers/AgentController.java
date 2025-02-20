@@ -30,17 +30,11 @@ public class AgentController {
         agentService.createAgent(request);
         return ResponseEntity.ok("Agent added successfully");
     }
-//    @GetMapping("/business/{businessId}")
-//    public ResponseEntity<Map<String, Object>> getAgentsByBusinessId(@PathVariable int businessId) {
-//        List<SupplierDetailsResponse> agents = agentService.getAgentsByBusinessId(businessId);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("success", true);
-//        response.put("businessId", businessId);
-//        response.put("agents", agents);
-//
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/suppliers/{businessId}")
+    public ResponseEntity<List<SupplierDetailsResponse>> getSupplierIds(@PathVariable int businessId) {
+        List<SupplierDetailsResponse> supplierIds = agentService.getAgentsByBusinessId(businessId);
+        return ResponseEntity.ok(supplierIds);
+    }
 
 
 }

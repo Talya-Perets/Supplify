@@ -37,8 +37,7 @@ public class SupplierService {
         return supplierRepo.findAll();
     }
 
-    //public List<Supplier> getAllSuppliersbyBusinessId(Integer businessId) {
-    // }
+
 
     public Supplier getSupplierById(Integer id) {
         return supplierRepo.findById(id)
