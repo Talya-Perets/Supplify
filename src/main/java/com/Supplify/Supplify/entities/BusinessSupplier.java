@@ -11,40 +11,36 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(BusinessSupplier.BusinessSupplierId.class)
 public class BusinessSupplier {
 
-    @EmbeddedId
-    private BusinessSupplierId id;
+    @Id
+    @Column(name = "business_id")
+    private int businessId;
 
-    @Embeddable
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    @Setter
-    @EqualsAndHashCode
-    public static class BusinessSupplierId implements Serializable {
-        @Column(name = "business_id")
-        private int businessId;
+    @Id
+    @Column(name = "supplier_id")
+    private int supplierId;
 
-        @Column(name = "supplier_id")
-        private int supplierId;
-    }
-
-    // Constructor for convenience
-    public BusinessSupplier(int businessId, int supplierId) {
-        this.id = new BusinessSupplierId(businessId, supplierId);
-    }
-
-    // Optional: Add these if you need to map to the actual Business and Supplier entities
-    /*
     @ManyToOne
-    @MapsId("businessId")
-    @JoinColumn(name = "business_id")
+    @JoinColumn(name = "business_id", insertable = false, updatable = false)
     private Business business;
 
     @ManyToOne
-    @MapsId("supplierId")
-    @JoinColumn(name = "supplier_id")
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false)
     private Supplier supplier;
-    */
+
+
+    public BusinessSupplier(int businessId, int supplierId) {
+        this.businessId = businessId;
+        this.supplierId = supplierId;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class BusinessSupplierId implements Serializable {
+        private int businessId;
+        private int supplierId;
+    }
 }

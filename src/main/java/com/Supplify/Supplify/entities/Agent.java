@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.entities;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,8 +11,9 @@ import lombok.*;
 @Table(name = "agents")
 public class Agent {
     @Id
-    @Column(name = "id", nullable = false, length = 45)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false, foreignKey = @ForeignKey(name = "fk_agents_supplier"))
@@ -21,9 +23,8 @@ public class Agent {
     private String name;
 
     @Column(name = "email", nullable = false, length = 45)
-    private String description;
+    private String email;
 
-    @Column(name = "phone", nullable = false, length = 45)
-    private int phone;
-
+    @Column(name = "phone", nullable = false, length = 10)
+    private String phone;
 }

@@ -5,8 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.Supplify.Supplify.DTO.CreateSupplierRequest;
-import com.Supplify.Supplify.entities.BusinessSupplier;
+import com.Supplify.Supplify.DTO.CreateAgentRequest;
 import com.Supplify.Supplify.entities.Supplier;
 import com.Supplify.Supplify.services.SupplierService;
 import com.Supplify.Supplify.controllers.SupplierController;
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +46,7 @@ public class SupplierTests {
     @Test
     public void testCreateSupplierSuccess() {
         // Mock request
-        CreateSupplierRequest request = new CreateSupplierRequest("Test Supplier", 1);
+        CreateAgentRequest request = new CreateAgentRequest("Test Supplier", 1);
 
         // Mock supplier entity
         Supplier savedSupplier = new Supplier("Test Supplier");
@@ -135,7 +133,7 @@ public class SupplierTests {
 
     @Test
     public void testCreateSupplierControllerSuccess() throws Exception {
-        CreateSupplierRequest request = new CreateSupplierRequest("Test Supplier", 1);
+        CreateAgentRequest request = new CreateAgentRequest("Test Supplier", 1);
 
         Supplier createdSupplier = new Supplier("Test Supplier");
         createdSupplier.setSupplierId(1);
