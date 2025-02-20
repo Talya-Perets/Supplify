@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import {
 import {doPost} from '../../util/HTTPRequests.ts';
 import {globals} from '../../util/Globals.ts';
 import styles from './login.styles';
+import {LoginContext} from '../../contexts/LoginContext.tsx';
+import {LoginContextType} from '../../contexts/UserContext.tsx';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -30,6 +32,7 @@ const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const {login} = useContext(LoginContext) as LoginContextType;
 
   const configureGoogleSignIn = () => {
     GoogleSignin.configure();
@@ -53,7 +56,19 @@ const LoginScreen = () => {
             username: userInfo.data.user.email,
           });
 
-          Alert.alert('Success', response.data);
+          Alert.alert(
+            'Success',
+            response.data.message
+              ? response.data.message
+              : 'Successful login via Google Sign-In',
+          );
+
+          login(
+            response.data.businessId,
+            response.data.userId,
+            response.data.role,
+          );
+
           navigation.navigate('Home');
         } catch (error) {
           console.error('Failed to login via Google Sign-In:', error);
@@ -83,7 +98,14 @@ const LoginScreen = () => {
 
       if (response.status === 200) {
         // Successful login
-        Alert.alert('Success', 'Login successful');
+        Alert.alert('Success', 'Successful login');
+
+        login(
+          response.data.businessId,
+          response.data.userId,
+          response.data.role,
+        );
+
         navigation.navigate('Home');
       } else {
         // Failed login

@@ -6,6 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CreateSupplierRequest {
-    String supplierName;
-    int businessId;
+    private String supplierName;
+    private int businessId;
 }

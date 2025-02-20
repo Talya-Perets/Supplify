@@ -5,9 +5,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CreateProductRequest {
-    String id;
-    int supplierId;
-    String productName;
-    String productDescription;
-    int stock;
+    private String id;
+    private int supplierId;
+    private String productName;
+    private String productDescription;
+    private int stock;
 }
