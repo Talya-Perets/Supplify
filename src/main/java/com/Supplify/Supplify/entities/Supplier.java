@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.entities;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,17 +8,18 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "SUPPLIERS")
+@Table(name = "suppliers")
 public class Supplier {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "supplier_id")
     private int supplierId;
 
     @Column(name = "comapny_name")
     private String companyName;
 
-    public Supplier(String supplierName) {
-        this.companyName = supplierName;
+    public Supplier(String companyName) {
+        this.companyName = companyName;
     }
 }

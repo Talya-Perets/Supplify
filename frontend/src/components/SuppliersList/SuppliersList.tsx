@@ -22,8 +22,8 @@ type SuppliersListScreenNavigationProp = StackNavigationProp<
 >;
 
 interface Supplier {
-  supplierId: number; 
-  companyName: string; 
+  supplierId: number;
+  companyName: string;
   contactPerson: string;
   phone: string;
   email: string;
@@ -65,9 +65,9 @@ const SuppliersListScreen = () => {
 
  //
 //add deletesupplier
-// 
-  
- 
+//
+
+
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}

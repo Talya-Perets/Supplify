@@ -12,6 +12,7 @@ import SuppliersListScreen from './src/components/SuppliersList/SuppliersList';
 import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/EmployeeRegistration';
 import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
+//import ManagerApprovalScreen from './src/components/ManagerScreen/Managerscreen';
 import {LoginProvider} from './src/contexts/LoginContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
