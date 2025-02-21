@@ -13,8 +13,10 @@ import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/Em
 import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
 import {LoginProvider} from './src/contexts/LoginContext';
+import {CartProvider} from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
+
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
 export type RootStackParamList = {
@@ -34,30 +36,32 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
-  return (
+  return ( 
     <LoginProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-          }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-          <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
-          <Stack.Screen name="AddProduct" component={AddProductScreen} />
-          <Stack.Screen name="ProductList" component={ProductListScreen} />
-          <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
-          <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
-          <Stack.Screen
-            name="EmployeeRegistration"
-            component={EmployeeRegistrationScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <CartProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{
+              headerShown: false,
+            }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
+            <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
+            <Stack.Screen name="AddProduct" component={AddProductScreen} />
+            <Stack.Screen name="ProductList" component={ProductListScreen} />
+            <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
+            <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
+            <Stack.Screen
+              name="EmployeeRegistration"
+              component={EmployeeRegistrationScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </CartProvider>
     </LoginProvider>
   );
 };
