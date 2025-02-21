@@ -34,8 +34,7 @@ const HomeScreen = () => {
   ];
   const goToShoppingCart = () => {
     navigation.navigate('ShoppingCart');
-};
-
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,8 +52,10 @@ const HomeScreen = () => {
             </TouchableOpacity>
             <Text style={styles.pageTitle}>דף הבית</Text>
             <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.cartButton} onPress={goToShoppingCart}>
-               <Icon name="shopping-cart" size={24} color="#4A90E2" />
+              <TouchableOpacity
+                style={styles.cartButton}
+                onPress={goToShoppingCart}>
+                <Icon name="shopping-cart" size={24} color="#4A90E2" />
               </TouchableOpacity>
               <View style={styles.notificationContainer}>
                 <Icon name="bell" size={24} color="#4A90E2" />

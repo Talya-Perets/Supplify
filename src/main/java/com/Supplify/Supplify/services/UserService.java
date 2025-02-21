@@ -1,6 +1,6 @@
 package com.Supplify.Supplify.services;
 
-import com.Supplify.Supplify.DTO.RegisterRequest;
+import com.Supplify.Supplify.DTO.UserContextResponse;
 import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.entities.Role;
 import com.Supplify.Supplify.entities.User;
@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -50,6 +48,19 @@ public class UserService {
     public boolean authenticateUser(String username, String password) {
         User user = findUserByUsername(username);
         if (user == null) return false;
-        return password.equals(user.getPassword());
+
+        return user.getPassword() == null || password.equals(user.getPassword());
+    }
+
+    public UserContextResponse getUserContext(String username) {
+        UserContextResponse userLoginContext;
+        User user = findUserByUsername(username);
+
+        userLoginContext = new UserContextResponse();
+        userLoginContext.setUserId(user.getId());
+        userLoginContext.setBusinessId(user.getBusiness().getId());
+        userLoginContext.setRole(user.getRole().getName());
+
+        return userLoginContext;
     }
 }

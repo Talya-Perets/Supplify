@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import {
 import {doPost} from '../../util/HTTPRequests.ts';
 import {globals} from '../../util/Globals.ts';
 import styles from './login.styles';
+import {LoginContext} from '../../contexts/LoginContext.tsx';
+import {LoginContextType} from '../../contexts/UserContext.tsx';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -30,6 +32,7 @@ const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const {login} = useContext(LoginContext) as LoginContextType;
 
   const configureGoogleSignIn = () => {
     GoogleSignin.configure();
@@ -53,7 +56,19 @@ const LoginScreen = () => {
             username: userInfo.data.user.email,
           });
 
-          Alert.alert('Success', response.data);
+          Alert.alert(
+            'Success',
+            response.data.message
+              ? response.data.message
+              : 'Successful login via Google Sign-In',
+          );
+
+          login(
+            response.data.businessId,
+            response.data.userId,
+            response.data.role,
+          );
+
           navigation.navigate('Home');
         } catch (error) {
           console.error('Failed to login via Google Sign-In:', error);
@@ -83,7 +98,14 @@ const LoginScreen = () => {
 
       if (response.status === 200) {
         // Successful login
-        Alert.alert('Success', 'Login successful');
+        Alert.alert('Success', 'Successful login');
+
+        login(
+          response.data.businessId,
+          response.data.userId,
+          response.data.role,
+        );
+
         navigation.navigate('Home');
       } else {
         // Failed login
@@ -101,20 +123,21 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.card}>
+    <SafeAreaView style={styles.container} accessible={false}>
+      <View style={styles.card} accessible={false}>
         <Text style={styles.title}>Supplify</Text>
 
         <View style={styles.inputContainer}>
           <Icon name="user" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="email"
+            placeholder="Email"
             value={username}
             onChangeText={setUsername}
             placeholderTextColor="#A0A0A0"
             autoCapitalize="none"
             keyboardType="email-address"
+            testID="email-input"
           />
         </View>
 
@@ -122,18 +145,20 @@ const LoginScreen = () => {
           <Icon name="lock" size={20} color="#4A90E2" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="סיסמא"
+            placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             placeholderTextColor="#A0A0A0"
+            testID="password-input"
           />
         </View>
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleLogin}
-          disabled={isLoading}>
+          disabled={isLoading}
+          testID="login-button">
           <Icon
             name="log-in"
             size={20}
@@ -141,7 +166,7 @@ const LoginScreen = () => {
             style={styles.buttonIcon}
           />
           <Text style={styles.buttonText}>
-            {isLoading ? 'מתחבר...' : 'התחבר'}
+            {isLoading ? 'Login...' : 'Login'}
           </Text>
         </TouchableOpacity>
 
@@ -158,10 +183,12 @@ const LoginScreen = () => {
         <View style={styles.linkContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={styles.link}>שכחתי סיסמא</Text>
+            <Text style={styles.link}>Forgot password</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.link}>הירשם</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Register')}
+            testID="register-link">
+            <Text style={styles.link}>Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>
