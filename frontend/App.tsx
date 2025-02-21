@@ -13,7 +13,7 @@ import SuppliersListScreen from './src/components/SuppliersList/SuppliersList';
 import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/EmployeeRegistration';
 import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
-import ManagerApprovalScreen from './src/components/ManagerScreen/Managerscreen';
+//import ManagerApprovalScreen from './src/components/ManagerScreen/Managerscreen';
 import {LoginProvider} from './src/contexts/LoginContext';
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
@@ -25,37 +25,15 @@ export type RootStackParamList = {
   AddSupplier: undefined;
   AddProduct: undefined;
   SuppliersList: undefined;
-  ProductList:undefined;
-  ShoppingCart:undefined;
-  EmployeeRegistration:undefined;
+  ProductList: undefined;
+  ShoppingCart: undefined;
+  EmployeeRegistration: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-          headerShown: false,
-        }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-        <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
-        <Stack.Screen name="AddProduct" component={AddProductScreen} />
-        <Stack.Screen name="ProductList" component={ProductListScreen} />
-        <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
-        <Stack.Screen name="ManagerApproval" component={ManagerApprovalScreen} />
-        <Stack.Screen name="EmployeeRegistration" component={EmployeeRegistrationScreen} />
-
-
-
-
-      </Stack.Navigator>
-    </NavigationContainer>
     <LoginProvider>
       <NavigationContainer>
         <Stack.Navigator
