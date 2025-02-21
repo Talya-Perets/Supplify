@@ -63,4 +63,19 @@ public class UserService {
 
         return userLoginContext;
     }
+
+    public boolean resetPassword(String email, String newPassword) {
+        User user = userRepo.findUserByUsername(email);
+
+        if (user == null) {
+            logger.error("User not found with email: {}", email);
+            return false;
+        }
+        user.setPassword(newPassword);
+        userRepo.save(user);
+
+        logger.info("Password updated successfully for email: {}", email);
+        return true;
+    }
+
 }

@@ -33,7 +33,7 @@ const ProductList = () => {
     setIsLoading(true);
     try {
       const data = await doGet(globals.PRODUCT.displayProducts);
-      console.log('API Response:', data); // Debugging
+      console.log('API Response:', data); 
   
       if (data) {
         setProducts(data);
@@ -89,15 +89,16 @@ const ProductList = () => {
     // Add your cart logic here
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar userRole={userRole} />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
+
           <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
             <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
           </TouchableOpacity>
+
           <Text style={styles.headerTitle}>רשימת מוצרים</Text>
         </View>
 

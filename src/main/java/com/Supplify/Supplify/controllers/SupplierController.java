@@ -44,7 +44,7 @@ public class SupplierController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/displaySupplier")
     public ResponseEntity<List<Supplier>> getAllSuppliers() {
         logger.info("Fetching all suppliers");
 

@@ -17,7 +17,7 @@ const menuItems = [
   { id: 'orders', title: 'רשימת הזמנות', icon: 'list-alt' },
   { id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube' },
   { id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users' },
-  { id: 'search', title: 'חיפוש מוצר', icon: 'search' },
+  { id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search' },
   { id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart' },];
 
 const managerItems = [

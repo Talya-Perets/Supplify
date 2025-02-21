@@ -1,9 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
-import com.Supplify.Supplify.DTO.GoogleRequest;
-import com.Supplify.Supplify.DTO.LoginRequest;
-import com.Supplify.Supplify.DTO.UserContextResponse;
-import com.Supplify.Supplify.DTO.RegisterRequest;
+import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.enums.UserRoleEnum;
@@ -29,7 +26,6 @@ public class AuthController {
     private final BusinessService businessService;
     private final UserService userService;
     private final RoleService roleService;
-
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws Exception {
@@ -98,6 +94,26 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        logger.info("Received forgotPassword request for email: {}", forgotPasswordRequest.getEmail());
+
+        try {
+            boolean isEmailRegistered = userService.isEmailAlreadyUsed(forgotPasswordRequest.getEmail());
+
+            if (isEmailRegistered) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Email not found
+            }
+        } catch (Exception e) {
+            logger.error("Error processing forgotPassword request", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     @PostMapping("/google")
     public ResponseEntity<?> google(@RequestBody GoogleRequest googleRequest) {

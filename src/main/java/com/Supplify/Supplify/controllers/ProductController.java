@@ -26,7 +26,7 @@ public class ProductController {
     }
 
     // Get product by ID
-    @GetMapping("/getProductById/{productId}") // Added {productId} to match the path variable
+    @GetMapping("/fetchProduct") // Added {productId} to match the path variable
     public ResponseEntity<Product> getProductById(@PathVariable int productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)

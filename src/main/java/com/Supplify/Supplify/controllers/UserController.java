@@ -1,8 +1,6 @@
 package com.Supplify.Supplify.controllers;
 
-import com.Supplify.Supplify.DTO.CreateUserRequest;
-import com.Supplify.Supplify.DTO.LoginRequest;
-import com.Supplify.Supplify.DTO.RegisterRequest;
+import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.services.UserService;
 import lombok.AllArgsConstructor;
@@ -16,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 @AllArgsConstructor
 public class UserController {
 
@@ -63,4 +61,26 @@ public class UserController {
         }
         return errors;
     }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        logger.info("Received password reset request for email: {}", resetPasswordRequest.getEmail());
+
+        try {
+            boolean isPasswordUpdated = userService.resetPassword(
+                    resetPasswordRequest.getEmail(),
+                    resetPasswordRequest.getNewPassword()
+            );
+
+            if (isPasswordUpdated) {
+                return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Invalid email or password update failed", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error("Error during password reset", e);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
