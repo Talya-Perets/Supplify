@@ -75,14 +75,15 @@ const ProductList = () => {
           supplierId: product.supplier.supplierId,
           companyName: product.supplier.companyName,
         },
-        id: (product.id), 
+        id: product.id,
+        productId: product.id, // Add this line - map the product.id to productId
         name: product.productName,
         stock: product.stock,
       }, quantity);
       setSuccessMessage('מוצר נוסף לסל בהצלחה');
 
-       // Hide the message after 2 seconds
-       setTimeout(() => {
+      // Hide the message after 2 seconds
+      setTimeout(() => {
         setSuccessMessage(null);
       }, 2000);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import { useOrder } from '../../contexts/OrderContext';
 import { useNavigation } from '@react-navigation/native';
@@ -15,9 +14,11 @@ import Sidebar from '../../components/sidebar-component';
 import { doGet } from '../../util/HTTPRequests';
 import { globals } from '../../util/Globals';
 import styles from './OrderDetails.styles';
+import { LoginContext } from '../../contexts/LoginContext';
+import { LoginContextType } from '../../contexts/UserContext';
 
 interface CreateOrderRequest {
-  businessId: number;
+  businessId: string | null;
   orderId?: number;
 }
 
@@ -71,6 +72,7 @@ const OrderDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const { userInfo } = useContext(LoginContext) as LoginContextType;
   const [userRole] = useState<'manager' | 'employee'>('manager');
 
   useEffect(() => {
@@ -78,29 +80,32 @@ const OrderDetailsScreen = () => {
       navigation.goBack();
       return;
     }
-
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Create the request parameter object
+    
         const orderRequest: CreateOrderRequest = {
-          businessId: 2, // Replace with actual business ID from context or props
+          businessId: userInfo.businessId,
           orderId: selectedOrderId,
         };
-
-        // Add the request parameters to the URL
+    
         const queryParams = new URLSearchParams({
-          businessId: orderRequest.businessId.toString(),
+          businessId: orderRequest.businessId ? orderRequest.businessId.toString() : '',
           orderId: orderRequest.orderId?.toString() || '',
         }).toString();
-
-        // Send GET request with query parameters
+    
         const response = await doGet(`${globals.ORDER.getOrderInfo}?${queryParams}`);
+        console.log('API Response:', response); // Add this to inspect the full API response
+    
         setOrderDetails({
-          ...response,
-          items: response.items || [], // Ensure items is an array
+          id: response.id || 0,
+          user: response.user || { id: 0, name: '' },
+          business: response.business || { id: 0, name: '' },
+          items: response.orderProducts || [], // Make sure you're using the correct property here
+          totalAmount: response.totalAmount || 0,
+          status: response.status || '',
+          orderDate: response.orderDate || '',
         });
       } catch (err) {
         setError('Failed to load order details');
@@ -109,6 +114,7 @@ const OrderDetailsScreen = () => {
         setLoading(false);
       }
     };
+    
 
     fetchOrderDetails();
   }, [selectedOrderId]);
@@ -160,35 +166,41 @@ const OrderDetailsScreen = () => {
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>ספק:</Text>
-                <Text style={styles.value}>{orderDetails.business.name}</Text>
+                <Text style={styles.value}>
+                  {orderDetails.business ? orderDetails.business.name : 'N/A'}
+                </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>מזמין:</Text>
-                <Text style={styles.value}>{orderDetails.user.name}</Text>
+                <Text style={styles.value}>
+                  {orderDetails.user ? orderDetails.user.name : 'N/A'}
+                </Text>
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>פריטים</Text>
-              {orderDetails.items && orderDetails.items.length > 0 ? (
-                orderDetails.items.map((item) => (
-                  <View key={item.id} style={styles.itemRow}>
-                    <View style={styles.itemInfo}>
-                      <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
-                    </View>
-                    {item.price && (
-                      <Text style={styles.itemPrice}>
-                        ₪{(item.price * item.quantity).toFixed(2)}
-                      </Text>
-                    )}
-                  </View>
-                ))
-              ) : (
-                <Text style={styles.noItemsText}>No items found in this order.</Text>
-              )}
-            </View>
+  <Text style={styles.sectionTitle}>פריטים</Text>
+  {orderDetails.items && orderDetails.items.length > 0 ? (
+    orderDetails.items.map((item) => {
+      return (
+        <View key={item.id} style={styles.itemRow}>
+          <View style={styles.itemInfo}>
+            <Text style={styles.itemName}>{item.name}</Text> 
+            <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
+          </View>
+          {item.price && (
+            <Text style={styles.itemPrice}>
+              ₪{(item.price * item.quantity).toFixed(2)}
+            </Text>
+          )}
+        </View>
+      );
+    })
+  ) : (
+    <Text style={styles.noItemsText}>No items found in this order.</Text>
+  )}
+</View>
 
             {orderDetails.totalAmount > 0 && (
               <View style={styles.totalSection}>
@@ -199,7 +211,11 @@ const OrderDetailsScreen = () => {
               </View>
             )}
           </ScrollView>
-        ) : null}
+        ) : (
+          <View style={styles.centerContent}>
+            <Text style={styles.errorText}>No order details found.</Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );

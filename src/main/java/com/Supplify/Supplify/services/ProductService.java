@@ -35,8 +35,8 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // Retrieve a product by ID
-    public Optional<Product> getProductById(int productId) {
+
+    public Optional<Product> getProductById(String productId) {
         return productRepository.findById(productId);
     }
 
@@ -59,7 +59,6 @@ public class ProductService {
         Business business = businessRepo.findById(request.getBusinessId())
                 .orElseThrow(() -> new IllegalArgumentException("Business ID " + request.getBusinessId() + " does not exist."));
 
-        // Save BusinessProduct (linking Business, Product, and Price)
         BusinessProduct businessProduct = new BusinessProduct(
                 new BusinessProduct.BusinessProductId(business.getId(), product.getId()), // ✅ Use composite key
                 business,
@@ -70,10 +69,8 @@ public class ProductService {
         return product;
     }
 
-
-
     // Delete a product by ID
-    public void deleteProduct(int productId) {
+    public void deleteProduct(String productId) {
         if (!productRepository.existsById(productId)) {
             throw new IllegalArgumentException("Product with ID " + productId + " not found");
         }

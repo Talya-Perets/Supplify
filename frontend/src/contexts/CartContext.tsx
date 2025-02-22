@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type CartItem = {
   id: string;
+  productId: string; 
   name: string;
   stock: number;
   quantity: number;

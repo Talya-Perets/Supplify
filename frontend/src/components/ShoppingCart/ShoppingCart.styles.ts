@@ -33,6 +33,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'right',
   },
+  itemId: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+    fontFamily: 'System',  // Or your app's default font
+    textAlign: 'right',    // Since your app seems to use RTL layout
+    direction: 'rtl'
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',

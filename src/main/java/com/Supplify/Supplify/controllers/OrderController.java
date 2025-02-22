@@ -28,7 +28,7 @@ public class OrderController {
 
     @GetMapping("/getOrders")
     public ResponseEntity<List<Order>> getOrdersByBusiness(@RequestParam int businessId) {
-        List<Order> orders = orderService.getOrdersByBusinessId(businessId);
+        List<Order> orders = orderService.get(businessId);
         if (orders == null || orders.isEmpty()) {
             return ResponseEntity.ok(Collections.emptyList()); // Return an empty list if no orders
         }

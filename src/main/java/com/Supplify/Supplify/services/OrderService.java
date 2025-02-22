@@ -25,46 +25,66 @@ public class OrderService {
     @Transactional
 
     public Order createOrder(CreateOrderRequest request) {
+        // Extract data from the request
         int userId = request.getUserId();
         int businessId = request.getBusinessId();
         double totalAmount = request.getTotalAmount();
         String status = request.getStatus();
         LocalDateTime orderDate = request.getOrderDate();
 
-        List<OrderProductRequest> orderItems = request.getOrderItems(); // ✅ Get items
+        // Get the list of order items from the request
+        List<OrderProductRequest> orderItems = request.getOrderItems();
 
+        // Fetch the User and Business entities
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Business business = businessRepo.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Business not found"));
+
+        // Create the new Order entity
         Order newOrder = new Order();
-        newOrder.setUser(userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
-        newOrder.setBusiness(businessRepo.findById(businessId).orElseThrow(() -> new RuntimeException("Business not found")));
+        newOrder.setUser(user);
+        newOrder.setBusiness(business);
         newOrder.setTotalAmount(totalAmount);
         newOrder.setStatus(status);
         newOrder.setOrderDate(orderDate);
 
-        // ✅ Convert orderItems DTOs to OrderProduct entities
+        // Process each order item
         List<OrderProduct> orderProductList = orderItems.stream().map(item -> {
-            Product product = productRepo.findById(Integer.valueOf(item.getProductId())).orElseThrow(() -> new RuntimeException("Product not found"));
+            // Validate product ID
+            if (item.getProductId() == null) {
+                throw new IllegalArgumentException("Product ID must not be null");
+            }
 
-            // ✅ Fetch unit price from business_products table
-            double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(businessId, Integer.parseInt(item.getProductId()));
+            // Fetch the Product entity
+            Product product = productRepo.findById(item.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
+
+            // Fetch the unit price for the product in the given business
+            Double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(request.getBusinessId(), item.getProductId());
+            if (unitPrice == null) {
+                // Handle the null case (e.g., set a default value or throw an exception)
+                unitPrice = 0.0; // Or you can decide on a fallback value
+                // Alternatively, throw a custom exception if this is critical
+                //throw new IllegalArgumentException("Price not found for the given business and product");
+            }
+
+            // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
-            orderProduct.setProduct(product);
+            orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
+            orderProduct.setOrder(newOrder); // Set the order (required for the composite key)
+            orderProduct.setProduct(product); // Set the product
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);
-            orderProduct.setSubtotal(unitPrice * item.getQuantity());
+
             return orderProduct;
         }).toList();
 
-        newOrder.setOrderProducts(orderProductList); // ✅ Attach items to order
+        // Set the list of OrderProduct entities in the Order
+        newOrder.setOrderProducts(orderProductList);
 
+        // Save the Order (cascading will save the OrderProduct entities)
         return orderRepo.save(newOrder);
-    }
-
-
-
-
-    public List<Order> getOrdersByBusinessId(int businessId) {
-        log.info("Fetching orders for business ID: {}", businessId);
-        return orderRepo.findByBusinessId(businessId);
     }
 
     public List<Order> getOrders() {
@@ -72,7 +92,10 @@ public class OrderService {
     }
 
     public Order getOrdersByBusinessIdAndOrderId(int businessId, int orderId) {
-        return orderRepo.findByBusinessIdAndId(businessId,orderId);
+        return orderRepo.findByBusinessIdAndOrderId(businessId,orderId);
     }
 
+    public List<Order> get(int businessId) {
+        return orderRepo.findByBusinessId(businessId);
+    }
 }

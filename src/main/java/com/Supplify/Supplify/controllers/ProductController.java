@@ -27,7 +27,7 @@ public class ProductController {
 
     // Get product by ID
     @GetMapping("/fetchProduct")
-    public ResponseEntity<Product> getProductById(@PathVariable int productId) {
+    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -65,7 +65,7 @@ public class ProductController {
      */
     // Delete a product
     @DeleteMapping("/deleteProduct/{productId}") // Added {productId} to match the path variable
-    public ResponseEntity<?> deleteProduct(@PathVariable int productId) {
+    public ResponseEntity<?> deleteProduct(@PathVariable String productId) {
         try {
             productService.deleteProduct(productId);
             return ResponseEntity.noContent().build();

@@ -59,6 +59,7 @@ const OrderListScreen = ({ navigation }: { navigation: OrderListScreenNavigation
         const response = await doGet(`${globals.ORDER.getOrders}`, {
           businessId: businessId,
         });
+        console.log('Order Response:', response);
 
         if (response && response.length > 0) {
           setOrders(response); // Set orders if response is not empty
@@ -83,12 +84,13 @@ const OrderListScreen = ({ navigation }: { navigation: OrderListScreenNavigation
   };
 
   const renderOrderItem = ({ item }: { item: Order }) => (
+    
     <TouchableOpacity style={styles.orderItem} onPress={() => handleOrderPress(item.id)}>
       <View style={styles.orderInfo}>
         <Text style={styles.orderId}>הזמנה #{item.id}</Text>
         <Text style={styles.orderDate}>תאריך: {new Date(item.orderDate).toLocaleDateString()}</Text>
         <Text style={styles.orderStatus}>סטטוס: {item.status}</Text>
-        <Text style={styles.orderAmount}>סכום: ₪{item.totalAmount.toFixed(2)}</Text>
+        <Text style={styles.orderAmount}>סכום: ₪{item.totalAmount}</Text>
         <Text style={styles.orderBusiness}>עסק: {item.business.name}</Text>
         <Text style={styles.orderUser}>משתמש: {item.user.name}</Text>
       </View>
