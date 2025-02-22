@@ -14,8 +14,13 @@ import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
 //import ManagerApprovalScreen from './src/components/ManagerScreen/Managerscreen';
 import {LoginProvider} from './src/contexts/LoginContext';
+import {CartProvider} from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
+import OrderListScreen from './src/components/OrderList/OrderList';
+import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
+import { OrderProvider } from './src/contexts/OrderContext';
+
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
 export type RootStackParamList = {
@@ -27,38 +32,46 @@ export type RootStackParamList = {
   AddProduct: undefined;
   SuppliersList: undefined;
   ProductList: undefined;
+  OrderList: undefined;
   ShoppingCart: undefined;
   EmployeeRegistration: undefined;
   SearchProduct: undefined;
+  OrderDetails: undefined; 
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
-  return (
+  return ( 
     <LoginProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-          }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-          <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
-          <Stack.Screen name="AddProduct" component={AddProductScreen} />
-          <Stack.Screen name="ProductList" component={ProductListScreen} />
-          <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
-          <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
-          <Stack.Screen
-            name="EmployeeRegistration"
-            component={EmployeeRegistrationScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <CartProvider>
+        <OrderProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{
+              headerShown: false,
+            }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
+            <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
+            <Stack.Screen name="AddProduct" component={AddProductScreen} />
+            <Stack.Screen name="ProductList" component={ProductListScreen} />
+            <Stack.Screen name="OrderList" component={OrderListScreen} />
+            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+            <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
+            <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
+            <Stack.Screen
+              name="EmployeeRegistration"
+              component={EmployeeRegistrationScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+        </OrderProvider>
+      </CartProvider>
     </LoginProvider>
   );
 };

@@ -1,5 +1,4 @@
 package com.Supplify.Supplify.controllers;
-
 import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
@@ -22,7 +21,7 @@ public class ProductController {
     @GetMapping("displayProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
         logger.info("Fetching all products");
-        List<Product> products = productService.getAllProducts();
+         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
@@ -47,6 +46,7 @@ public class ProductController {
         }
     }
 
+    /*
     // Update a product
     @PutMapping("updateProductById/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<?> updateProduct(@PathVariable int productId, @RequestBody Product updatedProduct) {
@@ -62,6 +62,8 @@ public class ProductController {
         }
     }
 
+
+     */
     // Delete a product
     @DeleteMapping("deleteProduct/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<?> deleteProduct(@PathVariable int productId) {
