@@ -26,7 +26,7 @@ public class ProductController {
     }
 
     // Get product by ID
-    @GetMapping("/fetchProduct") // Added {productId} to match the path variable
+    @GetMapping("/fetchProduct")
     public ResponseEntity<Product> getProductById(@PathVariable int productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)
@@ -46,6 +46,7 @@ public class ProductController {
         }
     }
 
+    /*
     // Update a product
     @PutMapping("/updateProductById/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<?> updateProduct(@PathVariable int productId, @RequestBody Product updatedProduct) {
@@ -60,6 +61,8 @@ public class ProductController {
             return ResponseEntity.status(500).body("Error updating product");
         }
     }
+
+     */
     // Delete a product
     @DeleteMapping("/deleteProduct/{productId}") // Added {productId} to match the path variable
     public ResponseEntity<?> deleteProduct(@PathVariable int productId) {

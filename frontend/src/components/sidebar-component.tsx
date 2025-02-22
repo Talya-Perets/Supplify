@@ -14,7 +14,7 @@ const menuItems = [
   { id: 'Home', title: 'דף הבית', icon: 'home' },
   { id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus' },
   { id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o' },
-  { id: 'orders', title: 'רשימת הזמנות', icon: 'list-alt' },
+  { id: 'OrderList', title: 'רשימת הזמנות', icon: 'list-alt' },
   { id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube' },
   { id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users' },
   { id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search' },

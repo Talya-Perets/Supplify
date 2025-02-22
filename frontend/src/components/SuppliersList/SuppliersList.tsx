@@ -63,10 +63,6 @@ const SuppliersListScreen = () => {
     console.log('עריכת ספק:', supplier);
   };
 
- //
-//add deletesupplier
-// 
-  
  
   return (
     <SafeAreaView style={styles.container}>

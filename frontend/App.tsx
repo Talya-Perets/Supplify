@@ -16,6 +16,9 @@ import {LoginProvider} from './src/contexts/LoginContext';
 import {CartProvider} from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
+import OrderListScreen from './src/components/OrderList/OrderList';
+import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
+import { OrderProvider } from './src/contexts/OrderContext';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
@@ -28,9 +31,11 @@ export type RootStackParamList = {
   AddProduct: undefined;
   SuppliersList: undefined;
   ProductList: undefined;
+  OrderList: undefined;
   ShoppingCart: undefined;
   EmployeeRegistration: undefined;
   SearchProduct: undefined;
+  OrderDetails: undefined; 
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -39,6 +44,7 @@ const App = () => {
   return ( 
     <LoginProvider>
       <CartProvider>
+        <OrderProvider>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Login"
@@ -53,6 +59,8 @@ const App = () => {
             <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
             <Stack.Screen name="AddProduct" component={AddProductScreen} />
             <Stack.Screen name="ProductList" component={ProductListScreen} />
+            <Stack.Screen name="OrderList" component={OrderListScreen} />
+            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
             <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
             <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
             <Stack.Screen
@@ -61,6 +69,7 @@ const App = () => {
             />
           </Stack.Navigator>
         </NavigationContainer>
+        </OrderProvider>
       </CartProvider>
     </LoginProvider>
   );

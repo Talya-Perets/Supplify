@@ -9,12 +9,29 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
   },
+  stockLabel: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 4,
+  },
   header: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
     backgroundColor: 'white',
+  },
+  footer: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'right',
   },
   headerTitle: {
     fontSize: 20,
