@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import Sidebar from '../../components/sidebar-component';
 
 const EmployeeRegistrationScreen = () => {
@@ -19,15 +19,19 @@ const EmployeeRegistrationScreen = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('employee');
-  const [userRole] = useState<'manager'>('manager');
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>רישום עובד חדש</Text>
         </View>
@@ -80,7 +84,7 @@ const EmployeeRegistrationScreen = () => {
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={role}
-              onValueChange={(itemValue) => setRole(itemValue)}
+              onValueChange={itemValue => setRole(itemValue)}
               style={styles.picker}>
               <Picker.Item label="עובד" value="employee" />
               <Picker.Item label="מנהל" value="manager" />
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,

@@ -3,6 +3,8 @@ package com.Supplify.Supplify.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +28,14 @@ public class Business {
 
     @Column(name = "phone", length = 45)
     private String phone;
+
+    @ManyToMany
+    @JoinTable(
+            name = "business_agent",
+            joinColumns = @JoinColumn(name = "business_id"),
+            inverseJoinColumns = @JoinColumn(name = "agent_id")
+    )
+    private List<Agent> agents;
 
     public Business(String name, String email, String address, String phone) {
         this.name = name;

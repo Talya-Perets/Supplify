@@ -8,8 +8,8 @@ import com.Supplify.Supplify.services.BusinessService;
 import com.Supplify.Supplify.services.RoleService;
 import com.Supplify.Supplify.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("auth")
 public class AuthController {
 
-    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final Logger logger = LogManager.getLogger(AuthController.class);
     private final BusinessService businessService;
     private final UserService userService;
     private final RoleService roleService;
 
-    @PostMapping("/register")
+    @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws Exception {
         logger.info("Registering new business");
         Business business = null;
@@ -70,7 +70,7 @@ public class AuthController {
         return new ResponseEntity<>(userContextResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         logger.info("Received login request for username: {}", loginRequest.getUsername());
 
@@ -95,7 +95,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/forgotPassword")
+    @PostMapping("forgotPassword")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         logger.info("Received forgotPassword request for email: {}", forgotPasswordRequest.getEmail());
 
@@ -114,8 +114,7 @@ public class AuthController {
     }
 
 
-
-    @PostMapping("/google")
+    @PostMapping("google")
     public ResponseEntity<?> google(@RequestBody GoogleRequest googleRequest) {
         logger.info("Received google request for username: {}", googleRequest.getUsername());
 

@@ -14,14 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("user")
 @AllArgsConstructor
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    @GetMapping("/getUser")
+    @GetMapping("getUser")
     public ResponseEntity<?> getUser(@PathVariable int id) {
 
         try {
@@ -62,7 +62,7 @@ public class UserController {
         return errors;
     }
 
-    @PostMapping("/resetPassword")
+    @PostMapping("resetPassword")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         logger.info("Received password reset request for email: {}", resetPasswordRequest.getEmail());
 

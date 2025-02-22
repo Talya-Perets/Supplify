@@ -1,19 +1,24 @@
 package com.Supplify.Supplify.services;
 
+import com.Supplify.Supplify.DTO.AgentDTO;
+import com.Supplify.Supplify.DTO.SupplierDetailsResponse;
 import com.Supplify.Supplify.utils.EmailValidator;
 import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.repositories.BusinessRepo;
 import com.Supplify.Supplify.utils.PhoneValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class BusinessService {
 
-    private final Logger logger = LoggerFactory.getLogger(BusinessService.class);
+    private final Logger logger = LogManager.getLogger(BusinessService.class);
     private final BusinessRepo businessRepo;
     private final UserService userService;
 
@@ -49,6 +54,18 @@ public class BusinessService {
         }
     }
 
+    public List<SupplierDetailsResponse> getBusinessSuppliersDetails(int businessId) throws Exception {
+
+        Business business = businessRepo.findById(businessId)
+                .orElseThrow(() -> new Exception("Business not found"));
+
+
+        return business.getAgents().stream()
+                .map(agent -> new SupplierDetailsResponse(
+                        new AgentDTO(agent.getId(), agent.getName(), agent.getPhone(), agent.getEmail()),
+                        agent.getSupplier().getCompanyName()))
+                .collect(Collectors.toList());
+    }
 }
 
 

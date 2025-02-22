@@ -1,20 +1,18 @@
 package com.Supplify.Supplify.DTO;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class CreateAgentRequest {
+public class AgentDTO {
+    private int id;
     private String name;
-    private String email;
     private String phone;
-    private int supplierId;
-    private int businessId;
-
+    private String email;
 }

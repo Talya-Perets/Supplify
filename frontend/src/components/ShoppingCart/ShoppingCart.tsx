@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
@@ -30,82 +30,95 @@ const ShoppingCartScreen = () => {
       supplierName: 'שטראוס',
       isExpanded: true,
       items: [
-        { 
-          id: 1, 
-          name: 'חלב מעדנות', 
-          quantity: 20, 
+        {
+          id: 1,
+          name: 'חלב מעדנות',
+          quantity: 20,
           recentlyOrdered: 15,
-          returned: 5 
+          returned: 5,
         },
-        { 
-          id: 2, 
-          name: 'גבינה צהובה', 
-          quantity: 15, 
+        {
+          id: 2,
+          name: 'גבינה צהובה',
+          quantity: 15,
           recentlyOrdered: 10,
-          returned: 3 
-        }
-      ]
+          returned: 3,
+        },
+      ],
     },
     {
       supplierId: 2,
       supplierName: 'תנובה',
       isExpanded: false,
       items: [
-        { 
-          id: 3, 
-          name: 'חלב', 
-          quantity: 10, 
+        {
+          id: 3,
+          name: 'חלב',
+          quantity: 10,
           recentlyOrdered: 8,
-          returned: 2 
+          returned: 2,
         },
-        { 
-          id: 4, 
-          name: 'יוגורט', 
-          quantity: 8, 
+        {
+          id: 4,
+          name: 'יוגורט',
+          quantity: 8,
           recentlyOrdered: 6,
-          returned: 1 
-        }
-      ]
-    }
+          returned: 1,
+        },
+      ],
+    },
   ]);
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [userRole] = useState<'manager' | 'employee'>('manager');
 
   const toggleSupplierExpand = (supplierId: number) => {
-    setCartItems(prev => 
-      prev.map(supplier => 
-        supplier.supplierId === supplierId 
+    setCartItems(prev =>
+      prev.map(supplier =>
+        supplier.supplierId === supplierId
           ? {...supplier, isExpanded: !supplier.isExpanded}
-          : supplier
-      )
+          : supplier,
+      ),
     );
   };
 
-  const updateQuantity = (supplierId: number, itemId: number, isIncrement: boolean) => {
-    setCartItems(prev => 
-      prev.map(supplier => 
-        supplier.supplierId === supplierId 
+  const updateQuantity = (
+    supplierId: number,
+    itemId: number,
+    isIncrement: boolean,
+  ) => {
+    setCartItems(prev =>
+      prev.map(supplier =>
+        supplier.supplierId === supplierId
           ? {
-              ...supplier, 
-              items: supplier.items.map(item => 
-                item.id === itemId 
-                  ? {...item, quantity: isIncrement ? item.quantity + 1 : Math.max(0, item.quantity - 1)}
-                  : item
-              )
+              ...supplier,
+              items: supplier.items.map(item =>
+                item.id === itemId
+                  ? {
+                      ...item,
+                      quantity: isIncrement
+                        ? item.quantity + 1
+                        : Math.max(0, item.quantity - 1),
+                    }
+                  : item,
+              ),
             }
-          : supplier
-      )
+          : supplier,
+      ),
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-           <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-             <Icon name={isSidebarVisible ? "x" : "menu"} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>סל קניות</Text>
         </View>
@@ -113,39 +126,49 @@ const ShoppingCartScreen = () => {
         <ScrollView style={styles.content}>
           {cartItems.map(supplier => (
             <View key={supplier.supplierId} style={styles.supplierSection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.supplierHeader}
-                onPress={() => toggleSupplierExpand(supplier.supplierId)}
-              >
+                onPress={() => toggleSupplierExpand(supplier.supplierId)}>
                 <Text style={styles.supplierName}>{supplier.supplierName}</Text>
                 <TouchableOpacity style={styles.approveButton}>
                   <Text style={styles.approveButtonText}>שלח להזמנת מנהל</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
 
-              {supplier.isExpanded && supplier.items.map(item => (
-                <View key={item.id} style={styles.itemRow}>
-                  <View style={styles.itemControls}>
-                    <TouchableOpacity>
-                      <Icon name="trash-2" size={20} color="red" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => updateQuantity(supplier.supplierId, item.id, false)}>
-                      <Icon name="minus" size={20} color="#4A90E2" />
-                    </TouchableOpacity>
-                    <Text style={styles.quantityText}>{item.quantity}</Text>
-                    <TouchableOpacity onPress={() => updateQuantity(supplier.supplierId, item.id, true)}>
-                      <Icon name="plus" size={20} color="#4A90E2" />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.itemDetails}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <View style={styles.itemStats}>
-                      <Text style={styles.itemStatLabel}>הוזמן לאחרונה: {item.recentlyOrdered}</Text>
-                      <Text style={styles.itemStatLabel}>הוחזר: {item.returned}</Text>
+              {supplier.isExpanded &&
+                supplier.items.map(item => (
+                  <View key={item.id} style={styles.itemRow}>
+                    <View style={styles.itemControls}>
+                      <TouchableOpacity>
+                        <Icon name="trash-2" size={20} color="red" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          updateQuantity(supplier.supplierId, item.id, false)
+                        }>
+                        <Icon name="minus" size={20} color="#4A90E2" />
+                      </TouchableOpacity>
+                      <Text style={styles.quantityText}>{item.quantity}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          updateQuantity(supplier.supplierId, item.id, true)
+                        }>
+                        <Icon name="plus" size={20} color="#4A90E2" />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <View style={styles.itemStats}>
+                        <Text style={styles.itemStatLabel}>
+                          הוזמן לאחרונה: {item.recentlyOrdered}
+                        </Text>
+                        <Text style={styles.itemStatLabel}>
+                          הוחזר: {item.returned}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              ))}
+                ))}
             </View>
           ))}
         </ScrollView>
@@ -186,7 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: 12,
     borderRadius: 8,
-    marginTop: 16, 
+    marginTop: 16,
   },
   supplierHeader: {
     flexDirection: 'row-reverse',

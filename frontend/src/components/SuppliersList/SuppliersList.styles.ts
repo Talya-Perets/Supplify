@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     },
     supplierDetails: {
       gap: 8,
+      textAlign: 'right',
     },
     detailRow: {
       flexDirection: 'row-reverse',
@@ -70,12 +71,14 @@ const styles = StyleSheet.create({
     detailLabel: {
       fontSize: 14,
       color: '#666',
-      marginLeft: 8,
-      width: 70,
+      marginLeft: 0,
+      width: 50,
+      textAlign: 'right',
     },
     detailText: {
       fontSize: 14,
       color: '#333',
+      textAlign: 'right',
     },
     loadingContainer: {
       flex: 1,

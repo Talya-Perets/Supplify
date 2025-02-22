@@ -1,6 +1,7 @@
 package com.Supplify.Supplify.services;
 
 import com.Supplify.Supplify.DTO.CreateAgentRequest;
+import com.Supplify.Supplify.DTO.CreateSupplierRequest;
 import com.Supplify.Supplify.entities.BusinessSupplier;
 import com.Supplify.Supplify.repositories.BusinessSupplierRepo;
 import com.Supplify.Supplify.repositories.SupplierRepo;
@@ -21,22 +22,27 @@ public class SupplierService {
 
     private final SupplierRepo supplierRepo;
     private final BusinessSupplierRepo businessSupplierRepo;
+    private final AgentService agentService;
 
     @Transactional
-    public Supplier createSupplier(CreateAgentRequest request) {
-        // Step 1: Save the supplier locally
-        Supplier savedSupplier = supplierRepo.saveAndFlush(new Supplier(request.getCompanyName()));
+    public void createSupplier(CreateSupplierRequest request) throws Exception {
+        Supplier newSupplier = new Supplier(request.getCompanyName());
+        supplierRepo.saveAndFlush(newSupplier);
 
-        // Step 2: Link the supplier to the business
-        BusinessSupplier businessSupplier = new BusinessSupplier(request.getBusinessId(), savedSupplier.getSupplierId());
-        businessSupplierRepo.save(businessSupplier);
-        return savedSupplier;
+        CreateAgentRequest agentRequest = new CreateAgentRequest();
+        agentRequest.setSupplierId(newSupplier.getSupplierId());
+        agentRequest.setBusinessId(request.getBusinessId());
+        agentRequest.setName(request.getName());
+        agentRequest.setEmail(request.getEmail());
+        agentRequest.setPhone(request.getPhone());
+
+        agentService.createAgent(agentRequest);
+
     }
 
     public List<Supplier> getAllSuppliers() {
         return supplierRepo.findAll();
     }
-
 
 
     public Supplier getSupplierById(Integer id) {

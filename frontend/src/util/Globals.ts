@@ -6,6 +6,8 @@ const AUTH = "/auth";
 const USER = "/user";
 const PRODUCT = "/product";
 const SUPPLIERS = "/suppliers";
+const AGENTS = "/agents";
+const BUSINESS = "/business";
 
 // Globals Object
 export const globals = {
@@ -19,14 +21,22 @@ export const globals = {
 
     },
 
+    BUSINESS: {
+        getBusinessSuppliers: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliers`
+    },
+
     USER: {
         resetPassword: `${PRODUCTION_URL}${USER}/resetPassword`,
     },
 
     SUPPLIERS:{
      createSupplier: `${PRODUCTION_URL}${SUPPLIERS}/createSupplier`,
-     displaySupplier: `${PRODUCTION_URL}${SUPPLIERS}/displaySupplier`,
+     getAllSuppliers: `${PRODUCTION_URL}${SUPPLIERS}/getAllSuppliers`,
      deleteSupplier: `${PRODUCTION_URL}${SUPPLIERS}/deleteSupplier`,
+    },
+
+    AGENTS: {
+        addAgent: `${PRODUCTION_URL}${AGENTS}/addAgent`,
     },
 
     PRODUCT:{

@@ -10,8 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SupplierDetailsResponse {
-    private String name;
-    private String email;
-    private String phone;
+    private AgentDTO agent;
     private String companyName;
 }

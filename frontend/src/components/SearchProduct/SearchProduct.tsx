@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,13 @@ import {
   ActivityIndicator,
   FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import { RootStackParamList, API_BASE_URL } from '../../../App';
+import {RootStackParamList, API_BASE_URL} from '../../../App';
 import styles from './SearchProduct.styles';
-import { doPost } from '../../util/HTTPRequests';
-import { globals } from '../../util/Globals';
+import {doPost} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals';
 import Sidebar from '../sidebar-component';
 
 type SearchProductScreenNavigationProp = StackNavigationProp<
@@ -25,7 +25,6 @@ type SearchProductScreenNavigationProp = StackNavigationProp<
 
 const SearchProductScreen = () => {
   const navigation = useNavigation<SearchProductScreenNavigationProp>();
-  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const [productData, setProductData] = useState({
@@ -48,7 +47,10 @@ const SearchProductScreen = () => {
       if (response) {
         setProducts(response.data);
       } else {
-        Alert.alert('No products found', 'No matching products found for your search.');
+        Alert.alert(
+          'No products found',
+          'No matching products found for your search.',
+        );
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -58,7 +60,7 @@ const SearchProductScreen = () => {
     }
   };
 
-  const renderProductCard = ({ item }: { item: any }) => (
+  const renderProductCard = ({item}: {item: any}) => (
     <View style={styles.productCard}>
       <Text style={styles.productName}>{item.productName}</Text>
       <Text style={styles.productDescription}>{item.productDescription}</Text>
@@ -68,12 +70,17 @@ const SearchProductScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
-           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Search Product</Text>
         </View>
         <View style={styles.searchContainer}>
@@ -81,13 +88,17 @@ const SearchProductScreen = () => {
             style={styles.input}
             placeholder="Enter product name"
             value={productData.productName}
-            onChangeText={(text) => setProductData({ ...productData, productName: text })}
+            onChangeText={text =>
+              setProductData({...productData, productName: text})
+            }
           />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearchProduct}>
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={handleSearchProduct}>
             <Icon name="search" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-        
+
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#4A90E2" />
@@ -97,8 +108,10 @@ const SearchProductScreen = () => {
           <FlatList
             data={products}
             renderItem={renderProductCard}
-            keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={<Text style={styles.noResultsText}>No products found.</Text>}
+            keyExtractor={item => item.id.toString()}
+            ListEmptyComponent={
+              <Text style={styles.noResultsText}>No products found.</Text>
+            }
           />
         )}
       </View>

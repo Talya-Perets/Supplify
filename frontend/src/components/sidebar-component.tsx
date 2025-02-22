@@ -1,31 +1,39 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../App'; 
+import React, {useContext} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Platform,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../App';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {LoginContext} from '../contexts/LoginContext';
+import {LoginContextType} from '../contexts/UserContext';
 type SidebarNavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface SidebarProps {
-  userRole: 'manager' | 'employee';
-}
-
 const menuItems = [
-  { id: 'Home', title: 'דף הבית', icon: 'home' },
-  { id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus' },
-  { id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o' },
-  { id: 'orders', title: 'רשימת הזמנות', icon: 'list-alt' },
-  { id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube' },
-  { id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users' },
-  { id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search' },
-  { id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart' },];
-
-const managerItems = [
-  { id: 'ManagerApproval', title: 'מסך ניהול', icon: 'cog' },
-  { id: 'EmployeeRegistration', title: 'הרשמת עובד', icon: 'user-plus' },
+  {id: 'Home', title: 'דף הבית', icon: 'home'},
+  {id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus'},
+  {id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o'},
+  {id: 'orders', title: 'רשימת הזמנות', icon: 'list-alt'},
+  {id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube'},
+  {id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users'},
+  {id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search'},
+  {id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart'},
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
+const managerItems = [
+  {id: 'ManagerApproval', title: 'מסך ניהול', icon: 'cog'},
+  {id: 'EmployeeRegistration', title: 'הרשמת עובד', icon: 'user-plus'},
+];
+
+const Sidebar: React.FC = () => {
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
+
   const navigation = useNavigation<SidebarNavigationProp>();
 
   const handleNavigation = (route: keyof RootStackParamList) => {
@@ -48,27 +56,40 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
       </View>
 
       <ScrollView style={styles.menuItems}>
-        {menuItems.map((item) => (
-         <TouchableOpacity 
-         key={item.id}
-         style={styles.menuItem} 
-         onPress={() => handleNavigation(item.id as keyof RootStackParamList)}
-       >
-            <FontAwesome name={item.icon} size={20} color="#4A90E2" style={styles.menuIcon} />
+        {menuItems.map(item => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.menuItem}
+            onPress={() =>
+              handleNavigation(item.id as keyof RootStackParamList)
+            }>
+            <FontAwesome
+              name={item.icon}
+              size={20}
+              color="#4A90E2"
+              style={styles.menuIcon}
+            />
             <Text style={styles.menuText}>{item.title}</Text>
           </TouchableOpacity>
         ))}
 
-        {userRole === 'manager' && managerItems.map((item) => (
-         <TouchableOpacity 
-         key={item.id}
-         style={styles.menuItem} 
-         onPress={() => handleNavigation(item.id as keyof RootStackParamList)}
-       >
-            <FontAwesome name={item.icon} size={20} color="#4A90E2" style={styles.menuIcon} />
-            <Text style={styles.menuText}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
+        {userInfo.userRole === 'Manager' &&
+          managerItems.map(item => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.menuItem}
+              onPress={() =>
+                handleNavigation(item.id as keyof RootStackParamList)
+              }>
+              <FontAwesome
+                name={item.icon}
+                size={20}
+                color="#4A90E2"
+                style={styles.menuIcon}
+              />
+              <Text style={styles.menuText}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
       </ScrollView>
     </View>
   );
@@ -84,7 +105,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 3,
       },

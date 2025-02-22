@@ -3,37 +3,37 @@ package com.Supplify.Supplify.controllers;
 import com.Supplify.Supplify.DTO.SupplierDetailsResponse;
 import com.Supplify.Supplify.DTO.CreateAgentRequest;
 import com.Supplify.Supplify.services.AgentService;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import java.util.List;
+
+
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/agents")
+@RequestMapping("agents")
 public class AgentController {
 
     private final AgentService agentService;
+    private final Logger logger = LogManager.getLogger(AgentController.class);
 
-    public AgentController(AgentService agentService) {
-        this.agentService = agentService;
-    }
+    @PostMapping("addAgent")
+    public ResponseEntity<?> addAgent(@RequestBody CreateAgentRequest request) throws Exception {
+        logger.info("Starting add agent request for business with id: {}", request.getBusinessId());
 
-    @PostMapping("/add")
-    public ResponseEntity<String> addAgent(@RequestBody(required = false) CreateAgentRequest request) {
-        if (request == null) {
-            return ResponseEntity.badRequest().body("Request body is null");
+        try {
+            agentService.createAgent(request);
+        } catch (Exception e) {
+            logger.error("Failed to create new agent {}", e.getMessage());
+            throw new Exception(e);
         }
 
-        System.out.println("Received request: " + request.getName());
-        agentService.createAgent(request);
-        return ResponseEntity.ok("Agent added successfully");
-    }
-    @GetMapping("/suppliers/{businessId}")
-    public ResponseEntity<List<SupplierDetailsResponse>> getSupplierIds(@PathVariable int businessId) {
-        List<SupplierDetailsResponse> supplierIds = agentService.getAgentsByBusinessId(businessId);
-        return ResponseEntity.ok(supplierIds);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

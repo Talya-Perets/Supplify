@@ -17,7 +17,6 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const pendingOrders = [
@@ -39,7 +38,7 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {isSidebarVisible && <Sidebar userRole={userRole} />}
+        {isSidebarVisible && <Sidebar />}
         <View style={styles.mainContent}>
           <View style={styles.header}>
             <TouchableOpacity

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("orders")
 @RequiredArgsConstructor
 public class OrderController {
     private final Logger logger = LoggerFactory.getLogger(OrderController.class);
@@ -46,14 +46,14 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/business/{businessId}")
+    @GetMapping("business/{businessId}")
     public ResponseEntity<List<Order>> getOrdersByBusiness(@PathVariable int businessId) {
         logger.info("Fetching orders for business ID: {}", businessId);
         List<Order> orders = orderService.getOrdersByBusinessId(businessId);
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("user/{userId}")
     public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable int userId) {
         logger.info("Fetching orders for user ID: {}", userId);
         List<Order> orders = orderService.getOrdersByUserId(userId);
