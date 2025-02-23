@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.Supplify.Supplify.DTO.OrderProductDetails;
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +29,6 @@ public class OrderService {
         // Extract data from the request
         int userId = request.getUserId();
         int businessId = request.getBusinessId();
-        double totalAmount = request.getTotalAmount();
         String status = request.getStatus();
         LocalDateTime orderDate = request.getOrderDate();
 
@@ -41,15 +41,17 @@ public class OrderService {
         Business business = businessRepo.findById(businessId)
                 .orElseThrow(() -> new RuntimeException("Business not found"));
 
+        // Initialize total amount
+        AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
+
         // Create the new Order entity
         Order newOrder = new Order();
         newOrder.setUser(user);
         newOrder.setBusiness(business);
-        newOrder.setTotalAmount(totalAmount);
         newOrder.setStatus(status);
         newOrder.setOrderDate(orderDate);
 
-        // Process each order item
+        // Process each order item and calculate total amount
         List<OrderProduct> orderProductList = orderItems.stream().map(item -> {
             // Validate product ID
             if (item.getProductId() == null) {
@@ -61,24 +63,30 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
 
             // Fetch the unit price for the product in the given business
-            Double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(request.getBusinessId(), item.getProductId());
+            Double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(businessId, item.getProductId());
             if (unitPrice == null) {
-                // Handle the null case (e.g., set a default value or throw an exception)
-                unitPrice = 0.0; // Or you can decide on a fallback value
-                // Alternatively, throw a custom exception if this is critical
-                //throw new IllegalArgumentException("Price not found for the given business and product");
+                throw new IllegalArgumentException("Price not found for the given business and product");
             }
+
+            // Calculate total price for this item
+            double itemTotal = unitPrice * item.getQuantity();
+
+            // Accumulate the total order amount
+                totalAmount.updateAndGet(v -> v + itemTotal);
+
 
             // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
-            orderProduct.setOrder(newOrder); // Set the order (required for the composite key)
-            orderProduct.setProduct(product); // Set the product
+            orderProduct.setOrder(newOrder);
+            orderProduct.setProduct(product);
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);
-
             return orderProduct;
         }).toList();
+
+        // Set the calculated total amount in the Order
+        newOrder.setTotalAmount(totalAmount.get());
 
         // Set the list of OrderProduct entities in the Order
         newOrder.setOrderProducts(orderProductList);
@@ -87,12 +95,8 @@ public class OrderService {
         return orderRepo.save(newOrder);
     }
 
-    public List<Order> getOrders() {
-        return orderRepo.findAll();
-    }
-
-    public Order getOrdersByBusinessIdAndOrderId(int businessId, int orderId) {
-        return orderRepo.findByBusinessIdAndOrderId(businessId,orderId);
+    public List<OrderProductDetails> getOrderProducts(int orderId) {
+        return orderRepo.findOrderProductDetailsByOrderId(orderId);
     }
 
     public List<Order> get(int businessId) {

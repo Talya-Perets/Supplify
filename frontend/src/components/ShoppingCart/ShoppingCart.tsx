@@ -15,37 +15,8 @@ import { globals } from '../../util/Globals';
 import { doPost } from '../../util/HTTPRequests';
 import { LoginContextType } from '../../contexts/UserContext';
 import { LoginContext } from '../../contexts/LoginContext';
+import { CartItem  } from '../../contexts/CartContext';
 
-type CartItem = {
-  id: string; 
-  productId: string; 
-  name: string;
-  stock: number;
-  price?: number;
-  quantity: number;
-  supplier: {
-    supplierId: number;
-    companyName: string;
-  };
-  recentlyOrdered?: string;
-  returned?: string;
-};
-
-interface Order {
-  id?: number;
-  user: {
-    id: number;
-    name: string;
-  };
-  business: {
-    id: number;
-    name: string;
-  };
-  items: CartItem[];
-  totalAmount: number;
-  status: string;
-  orderDate: string;
-}
 
 const validateCartItem = (item: CartItem): boolean => {
   if (!item.productId) {
@@ -84,25 +55,6 @@ const ShoppingCartScreen = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { userInfo } = useContext(LoginContext) as LoginContextType;
 
-  const validateOrderData = (
-    items: CartItem[], 
-    userId: number | null, 
-    businessId: number
-  ): boolean => {
-    if (!items.length) {
-      console.warn("No items in order");
-      return false;
-    }
-    if (!userId) {
-      console.warn("Missing userId");
-      return false;
-    }
-    if (!businessId) {
-      console.warn("Missing businessId");
-      return false;
-    }
-    return true;
-  };
 
   const createOrder = async () => {
     if (cartItems.length === 0) {
@@ -112,26 +64,14 @@ const ShoppingCartScreen = () => {
 
     try {
       setIsSubmitting(true);
-      const businessId = userInfo.businessId;
-
-      // Debug logging
-      console.log("Initial cart items:", cartItems);
-      
+      const businessId = userInfo.businessId;      
    
-
-      const supplierGroups = groupItemsBySupplier(cartItems);
       console.log("Supplier Groups:", supplierGroups);
-
       const orderPromises = Object.entries(supplierGroups).map(async ([supplierId, group]) => {
-        const totalAmount = group.items.reduce((sum, item) => {
-          if (!item.price) {
-            console.warn(`Missing price for item ${item.id}`);
-            return sum;
-          }
-          return sum + item.price * item.quantity;
-        }, 0);
 
-        // Log each item's data before creating order
+        
+        
+
         group.items.forEach(item => {
           console.log(`Item ${item.id} data:`, {
             productId: item.productId,
@@ -140,7 +80,7 @@ const ShoppingCartScreen = () => {
             supplier: item.supplier
           });
         });
-
+        
         const newOrder = {
           userId: userInfo.userId,
           businessId: businessId,
@@ -150,18 +90,14 @@ const ShoppingCartScreen = () => {
               quantity: item.quantity,
             };
             
-            // Validate order item
             if (!orderItem.productId) {
               console.error(`Missing productId for item: ${item.id}`);
             }
-            
             return orderItem;
           }),
-          totalAmount: totalAmount,
           status: 'pending',
           orderDate: new Date().toISOString(),
         };
-
         console.log("Sending order:", JSON.stringify(newOrder, null, 2));
         return await doPost(globals.ORDER.CreateOrder, newOrder);
       });

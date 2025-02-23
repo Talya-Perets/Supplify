@@ -18,8 +18,14 @@ import { LoginContext } from '../../contexts/LoginContext';
 import { LoginContextType } from '../../contexts/UserContext';
 
 interface CreateOrderRequest {
-  businessId: string | null;
-  orderId?: number;
+  orderId: number;
+}
+
+interface OrderProductDetails {
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
 }
 
 interface OrderDetails {
@@ -32,38 +38,11 @@ interface OrderDetails {
     id: number;
     name: string;
   };
-  items: {
-    id: string;
-    name: string;
-    quantity: number;
-    price?: number;
-  }[];
+  items: OrderProductDetails[];
   totalAmount: number;
   status: string;
   orderDate: string;
 }
-
-const OrderStatusBadge = ({ status }: { status: string }) => {
-  const getStatusColor = () => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return { bg: '#FEF3C7', text: '#D97706' };
-      case 'approved':
-        return { bg: '#D1FAE5', text: '#059669' };
-      case 'rejected':
-        return { bg: '#FEE2E2', text: '#DC2626' };
-      default:
-        return { bg: '#E5E7EB', text: '#374151' };
-    }
-  };
-
-  const colors = getStatusColor();
-  return (
-    <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
-      <Text style={[styles.statusText, { color: colors.text }]}>{status}</Text>
-    </View>
-  );
-};
 
 const OrderDetailsScreen = () => {
   const { selectedOrderId } = useOrder();
@@ -80,33 +59,31 @@ const OrderDetailsScreen = () => {
       navigation.goBack();
       return;
     }
+    
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-    
-        const orderRequest: CreateOrderRequest = {
-          businessId: userInfo.businessId,
-          orderId: selectedOrderId,
+
+        const orderRequest: CreateOrderRequest = { orderId: selectedOrderId };
+        const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`);
+        
+        console.log('API Response:', response);
+
+        // Create a default order structure with the items from the response
+        const formattedOrder: OrderDetails = {
+          id: selectedOrderId,
+          user: { id: 1, name: "user"}, 
+          business: { id: 1, name: 'Default Business' },
+          items: Array.isArray(response) ? response : [],
+          totalAmount: Array.isArray(response) 
+            ? response.reduce((sum, item) => sum + item.subtotal, 0) 
+            : 0,
+          status: 'active',
+          orderDate: new Date().toISOString(), // Set current date as default
         };
-    
-        const queryParams = new URLSearchParams({
-          businessId: orderRequest.businessId ? orderRequest.businessId.toString() : '',
-          orderId: orderRequest.orderId?.toString() || '',
-        }).toString();
-    
-        const response = await doGet(`${globals.ORDER.getOrderInfo}?${queryParams}`);
-        console.log('API Response:', response); // Add this to inspect the full API response
-    
-        setOrderDetails({
-          id: response.id || 0,
-          user: response.user || { id: 0, name: '' },
-          business: response.business || { id: 0, name: '' },
-          items: response.orderProducts || [], // Make sure you're using the correct property here
-          totalAmount: response.totalAmount || 0,
-          status: response.status || '',
-          orderDate: response.orderDate || '',
-        });
+
+        setOrderDetails(formattedOrder);
       } catch (err) {
         setError('Failed to load order details');
         console.error('Error fetching order details:', err);
@@ -114,10 +91,22 @@ const OrderDetailsScreen = () => {
         setLoading(false);
       }
     };
-    
 
     fetchOrderDetails();
   }, [selectedOrderId]);
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('he-IL', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+      });
+    } catch (err) {
+      return 'תאריך לא זמין';
+    }
+  };
 
   if (!selectedOrderId) return null;
 
@@ -153,54 +142,49 @@ const OrderDetailsScreen = () => {
           <ScrollView style={styles.content}>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <OrderStatusBadge status={orderDetails.status} />
                 <Text style={styles.orderId}>הזמנה #{orderDetails.id}</Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>תאריך:</Text>
                 <Text style={styles.value}>
-                  {new Date(orderDetails.orderDate).toLocaleDateString('he-IL')}
+                  {formatDate(orderDetails.orderDate)}
                 </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>ספק:</Text>
                 <Text style={styles.value}>
-                  {orderDetails.business ? orderDetails.business.name : 'N/A'}
+                  {orderDetails.business.name}
                 </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>מזמין:</Text>
                 <Text style={styles.value}>
-                  {orderDetails.user ? orderDetails.user.name : 'N/A'}
+                  {orderDetails.user.name}
                 </Text>
               </View>
             </View>
 
             <View style={styles.section}>
-  <Text style={styles.sectionTitle}>פריטים</Text>
-  {orderDetails.items && orderDetails.items.length > 0 ? (
-    orderDetails.items.map((item) => {
-      return (
-        <View key={item.id} style={styles.itemRow}>
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemName}>{item.name}</Text> 
-            <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
-          </View>
-          {item.price && (
-            <Text style={styles.itemPrice}>
-              ₪{(item.price * item.quantity).toFixed(2)}
-            </Text>
-          )}
-        </View>
-      );
-    })
-  ) : (
-    <Text style={styles.noItemsText}>No items found in this order.</Text>
-  )}
-</View>
+              <Text style={styles.sectionTitle}>פריטים</Text>
+              {orderDetails.items && orderDetails.items.length > 0 ? (
+                orderDetails.items.map((item, index) => (
+                  <View key={index} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.productName}</Text>
+                      <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
+                    </View>
+                    <Text style={styles.itemPrice}>
+                      ₪{item.subtotal.toFixed(2)}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noItemsText}>אין פריטים בהזמנה זו</Text>
+              )}
+            </View>
 
             {orderDetails.totalAmount > 0 && (
               <View style={styles.totalSection}>
@@ -213,7 +197,7 @@ const OrderDetailsScreen = () => {
           </ScrollView>
         ) : (
           <View style={styles.centerContent}>
-            <Text style={styles.errorText}>No order details found.</Text>
+            <Text style={styles.errorText}>לא נמצאו פרטי הזמנה</Text>
           </View>
         )}
       </View>
