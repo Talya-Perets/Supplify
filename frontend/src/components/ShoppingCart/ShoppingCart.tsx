@@ -51,7 +51,6 @@ const groupItemsBySupplier = (items: CartItem[]) => {
 const ShoppingCartScreen = () => {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { userInfo } = useContext(LoginContext) as LoginContextType;
 
