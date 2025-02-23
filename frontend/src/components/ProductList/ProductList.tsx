@@ -1,13 +1,18 @@
 import React, {useState, useEffect} from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, Alert, ActivityIndicator
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { doGet, doPost } from '../../util/HTTPRequests';
-import { globals } from '../../util/Globals';
-import { useCart } from '../../contexts/CartContext';
+import {doGet, doPost} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals';
+import {useCart} from '../../contexts/CartContext';
 import styles from './ProductList.styles';
 
 interface Product {
@@ -23,7 +28,7 @@ interface Product {
 
 const ProductList = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { addToCart } = useCart();
+  const {addToCart} = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -36,17 +41,19 @@ const ProductList = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const data = await doGet(globals.PRODUCT.displayProducts);
-      console.log('API Response:', data);
+      const response = await doGet(globals.PRODUCT.displayProducts);
 
-      if (data) {
-        setProducts(data);
+      if (response.status === 200) {
+        setProducts(response.data);
 
         // Initialize product quantities
-        const initialQuantities = data.reduce((acc: { [key: string]: number }, product: Product) => {
-          acc[product.id] = 0;
-          return acc;
-        }, {});
+        const initialQuantities = response.data.reduce(
+          (acc: {[key: string]: number}, product: Product) => {
+            acc[product.id] = 0;
+            return acc;
+          },
+          {},
+        );
         setQuantities(initialQuantities);
       } else {
         throw new Error('No data received from API');
@@ -62,29 +69,31 @@ const ProductList = () => {
   const updateQuantity = (productId: string, increment: boolean) => {
     setQuantities(prev => ({
       ...prev,
-      [productId]: Math.max(0, prev[productId] + (increment ? 1 : -1))
+      [productId]: Math.max(0, prev[productId] + (increment ? 1 : -1)),
     }));
   };
 
   const handleAddToCart = (product: Product) => {
     const quantity = quantities[product.id] || 0;
     if (quantity > 0) {
-      addToCart({
-        supplier: {
-          supplierId: product.supplier.supplierId,
-          companyName: product.supplier.companyName,
+      addToCart(
+        {
+          supplier: {
+            supplierId: product.supplier.supplierId,
+            companyName: product.supplier.companyName,
+          },
+          id: product.id,
+          name: product.productName,
+          stock: product.stock,
         },
-        id: (product.id),
-        name: product.productName,
-        stock: product.stock,
-      }, quantity);
+        quantity,
+      );
       setSuccessMessage('מוצר נוסף לסל בהצלחה');
 
-       // Hide the message after 2 seconds
-       setTimeout(() => {
+      // Hide the message after 2 seconds
+      setTimeout(() => {
         setSuccessMessage(null);
       }, 2000);
-
     } else {
       Alert.alert('שגיאה', 'נא לבחור כמות לפני הוספה לסל');
     }
@@ -103,44 +112,49 @@ const ProductList = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>רשימת מוצרים</Text>
         </View>
 
-          {/* Success message */}
-      {successMessage && (
-        <View style={styles.successMessage}>
-          <Text style={styles.successMessageText}>{successMessage}</Text>
-        </View>
-      )}
+        {/* Success message */}
+        {successMessage && (
+          <View style={styles.successMessage}>
+            <Text style={styles.successMessageText}>{successMessage}</Text>
+          </View>
+        )}
         {products.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>אין מוצרים להצגה</Text>
           </View>
         ) : (
           <ScrollView style={styles.productList}>
-            {products.map((product) => (
+            {products.map(product => (
               <View key={product.id} style={styles.productCard}>
                 <View style={styles.cardContent}>
                   <View style={styles.imageContainer} />
-                  
+
                   <View style={styles.detailsSection}>
                     <View style={styles.productInfo}>
-                      <Text style={styles.productName}>{product.productName}</Text>
+                      <Text style={styles.productName}>
+                        {product.productName}
+                      </Text>
                     </View>
 
                     <View style={styles.actionsSection}>
                       <View style={styles.quantityControls}>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => updateQuantity(product.id, false)}
-                        >
+                          onPress={() => updateQuantity(product.id, false)}>
                           <Icon name="minus" size={16} color="#4A90E2" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>
@@ -148,15 +162,13 @@ const ProductList = () => {
                         </Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => updateQuantity(product.id, true)}
-                        >
+                          onPress={() => updateQuantity(product.id, true)}>
                           <Icon name="plus" size={16} color="#4A90E2" />
                         </TouchableOpacity>
                       </View>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.addToCartButton}
-                        onPress={() => handleAddToCart(product)}
-                      >
+                        onPress={() => handleAddToCart(product)}>
                         <Icon name="shopping-cart" size={16} color="white" />
                         <Text style={styles.addToCartText}>הוסף לסל</Text>
                       </TouchableOpacity>
@@ -171,7 +183,5 @@ const ProductList = () => {
     </SafeAreaView>
   );
 };
-
-
 
 export default ProductList;

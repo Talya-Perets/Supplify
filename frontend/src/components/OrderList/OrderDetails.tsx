@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
-import { useOrder } from '../../contexts/OrderContext';
-import { useNavigation } from '@react-navigation/native';
+import {useOrder} from '../../contexts/OrderContext';
+import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { doGet } from '../../util/HTTPRequests';
-import { globals } from '../../util/Globals';
+import {doGet} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals';
 import styles from './OrderDetails.styles';
 
 interface CreateOrderRequest {
@@ -42,30 +41,30 @@ interface OrderDetails {
   orderDate: string;
 }
 
-const OrderStatusBadge = ({ status }: { status: string }) => {
+const OrderStatusBadge = ({status}: {status: string}) => {
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
       case 'pending':
-        return { bg: '#FEF3C7', text: '#D97706' };
+        return {bg: '#FEF3C7', text: '#D97706'};
       case 'approved':
-        return { bg: '#D1FAE5', text: '#059669' };
+        return {bg: '#D1FAE5', text: '#059669'};
       case 'rejected':
-        return { bg: '#FEE2E2', text: '#DC2626' };
+        return {bg: '#FEE2E2', text: '#DC2626'};
       default:
-        return { bg: '#E5E7EB', text: '#374151' };
+        return {bg: '#E5E7EB', text: '#374151'};
     }
   };
 
   const colors = getStatusColor();
   return (
-    <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
-      <Text style={[styles.statusText, { color: colors.text }]}>{status}</Text>
+    <View style={[styles.statusBadge, {backgroundColor: colors.bg}]}>
+      <Text style={[styles.statusText, {color: colors.text}]}>{status}</Text>
     </View>
   );
 };
 
 const OrderDetailsScreen = () => {
-  const { selectedOrderId } = useOrder();
+  const {selectedOrderId} = useOrder();
   const navigation = useNavigation();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,10 +96,12 @@ const OrderDetailsScreen = () => {
         }).toString();
 
         // Send GET request with query parameters
-        const response = await doGet(`${globals.ORDER.getOrderInfo}?${queryParams}`);
+        const response = await doGet(
+          `${globals.ORDER.getOrderInfo}?${queryParams}`,
+        );
         setOrderDetails({
-          ...response,
-          items: response.items || [], // Ensure items is an array
+          ...response.data,
+          items: response.data.items || [], // Ensure items is an array
         });
       } catch (err) {
         setError('Failed to load order details');
@@ -117,11 +118,16 @@ const OrderDetailsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>פרטי הזמנה</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -138,8 +144,7 @@ const OrderDetailsScreen = () => {
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity
               style={styles.retryButton}
-              onPress={() => navigation.goBack()}
-            >
+              onPress={() => navigation.goBack()}>
               <Text style={styles.retryButtonText}>חזור אחורה</Text>
             </TouchableOpacity>
           </View>
@@ -172,11 +177,13 @@ const OrderDetailsScreen = () => {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>פריטים</Text>
               {orderDetails.items && orderDetails.items.length > 0 ? (
-                orderDetails.items.map((item) => (
+                orderDetails.items.map(item => (
                   <View key={item.id} style={styles.itemRow}>
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
+                      <Text style={styles.itemQuantity}>
+                        כמות: {item.quantity}
+                      </Text>
                     </View>
                     {item.price && (
                       <Text style={styles.itemPrice}>
@@ -186,7 +193,9 @@ const OrderDetailsScreen = () => {
                   </View>
                 ))
               ) : (
-                <Text style={styles.noItemsText}>No items found in this order.</Text>
+                <Text style={styles.noItemsText}>
+                  No items found in this order.
+                </Text>
               )}
             </View>
 

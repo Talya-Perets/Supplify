@@ -5,6 +5,7 @@ import com.Supplify.Supplify.entities.Product;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class ProductController {
 
     // Get product by ID
     @GetMapping("fetchProduct") // Added {productId} to match the path variable
-    public ResponseEntity<Product> getProductById(@PathVariable int productId) {
+    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
         return productService.getProductById(productId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -35,14 +36,14 @@ public class ProductController {
 
     // Add a new product
     @PostMapping("createProduct")
-    public ResponseEntity<Product> CreateProduct(@RequestBody CreateProductRequest request) {
+    public ResponseEntity<?> CreateProduct(@RequestBody CreateProductRequest request) {
         try {
-            Product createdProduct = productService.addProduct(request);
+            productService.addProduct(request);
             logger.info("New Product has added");
-            return ResponseEntity.status(201).body(createdProduct);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Error adding product: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body(null);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -66,7 +67,7 @@ public class ProductController {
      */
     // Delete a product
     @DeleteMapping("deleteProduct/{productId}") // Added {productId} to match the path variable
-    public ResponseEntity<?> deleteProduct(@PathVariable int productId) {
+    public ResponseEntity<?> deleteProduct(@PathVariable String productId) {
         try {
             productService.deleteProduct(productId);
             return ResponseEntity.noContent().build();

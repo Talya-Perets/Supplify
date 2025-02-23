@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   FlatList,
+  TextInput,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -17,7 +18,6 @@ import {doGet, doPost} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals';
 import {LoginContext} from '../../contexts/LoginContext';
 import {LoginContextType} from '../../contexts/UserContext';
-import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import {SupplierDetails, Agent} from '../../types/models';
 
 type SuppliersListScreenNavigationProp = StackNavigationProp<
@@ -31,16 +31,16 @@ const SuppliersListScreen = () => {
   const [suppliers, setSuppliers] = useState<SupplierDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<string | null>(null);
+  const [editedAgent, setEditedAgent] = useState<Agent>();
 
   useEffect(() => {
-    const getBusinessSuppliers = async () => {
+    const getBusinessSuppliersAndAgents = async () => {
       setIsLoading(true);
       try {
         const response = await doGet(
-          `${globals.BUSINESS.getBusinessSuppliers}/${userInfo.businessId}`,
+          `${globals.BUSINESS.getBusinessSuppliersAndAgents}/${userInfo.businessId}`,
         );
-        console.log('API Response:', response.data);
-
         if (response.data) {
           setSuppliers(response.data);
         } else {
@@ -53,11 +53,50 @@ const SuppliersListScreen = () => {
         setIsLoading(false);
       }
     };
-    getBusinessSuppliers();
+    getBusinessSuppliersAndAgents();
   }, []);
 
-  const handleEditSupplier = (supplier: SupplierDetails) => {
-    console.log('עריכת ספק:', supplier);
+  const handleEditAgent = (supplier: SupplierDetails) => {
+    setEditingAgent(supplier.companyName);
+    setEditedAgent({...supplier.agent});
+  };
+
+  const handleSaveAgent = async (supplier: SupplierDetails) => {
+    try {
+      const response = await doPost(
+        `${globals.BUSINESS.updateAgent}/${userInfo.businessId}`,
+        {
+          id: supplier.agent.id,
+          name: editedAgent?.name,
+          phone: editedAgent?.phone,
+          email: editedAgent?.email,
+        },
+      );
+
+      if (response.status === 200) {
+        setSuppliers(prevSuppliers =>
+          prevSuppliers.map(s =>
+            s.companyName === supplier.companyName
+              ? {
+                  ...s,
+                  agent: {
+                    id: supplier.agent?.id ?? 0,
+                    name: editedAgent?.name ?? supplier.agent.name,
+                    email: editedAgent?.email ?? supplier.agent.email,
+                    phone: editedAgent?.phone ?? supplier.agent.phone,
+                  },
+                }
+              : s,
+          ),
+        );
+        setEditingAgent(null);
+      } else {
+        throw new Error(response.data.message || 'Failed to update supplier');
+      }
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+      Alert.alert('שגיאה', 'אירעה שגיאה בעדכון הספק');
+    }
   };
 
   const handleDeleteSupplier = async (supplier: SupplierDetails) => {
@@ -71,7 +110,10 @@ const SuppliersListScreen = () => {
         onPress: async () => {
           console.log('מחיקת ספק:', supplier);
           try {
-            const response = await doPost(globals.SUPPLIERS.deleteSupplier, {});
+            const response = await doPost(
+              `${globals.BUSINESS.deleteSupplierFromBusiness}${userInfo.businessId}`,
+              {agentid: supplier.agent.id},
+            );
 
             if (response.status === 200) {
               setSuppliers(prevSuppliers =>
@@ -124,9 +166,20 @@ const SuppliersListScreen = () => {
                 {userInfo.userRole === 'Manager' && (
                   <View style={styles.actionButtons}>
                     <TouchableOpacity
-                      onPress={() => handleEditSupplier(item)}
+                      onPress={
+                        () =>
+                          editingAgent === item.companyName
+                            ? handleSaveAgent(item) // Save when already editing
+                            : handleEditAgent(item) // Edit otherwise
+                      }
                       style={styles.actionButton}>
-                      <Icon name="edit-2" size={20} color="#4A90E2" />
+                      <Icon
+                        name={
+                          editingAgent === item.companyName ? 'save' : 'edit-2'
+                        }
+                        size={20}
+                        color="#4A90E2"
+                      />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleDeleteSupplier(item)}
@@ -139,15 +192,45 @@ const SuppliersListScreen = () => {
               <View style={styles.supplierDetails}>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>סוכן :</Text>
-                  <Text style={styles.detailText}>{item.agent.name}</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.name ?? item.agent.name}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, name: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.name}</Text>
+                  )}
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>טלפון:</Text>
-                  <Text style={styles.detailText}>{item.agent.phone}</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.phone ?? item.agent.phone}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, phone: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.phone}</Text>
+                  )}
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>מייל:</Text>
-                  <Text style={styles.detailText}>{item.agent.email}</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.email ?? item.agent.email}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, email: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.email}</Text>
+                  )}
                 </View>
               </View>
             </View>

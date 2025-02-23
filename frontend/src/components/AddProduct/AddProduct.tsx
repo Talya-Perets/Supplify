@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,18 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import { RootStackParamList, API_BASE_URL } from '../../../App';
-import { doPost } from "../../util/HTTPRequests.ts";
-import { globals } from '../../util/Globals.ts';
+import {RootStackParamList, API_BASE_URL} from '../../../App';
+import {doGet, doPost} from '../../util/HTTPRequests.ts';
+import {globals} from '../../util/Globals.ts';
 import styles from './AddProduct.styles';
-import { LoginContext } from '../../contexts/LoginContext.tsx';
-import { LoginContextType } from '../../contexts/UserContext.tsx';
+import {LoginContext} from '../../contexts/LoginContext.tsx';
+import {LoginContextType} from '../../contexts/UserContext.tsx';
+import {Supplier} from '../../types/models.ts';
+import {Dropdown} from 'react-native-element-dropdown';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,52 +30,76 @@ const AddProductScreen = () => {
   const navigation = useNavigation<AddProductScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const { userInfo } = useContext(LoginContext) as LoginContextType;
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const [isLoading, setIsLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [value, setValue] = useState(-1);
 
   const [productData, setProductData] = useState({
     id: '',
     productName: '',
     productDescription: '',
-    supplierId: '',
     stock: '',
     price: '',
   });
 
   const handleAddProduct = async () => {
-    if (!productData.id || !productData.productName || !productData.supplierId || !productData.price) {
-        Alert.alert('Error', 'Please fill in all required product details');
-        return;
-    }
-
-    if (!userInfo?.businessId) {
-        Alert.alert('Error', 'Business ID is missing or invalid.');
-        return;
+    if (
+      !productData.id ||
+      !productData.productName ||
+      value == -1 ||
+      !productData.price
+    ) {
+      Alert.alert('Error', 'Please fill in all required product details');
+      return;
     }
 
     const payload = {
       id: productData.id,
       productName: productData.productName,
       productDescription: productData.productDescription || '',
-      supplierId: parseInt(productData.supplierId, 10), 
-      stock: parseInt(productData.stock, 10) || 0, 
+      supplierId: value,
+      stock: parseInt(productData.stock, 10) || 0,
       price: parseFloat(productData.price),
-      businessId: userInfo.businessId, 
+      businessId: userInfo.businessId,
     };
 
     console.log('Payload:', payload); // Log the payload
 
     try {
-        const response = await doPost(globals.PRODUCT.createProduct, payload);
-        // Handle success response
+      const response = await doPost(globals.PRODUCT.createProduct, payload);
+      // Handle success response
     } catch (error) {
-        console.error('Error adding product:', error);
-        Alert.alert('Error', 'Failed to add product. Please try again.');
+      console.error('Error adding product:', error);
+      Alert.alert('Error', 'Failed to add product. Please try again.');
     }
-};
+  };
+
+  useEffect(() => {
+    const getBusinessSuppliers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await doGet(
+          `${globals.BUSINESS.getBusinessSuppliers}/${userInfo.businessId}`,
+        );
+        if (response.data) {
+          setSuppliers(response.data);
+        } else {
+          throw new Error('No data received from API');
+        }
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        Alert.alert('שגיאה', 'אירעה שגיאה בטעינת רשימת הספקים');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getBusinessSuppliers();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -88,13 +114,31 @@ const AddProductScreen = () => {
         </View>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.inputContainer}>
+            <Dropdown
+              data={[
+                {label: 'בחר ספק', value: -1},
+                ...suppliers.map(supplier => ({
+                  label: supplier.companyName,
+                  value: supplier.supplierId,
+                })),
+              ]}
+              labelField="label"
+              valueField="value"
+              placeholder="בחר ספק"
+              value={value}
+              onChange={item => {
+                setValue(item.value);
+              }}
+              style={styles.dropdownContainer}
+              placeholderStyle={styles.placeholder}
+              selectedTextStyle={styles.selectedText}
+              itemTextStyle={{textAlign: 'right', writingDirection: 'rtl'}}
+            />
             <TextInput
               style={styles.input}
               placeholder="ברקוד"
               value={productData.id}
-              onChangeText={text =>
-                setProductData({ ...productData, id: text })
-              }
+              onChangeText={text => setProductData({...productData, id: text})}
               keyboardType="numeric"
             />
             <TextInput
@@ -102,7 +146,7 @@ const AddProductScreen = () => {
               placeholder="שם מוצר"
               value={productData.productName}
               onChangeText={text =>
-                setProductData({ ...productData, productName: text })
+                setProductData({...productData, productName: text})
               }
             />
             <TextInput
@@ -110,24 +154,16 @@ const AddProductScreen = () => {
               placeholder="תיאור מוצר"
               value={productData.productDescription}
               onChangeText={text =>
-                setProductData({ ...productData, productDescription: text })
+                setProductData({...productData, productDescription: text})
               }
               multiline
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="שם ספק"
-              value={productData.supplierId}
-              onChangeText={text =>
-                setProductData({ ...productData, supplierId: text })
-              }
             />
             <TextInput
               style={styles.input}
               placeholder="מחיר מוצר"
               value={productData.price}
               onChangeText={text =>
-                setProductData({ ...productData, price: text })
+                setProductData({...productData, price: text})
               }
               keyboardType="numeric"
             />
@@ -137,7 +173,7 @@ const AddProductScreen = () => {
                 placeholder="מלאי מתבקש"
                 value={productData.stock}
                 onChangeText={text =>
-                  setProductData({ ...productData, stock: text })
+                  setProductData({...productData, stock: text})
                 }
                 keyboardType="numeric"
               />

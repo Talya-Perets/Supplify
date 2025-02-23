@@ -44,7 +44,7 @@ const AddSupplierScreen = () => {
   const handleSupplierChange = (value: number) => {
     setSelectedSupplierId(value);
 
-    if (value) {
+    if (value !== -1) {
       setSupplierData(prev => ({...prev, companyName: ''}));
     }
   };

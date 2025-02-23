@@ -29,6 +29,9 @@ public class BusinessProduct {
     @Column(name = "price", nullable = false)
     private double price;
 
+    @Column(name = "stock", nullable = false)
+    private int stock;
+
     @Embeddable
     @NoArgsConstructor
     @AllArgsConstructor

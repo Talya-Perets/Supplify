@@ -1,22 +1,30 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../App'; 
+import React, {useContext} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Platform,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../App';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {LoginContext} from '../contexts/LoginContext';
 import {LoginContextType} from '../contexts/UserContext';
 type SidebarNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const menuItems = [
-  { id: 'Home', title: 'דף הבית', icon: 'home' },
-  { id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus' },
-  { id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o' },
-  { id: 'OrderList', title: 'רשימת הזמנות', icon: 'list-alt' },
-  { id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube' },
-  { id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users' },
-  { id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search' },
-  { id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart' },];
+  {id: 'Home', title: 'דף הבית', icon: 'home'},
+  {id: 'AddSupplier', title: 'הוספת ספק', icon: 'user-plus'},
+  {id: 'AddProduct', title: 'הוספת מוצר', icon: 'plus-square-o'},
+  {id: 'OrderList', title: 'רשימת הזמנות', icon: 'list-alt'},
+  {id: 'ProductList', title: 'רשימת מוצרים', icon: 'cube'},
+  {id: 'SuppliersList', title: 'רשימת ספקים', icon: 'users'},
+  {id: 'SearchProduct', title: 'חיפוש מוצר', icon: 'search'},
+  {id: 'ShoppingCart', title: 'סל קניות', icon: 'shopping-cart'},
+];
 
 const managerItems = [
   {id: 'ManagerApproval', title: 'מסך ניהול', icon: 'cog'},

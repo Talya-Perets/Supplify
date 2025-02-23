@@ -80,6 +80,33 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       marginBottom: 16,
     },
+    dropdownContainer: {
+      backgroundColor: 'white',
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      height: 50,
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: '#D1D1D1',
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    placeholder: {
+      fontSize: 16,
+      color: '#999',
+      textAlign: 'right',
+      writingDirection: 'rtl',
+    },
+    selectedText: {
+      fontSize: 16,
+      color: '#333',
+      textAlign: 'right',
+      writingDirection: 'rtl',
+    },
   });
 
   export default styles;

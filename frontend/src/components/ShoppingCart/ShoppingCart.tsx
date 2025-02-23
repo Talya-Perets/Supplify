@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,11 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import styles from './ShoppingCart.styles';
-import { useCart } from '../../contexts/CartContext';
-import { globals } from '../../util/Globals';
-import { doPost } from '../../util/HTTPRequests';
-import { LoginContextType } from '../../contexts/UserContext';
-import { LoginContext } from '../../contexts/LoginContext';
+import {useCart} from '../../contexts/CartContext';
+import {globals} from '../../util/Globals';
+import {doPost} from '../../util/HTTPRequests';
+import {LoginContextType} from '../../contexts/UserContext';
+import {LoginContext} from '../../contexts/LoginContext';
 
 type CartItem = {
   id: string; // Ensure the ID is a string
@@ -57,16 +57,14 @@ const groupItemsBySupplier = (items: CartItem[]) => {
     }
     groups[supplierId].items.push(item);
     return groups;
-  }, {} as Record<number, { supplierName: string; items: CartItem[] }>);
+  }, {} as Record<number, {supplierName: string; items: CartItem[]}>);
 };
 
 const ShoppingCartScreen = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const {cartItems, updateQuantity, removeFromCart} = useCart();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { userInfo } = useContext(LoginContext) as LoginContextType;
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
 
   const createOrder = async () => {
     if (cartItems.length === 0) {
@@ -101,50 +99,50 @@ const ShoppingCartScreen = () => {
             orderDate: new Date().toISOString(),
           };
           // Send the order to the backend
-          const response = await doPost(`${globals.ORDER.CreateOrder}`, newOrder);
+          const response = await doPost(
+            `${globals.ORDER.CreateOrder}`,
+            newOrder,
+          );
           return response;
-        }
+        },
       );
 
       // Wait for all orders to be created
       await Promise.all(orderPromises);
 
       // Show success message
-      Alert.alert(
-        'הצלחה',
-        'ההזמנות נשלחו בהצלחה לאישור מנהל',
-        [
-          {
-            text: 'אישור',
-            onPress: () => {
-              // Clear cart items for the processed orders
-              cartItems.forEach((item) => removeFromCart(item.id));
-            },
+      Alert.alert('הצלחה', 'ההזמנות נשלחו בהצלחה לאישור מנהל', [
+        {
+          text: 'אישור',
+          onPress: () => {
+            // Clear cart items for the processed orders
+            cartItems.forEach(item => removeFromCart(item.id));
           },
-        ]
-      );
+        },
+      ]);
     } catch (error) {
       // Show error message
-      Alert.alert(
-        'שגיאה',
-        'אירעה שגיאה ביצירת ההזמנה. אנא נסה שוב מאוחר יותר'
-      );
+      Alert.alert('שגיאה', 'אירעה שגיאה ביצירת ההזמנה. אנא נסה שוב מאוחר יותר');
       console.error('Error creating orders:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-
   const supplierGroups = groupItemsBySupplier(cartItems);
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>סל קניות</Text>
         </View>
@@ -158,7 +156,7 @@ const ShoppingCartScreen = () => {
                 <View style={styles.supplierHeader}>
                   <Text style={styles.supplierName}>{group.supplierName}</Text>
                 </View>
-                {group.items.map((item) => (
+                {group.items.map(item => (
                   <View key={item.id} style={styles.itemRow}>
                     <View style={styles.itemControls}>
                       <TouchableOpacity onPress={() => removeFromCart(item.id)}>
@@ -166,8 +164,7 @@ const ShoppingCartScreen = () => {
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => updateQuantity(item.id, false)}
-                        disabled={item.quantity <= 1}
-                      >
+                        disabled={item.quantity <= 1}>
                         <Icon
                           name="minus"
                           size={20}
@@ -177,12 +174,13 @@ const ShoppingCartScreen = () => {
                       <Text style={styles.quantityText}>{item.quantity}</Text>
                       <TouchableOpacity
                         onPress={() => updateQuantity(item.id, true)}
-                        disabled={item.quantity >= item.stock}
-                      >
+                        disabled={item.quantity >= item.stock}>
                         <Icon
                           name="plus"
                           size={20}
-                          color={item.quantity >= item.stock ? '#ccc' : '#4A90E2'}
+                          color={
+                            item.quantity >= item.stock ? '#ccc' : '#4A90E2'
+                          }
                         />
                       </TouchableOpacity>
                     </View>
@@ -213,8 +211,7 @@ const ShoppingCartScreen = () => {
             isSubmitting && styles.finalSubmitButton,
           ]}
           onPress={createOrder}
-          disabled={isSubmitting || cartItems.length === 0}
-        >
+          disabled={isSubmitting || cartItems.length === 0}>
           <Text style={styles.finalSubmitText}>
             {isSubmitting ? 'שולח...' : 'שלח לאישור מנהל'}
           </Text>

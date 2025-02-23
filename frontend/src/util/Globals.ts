@@ -21,7 +21,10 @@ export const globals = {
     },
 
     BUSINESS: {
-        getBusinessSuppliers: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliers`
+        getBusinessSuppliers: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliers`,
+        getBusinessSuppliersAndAgents: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliersAndAgents`,
+        deleteSupplierFromBusiness: `${PRODUCTION_URL}${BUSINESS}/deleteSupplierFromBusiness`,
+        updateAgent: `${PRODUCTION_URL}${BUSINESS}/updateAgent`,
     },
 
     USER: {
