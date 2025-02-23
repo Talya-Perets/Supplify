@@ -1,6 +1,7 @@
 package com.Supplify.Supplify.controllers;
 import com.Supplify.Supplify.DTO.CreateOrderRequest;
 import com.Supplify.Supplify.DTO.GetOrderInfo;
+import com.Supplify.Supplify.DTO.OrderProductDetails;
 import com.Supplify.Supplify.entities.Order;
 import com.Supplify.Supplify.services.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class OrderController {
 
     @GetMapping("/getOrders")
     public ResponseEntity<List<Order>> getOrdersByBusiness(@RequestParam int businessId) {
-        List<Order> orders = orderService.getOrdersByBusinessId(businessId);
+        List<Order> orders = orderService.get(businessId);
         if (orders == null || orders.isEmpty()) {
             return ResponseEntity.ok(Collections.emptyList()); // Return an empty list if no orders
         }
@@ -36,11 +37,9 @@ public class OrderController {
     }
 
     @GetMapping("/getOrderInfo")
-    public ResponseEntity<Order> getOrderByBusinessAndOrderID(@RequestParam("businessId") int businessId,
-                                                              @RequestParam("orderId") int orderId) {
-        logger.info("Fetching orders for business ID: {}", businessId);
-        Order order = orderService.getOrdersByBusinessIdAndOrderId(businessId, orderId);
-        return ResponseEntity.ok(order);
+    public List<OrderProductDetails> getOrderProducts(@RequestParam int orderId) {
+        logger.info("Fetching order details for order ID: {}",orderId);
+        return orderService.getOrderProducts(orderId);
     }
 
 

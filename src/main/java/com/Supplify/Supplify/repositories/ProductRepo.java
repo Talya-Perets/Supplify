@@ -9,8 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ProductRepo extends JpaRepository<Product, String> {
-    //@Query("SELECT DISTINCT p.SupplierID FROM Products p WHERE p.ProductName = :productName")
-    //  List<Integer> findSuppliersByProductName(@Param("productName") String productName);
 
     List<Product> findBySupplier(Supplier supplier);
 }

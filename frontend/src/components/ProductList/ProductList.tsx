@@ -76,18 +76,17 @@ const ProductList = () => {
   const handleAddToCart = (product: Product) => {
     const quantity = quantities[product.id] || 0;
     if (quantity > 0) {
-      addToCart(
-        {
-          supplier: {
-            supplierId: product.supplier.supplierId,
-            companyName: product.supplier.companyName,
-          },
-          id: product.id,
-          name: product.productName,
-          stock: product.stock,
+      addToCart({
+        supplier: {
+          supplierId: product.supplier.supplierId,
+          companyName: product.supplier.companyName,
         },
-        quantity,
-      );
+        id: product.id,
+        productId: product.id, // Add this line - map the product.id to productId
+        name: product.productName,
+        stock: product.stock,
+      }, quantity);
+
       setSuccessMessage('מוצר נוסף לסל בהצלחה');
 
       // Hide the message after 2 seconds

@@ -1,8 +1,10 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-type CartItem = {
+export type CartItem = {
   id: string;
+  productId: string; 
   name: string;
+  price:number
   stock: number;
   quantity: number;
   supplier: {

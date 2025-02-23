@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,44 +10,32 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
 import styles from './ShoppingCart.styles';
-import {useCart} from '../../contexts/CartContext';
-import {globals} from '../../util/Globals';
-import {doPost} from '../../util/HTTPRequests';
-import {LoginContextType} from '../../contexts/UserContext';
-import {LoginContext} from '../../contexts/LoginContext';
+import { useCart } from '../../contexts/CartContext';
+import { globals } from '../../util/Globals';
+import { doPost } from '../../util/HTTPRequests';
+import { LoginContextType } from '../../contexts/UserContext';
+import { LoginContext } from '../../contexts/LoginContext';
+import { CartItem  } from '../../contexts/CartContext';
 
-type CartItem = {
-  id: string; // Ensure the ID is a string
-  name: string;
-  stock: number;
-  price?: number;
-  quantity: number;
-  supplier: {
-    supplierId: number;
-    companyName: string;
-  };
-  recentlyOrdered?: string;
-  returned?: string;
+
+const validateCartItem = (item: CartItem): boolean => {
+  if (!item.productId) {
+    console.warn(`Invalid cart item - missing productId:`, item);
+    return false;
+  }
+  if (!item.supplier?.supplierId) {
+    console.warn(`Invalid cart item - missing supplier info:`, item);
+    return false;
+  }
+  return true;
 };
 
-interface Order {
-  id?: number; // Optional because the backend might generate it
-  user: {
-    id: number;
-    name: string;
-  };
-  business: {
-    id: number;
-    name: string;
-  };
-  items: CartItem[]; // Include items in the order
-  totalAmount: number;
-  status: string;
-  orderDate: string;
-}
-
 const groupItemsBySupplier = (items: CartItem[]) => {
-  return items.reduce((groups, item) => {
+  console.log("Grouping items by supplier. Total items:", items.length);
+  const validItems = items.filter(validateCartItem);
+  console.log("Valid items after validation:", validItems.length);
+
+  return validItems.reduce((groups, item) => {
     const supplierId = item.supplier.supplierId;
     if (!groups[supplierId]) {
       groups[supplierId] = {
@@ -57,73 +45,77 @@ const groupItemsBySupplier = (items: CartItem[]) => {
     }
     groups[supplierId].items.push(item);
     return groups;
-  }, {} as Record<number, {supplierName: string; items: CartItem[]}>);
+  }, {} as Record<number, { supplierName: string; items: CartItem[] }>);
 };
 
 const ShoppingCartScreen = () => {
-  const {cartItems, updateQuantity, removeFromCart} = useCart();
+  const { cartItems, updateQuantity, removeFromCart } = useCart();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const { userInfo } = useContext(LoginContext) as LoginContextType;
+
 
   const createOrder = async () => {
     if (cartItems.length === 0) {
       Alert.alert('שגיאה', 'לא ניתן ליצור הזמנה עם סל ריק');
       return;
     }
-
+  
     try {
       setIsSubmitting(true);
+      const businessId = userInfo.businessId;
 
-      // Group items by supplier
-      const supplierGroups = groupItemsBySupplier(cartItems);
+      console.log("Supplier Groups:", supplierGroups);
+      const orderPromises = Object.entries(supplierGroups).map(async ([supplierId, group]) => {
 
-      // Create and send orders for each supplier
-      const orderPromises = Object.entries(supplierGroups).map(
-        async ([supplierId, group]) => {
-          // Calculate the total amount for the order
-          const totalAmount = group.items.reduce((sum, item) => {
-            return sum + (item.price || 0) * item.quantity;
-          }, 0);
 
-          // Ensure userId is a number
-          const userId = userInfo.userId;
 
-          // Create the new order object
-          const newOrder = {
-            userId: userInfo.userId,
-            businessId: userInfo.businessId,
-            items: group.items,
-            totalAmount: totalAmount,
-            status: 'pending',
-            orderDate: new Date().toISOString(),
-          };
-          // Send the order to the backend
-          const response = await doPost(
-            `${globals.ORDER.CreateOrder}`,
-            newOrder,
-          );
-          return response;
-        },
-      );
 
-      // Wait for all orders to be created
-      await Promise.all(orderPromises);
+        group.items.forEach(item => {
+          console.log(`Item ${item.id} data:`, {
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            supplier: item.supplier
+          });
+        });
 
-      // Show success message
+        const newOrder = {
+          userId: userInfo.userId,
+          businessId: businessId,
+          orderItems: group.items.map((item) => {
+            const orderItem = {
+              productId: item.productId,
+              quantity: item.quantity,
+            };
+
+            if (!orderItem.productId) {
+              console.error(`Missing productId for item: ${item.id}`);
+            }
+            return orderItem;
+          }),
+          status: 'pending',
+          orderDate: new Date().toISOString(),
+        };
+        console.log("Sending order:", JSON.stringify(newOrder, null, 2));
+        return await doPost(globals.ORDER.CreateOrder, newOrder);
+      });
+
+      const results = await Promise.all(orderPromises);
+      console.log("Order creation results:", results);
+
       Alert.alert('הצלחה', 'ההזמנות נשלחו בהצלחה לאישור מנהל', [
         {
           text: 'אישור',
           onPress: () => {
-            // Clear cart items for the processed orders
-            cartItems.forEach(item => removeFromCart(item.id));
+            cartItems.forEach((item) => removeFromCart(item.id));
           },
         },
       ]);
     } catch (error) {
-      // Show error message
-      Alert.alert('שגיאה', 'אירעה שגיאה ביצירת ההזמנה. אנא נסה שוב מאוחר יותר');
       console.error('Error creating orders:', error);
+      Alert.alert('שגיאה', 'אירעה שגיאה ביצירת ההזמנה. אנא נסה שוב מאוחר יותר');
     } finally {
       setIsSubmitting(false);
     }
@@ -159,7 +151,12 @@ const ShoppingCartScreen = () => {
                 {group.items.map(item => (
                   <View key={item.id} style={styles.itemRow}>
                     <View style={styles.itemControls}>
-                      <TouchableOpacity onPress={() => removeFromCart(item.id)}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          console.log(`Removing item: ${item.id}, productId: ${item.productId}`);
+                          removeFromCart(item.id);
+                        }}
+                      >
                         <Icon name="trash-2" size={20} color="red" />
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -186,6 +183,7 @@ const ShoppingCartScreen = () => {
                     </View>
                     <View style={styles.itemDetails}>
                       <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemId}>Product ID: {item.productId}</Text>
                       {item.recentlyOrdered && (
                         <Text style={styles.itemStatLabel}>
                           הוזמן לאחרונה: {item.recentlyOrdered}

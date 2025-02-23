@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.Supplify.Supplify.DTO.OrderProductDetails;
 
 @RequiredArgsConstructor
 @Service
@@ -25,54 +26,80 @@ public class OrderService {
     @Transactional
 
     public Order createOrder(CreateOrderRequest request) {
+        // Extract data from the request
         int userId = request.getUserId();
         int businessId = request.getBusinessId();
-        double totalAmount = request.getTotalAmount();
         String status = request.getStatus();
         LocalDateTime orderDate = request.getOrderDate();
 
-        List<OrderProductRequest> orderItems = request.getOrderItems(); // ✅ Get items
+        // Get the list of order items from the request
+        List<OrderProductRequest> orderItems = request.getOrderItems();
 
+        // Fetch the User and Business entities
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Business business = businessRepo.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Business not found"));
+
+        // Initialize total amount
+        AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
+
+        // Create the new Order entity
         Order newOrder = new Order();
-        newOrder.setUser(userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
-        newOrder.setBusiness(businessRepo.findById(businessId).orElseThrow(() -> new RuntimeException("Business not found")));
-        newOrder.setTotalAmount(totalAmount);
+        newOrder.setUser(user);
+        newOrder.setBusiness(business);
         newOrder.setStatus(status);
         newOrder.setOrderDate(orderDate);
 
-        // ✅ Convert orderItems DTOs to OrderProduct entities
+        // Process each order item and calculate total amount
         List<OrderProduct> orderProductList = orderItems.stream().map(item -> {
-            Product product = productRepo.findById(Integer.valueOf(item.getProductId())).orElseThrow(() -> new RuntimeException("Product not found"));
+            // Validate product ID
+            if (item.getProductId() == null) {
+                throw new IllegalArgumentException("Product ID must not be null");
+            }
 
-            // ✅ Fetch unit price from business_products table
-            double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(businessId, Integer.parseInt(item.getProductId()));
+            // Fetch the Product entity
+            Product product = productRepo.findById(item.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
+
+            // Fetch the unit price for the product in the given business
+            Double unitPrice = businessproductRepo.findPriceByBusinessAndProduct(businessId, item.getProductId());
+            if (unitPrice == null) {
+                throw new IllegalArgumentException("Price not found for the given business and product");
+            }
+
+            // Calculate total price for this item
+            double itemTotal = unitPrice * item.getQuantity();
+
+            // Accumulate the total order amount
+                totalAmount.updateAndGet(v -> v + itemTotal);
+
+
+            // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
+            orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
+            orderProduct.setOrder(newOrder);
             orderProduct.setProduct(product);
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);
-            orderProduct.setSubtotal(unitPrice * item.getQuantity());
             return orderProduct;
         }).toList();
 
-        newOrder.setOrderProducts(orderProductList); // ✅ Attach items to order
+        // Set the calculated total amount in the Order
+        newOrder.setTotalAmount(totalAmount.get());
 
+        // Set the list of OrderProduct entities in the Order
+        newOrder.setOrderProducts(orderProductList);
+
+        // Save the Order (cascading will save the OrderProduct entities)
         return orderRepo.save(newOrder);
     }
 
+    public List<OrderProductDetails> getOrderProducts(int orderId) {
+        return orderRepo.findOrderProductDetailsByOrderId(orderId);
+    }
 
-
-
-    public List<Order> getOrdersByBusinessId(int businessId) {
-        log.info("Fetching orders for business ID: {}", businessId);
+    public List<Order> get(int businessId) {
         return orderRepo.findByBusinessId(businessId);
     }
-
-    public List<Order> getOrders() {
-        return orderRepo.findAll();
-    }
-
-    public Order getOrdersByBusinessIdAndOrderId(int businessId, int orderId) {
-        return orderRepo.findByBusinessIdAndId(businessId,orderId);
-    }
-
 }
