@@ -37,6 +37,7 @@ const groupItemsBySupplier = (items: CartItem[]) => {
 
   return validItems.reduce((groups, item) => {
     const supplierId = item.supplier.supplierId;
+    
     if (!groups[supplierId]) {
       groups[supplierId] = {
         supplierName: item.supplier.companyName,
@@ -67,15 +68,10 @@ const ShoppingCartScreen = () => {
 
       console.log("Supplier Groups:", supplierGroups);
       const orderPromises = Object.entries(supplierGroups).map(async ([supplierId, group]) => {
-
-
-
-
         group.items.forEach(item => {
           console.log(`Item ${item.id} data:`, {
             productId: item.productId,
             quantity: item.quantity,
-            price: item.price,
             supplier: item.supplier
           });
         });
@@ -83,6 +79,7 @@ const ShoppingCartScreen = () => {
         const newOrder = {
           userId: userInfo.userId,
           businessId: businessId,
+          supplierId: supplierId,
           orderItems: group.items.map((item) => {
             const orderItem = {
               productId: item.productId,

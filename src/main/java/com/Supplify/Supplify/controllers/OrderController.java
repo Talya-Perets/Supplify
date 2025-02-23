@@ -42,7 +42,17 @@ public class OrderController {
         return orderService.getOrderProducts(orderId);
     }
 
+    @GetMapping("/getPendingOrders")
+    public List<Integer> getPendingOrderProducts() {
+        logger.info("Fetching all pending orders:");
+        return orderService.getPendingOrders();
+    }
 
+    @PostMapping("/OrderConfirm")
+    public ResponseEntity<?> updateOrderStatus(@RequestParam int orderId) {
+        orderService.OrderConfirmation(orderId);
+        return ResponseEntity.ok().build();
+    }
 
     private static class ValidationException extends Exception {
         public ValidationException(String message) {

@@ -36,7 +36,7 @@ public class Order {
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "id.orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
 
 

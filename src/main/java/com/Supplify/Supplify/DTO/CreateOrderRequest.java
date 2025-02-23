@@ -15,8 +15,10 @@ import java.util.List;
 public class CreateOrderRequest {
     private int userId;
     private int businessId;
+    private int supplierId;
     private double totalAmount;
     private String status;
     private LocalDateTime orderDate;
     private List<OrderProductRequest> orderItems;
+
 }

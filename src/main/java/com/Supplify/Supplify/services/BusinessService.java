@@ -69,7 +69,6 @@ public class BusinessService {
         Business business = businessRepo.findById(businessId)
                 .orElseThrow(() -> new Exception("Business not found"));
 
-
         return business.getAgents().stream()
                 .map(agent -> new SupplierDetailsResponse(
                         new AgentDTO(agent.getId(), agent.getName(), agent.getPhone(), agent.getEmail()),

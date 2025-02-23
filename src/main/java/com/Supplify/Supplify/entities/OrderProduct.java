@@ -1,7 +1,6 @@
 package com.Supplify.Supplify.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,12 +22,6 @@ public class OrderProduct {
     @JoinColumn(name = "product_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Prevent serialization issues
     private Product product;
-
-    @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference // Prevent circular reference
-    private Order order;
 
 
     @Column(name = "quantity", nullable = false)

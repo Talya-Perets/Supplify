@@ -36,7 +36,7 @@ public class ProductService {
     }
 
     // Add a new product
-    public Product addProduct(CreateProductRequest request) {
+    public void addProduct(CreateProductRequest request) {
 
         // Check if product already exists
         if (productRepository.existsById(request.getId())) {
@@ -75,7 +75,6 @@ public class ProductService {
         );
 
         businessProductRepo.saveAndFlush(businessProduct);
-        return product;
     }
 
 

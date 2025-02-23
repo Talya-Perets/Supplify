@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import {useOrder} from '../../contexts/OrderContext';
-import {useNavigation} from '@react-navigation/native';
+import { useOrder } from '../../contexts/OrderContext';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../../components/sidebar-component';
-import {doGet} from '../../util/HTTPRequests';
-import {globals} from '../../util/Globals';
+import { doGet, doPost } from '../../util/HTTPRequests';
+import { globals } from '../../util/Globals';
 import styles from './OrderDetails.styles';
 import { LoginContext } from '../../contexts/LoginContext';
 import { LoginContextType } from '../../contexts/UserContext';
@@ -45,14 +45,13 @@ interface OrderDetails {
 }
 
 const OrderDetailsScreen = () => {
-  const {selectedOrderId} = useOrder();
+  const { selectedOrderId } = useOrder();
   const navigation = useNavigation();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const { userInfo } = useContext(LoginContext) as LoginContextType;
-  const [userRole] = useState<'manager' | 'employee'>('manager');
 
   useEffect(() => {
     if (!selectedOrderId) {
@@ -67,21 +66,22 @@ const OrderDetailsScreen = () => {
 
         const orderRequest: CreateOrderRequest = { orderId: selectedOrderId };
         const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`);
+   
+        const orderItems = response?.data || [];  // Assuming response has a `data` field
+        const order_status = orderItems.length > 0 ? orderItems[0].status : 'undefined';  // Extract the status from the first item if available
 
-        console.log('API Response:', response);
-
-        // Create a default order structure with the items from the response
         const formattedOrder: OrderDetails = {
           id: selectedOrderId,
-          user: { id: 1, name: "user"},
+          user: { id: 1, name: 'Default User' },
           business: { id: 1, name: 'Default Business' },
-          items: Array.isArray(response) ? response : [],
-          totalAmount: Array.isArray(response)
-            ? response.reduce((sum, item) => sum + item.subtotal, 0)
+          items: Array.isArray(orderItems) ? orderItems : [],
+          totalAmount: Array.isArray(orderItems)
+            ? orderItems.reduce((sum, item) => sum + item.subtotal, 0)
             : 0,
-          status: 'active',
-          orderDate: new Date().toISOString(), // Set current date as default
+            status: order_status || 'Undefined', // Convert to string explicitly
+          orderDate: new Date().toISOString(),
         };
+        console.log('Order Status:', order_status);
 
         setOrderDetails(formattedOrder);
       } catch (err) {
@@ -108,8 +108,39 @@ const OrderDetailsScreen = () => {
     }
   };
 
-  if (!selectedOrderId) return null;
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [orderSent, setOrderSent] = useState(false); // Track if order was sent
 
+const handleSendOrder = async () => {
+  try {
+    const response = await doPost(
+      `${globals.ORDER.OrderConfirm}?orderId=${selectedOrderId}`,  // Pass orderId in the query string
+      {}
+    );
+
+    if (response.status === 200) {
+      // Success message
+      setStatusMessage('הזמנה בוצעה בהצלחה');
+      setOrderSent(true);
+    } else {
+      // Failure message
+      setStatusMessage('הזמנה לא בוצעה, אנא נסה שנית');
+    }
+
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, 2000);
+  } catch (err) {
+    setStatusMessage('הזמנה לא בוצעה, אנא נסה שנית');
+    console.error('Error updating order status:', err);
+
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, 2000);
+  }
+};
+
+  if (!selectedOrderId) return null;
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar />}
@@ -123,7 +154,7 @@ const OrderDetailsScreen = () => {
             <Icon name="arrow-right" size={24} color="#4A90E2" />
           </TouchableOpacity>
         </View>
-
+  
         {loading ? (
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color="#4A90E2" />
@@ -144,29 +175,23 @@ const OrderDetailsScreen = () => {
               <View style={styles.sectionHeader}>
                 <Text style={styles.orderId}>הזמנה #{orderDetails.id}</Text>
               </View>
-
+  
               <View style={styles.infoRow}>
                 <Text style={styles.label}>תאריך:</Text>
-                <Text style={styles.value}>
-                  {formatDate(orderDetails.orderDate)}
-                </Text>
+                <Text style={styles.value}>{formatDate(orderDetails.orderDate)}</Text>
               </View>
-
+  
               <View style={styles.infoRow}>
                 <Text style={styles.label}>ספק:</Text>
-                <Text style={styles.value}>
-                  {orderDetails.business.name}
-                </Text>
+                <Text style={styles.value}>{orderDetails.business.name}</Text>
               </View>
-
+  
               <View style={styles.infoRow}>
                 <Text style={styles.label}>מזמין:</Text>
-                <Text style={styles.value}>
-                  {orderDetails.user.name}
-                </Text>
+                <Text style={styles.value}>{orderDetails.user.name}</Text>
               </View>
             </View>
-
+  
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>פריטים</Text>
               {orderDetails.items && orderDetails.items.length > 0 ? (
@@ -176,16 +201,14 @@ const OrderDetailsScreen = () => {
                       <Text style={styles.itemName}>{item.productName}</Text>
                       <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
                     </View>
-                    <Text style={styles.itemPrice}>
-                      ₪{item.subtotal.toFixed(2)}
-                    </Text>
+                    <Text style={styles.itemPrice}>₪{item.subtotal.toFixed(2)}</Text>
                   </View>
                 ))
               ) : (
                 <Text style={styles.noItemsText}>אין פריטים בהזמנה זו</Text>
               )}
             </View>
-
+  
             {orderDetails.totalAmount > 0 && (
               <View style={styles.totalSection}>
                 <Text style={styles.totalLabel}>סה"כ:</Text>
@@ -194,15 +217,32 @@ const OrderDetailsScreen = () => {
                 </Text>
               </View>
             )}
+  
+            {orderDetails.status === 'pending' && userInfo.userRole === 'Manager' && !orderSent && (
+              <TouchableOpacity
+                style={styles.sendOrderButton}
+                onPress={handleSendOrder}  // Attach handleSendOrder here
+              >
+                <Text style={styles.sendOrderButtonText}>שלח הזמנה</Text>
+              </TouchableOpacity>
+            )}
           </ScrollView>
         ) : (
           <View style={styles.centerContent}>
             <Text style={styles.errorText}>לא נמצאו פרטי הזמנה</Text>
           </View>
         )}
+  
+        {statusMessage && (
+          <View style={styles.statusMessageContainer}>
+            <Text style={styles.statusMessage}>{statusMessage}</Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
+  
+  
 };
 
 export default OrderDetailsScreen;
