@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,6 +64,8 @@ public class OrderService {
         newOrder.setOrderDate(orderDate);
         newOrder.setAgent(orderAgent);
 
+        Order preProcessedOrder = orderRepo.saveAndFlush(newOrder);
+
         // Process each order item and calculate total amount
         List<OrderProduct> orderProductList = orderItems.stream().map(item -> {
             // Validate product ID
@@ -86,17 +89,18 @@ public class OrderService {
             totalAmount.updateAndGet(v -> v + itemTotal);
             // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
-            orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
+            orderProduct.setId(new OrderProduct.OrderProductId(preProcessedOrder.getId(), item.getProductId())); // Set composite key
             orderProduct.setProduct(product);
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);
             return orderProduct;
         }).toList();
-        newOrder.setTotalAmount(totalAmount.get());
+        preProcessedOrder.setTotalAmount(totalAmount.get());
+
         // Set the list of OrderProduct entities in the Order
-        newOrder.setOrderProducts(orderProductList);
+        preProcessedOrder.setOrderProducts(new ArrayList<>(orderProductList));
         // Save the Order (cascading will save the OrderProduct entities)
-        return orderRepo.saveAndFlush(newOrder);
+        return orderRepo.saveAndFlush(preProcessedOrder);
     }
 
 

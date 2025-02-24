@@ -69,6 +69,7 @@ const ShoppingCartScreen = () => {
           console.log('Creating order for supplier:', group.supplierName);
 
           const newOrder = {
+            supplierId: supplierId,
             userId: userInfo.userId,
             businessId: businessId,
             orderItems: group.items.map(item => {
