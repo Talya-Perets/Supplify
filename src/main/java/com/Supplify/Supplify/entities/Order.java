@@ -39,5 +39,9 @@ public class Order {
     @OneToMany(mappedBy = "id.orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
 
+    @ManyToOne
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_id_fk"))
+    private Agent agent;
+
 
 }

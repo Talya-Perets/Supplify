@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.Supplify.Supplify.DTO.OrderProductDetails;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +26,7 @@ public class OrderService {
     private final BusinessRepo businessRepo;
     private final BusinessProductRepo businessproductRepo;
     private final UserRepo userRepo;
-    private final AgentRepo agentRepo;
+    private final WhatsAppService whatsAppService;
 
     @Transactional
 
@@ -36,6 +34,7 @@ public class OrderService {
         // Extract data from the request
         int userId = request.getUserId();
         int businessId = request.getBusinessId();
+        int supplier_id = request.getSupplierId();
         String status = request.getStatus();
         LocalDateTime orderDate = request.getOrderDate();
 
@@ -48,6 +47,11 @@ public class OrderService {
         Business business = businessRepo.findById(businessId)
                 .orElseThrow(() -> new RuntimeException("Business not found"));
 
+        Agent orderAgent = business.getAgents().stream()
+                .filter(agent -> agent.getSupplier().getSupplierId() == supplier_id)
+                .findAny()
+                .orElse(null);
+
         // Initialize total amount
         AtomicReference<Double> totalAmount = new AtomicReference<>(0.0);
 
@@ -57,6 +61,7 @@ public class OrderService {
         newOrder.setBusiness(business);
         newOrder.setStatus(status);
         newOrder.setOrderDate(orderDate);
+        newOrder.setAgent(orderAgent);
 
         // Process each order item and calculate total amount
         List<OrderProduct> orderProductList = orderItems.stream().map(item -> {
@@ -78,10 +83,7 @@ public class OrderService {
             // Calculate total price for this item
             double itemTotal = unitPrice * item.getQuantity();
 
-            // Accumulate the total order amount
             totalAmount.updateAndGet(v -> v + itemTotal);
-
-
             // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
@@ -90,7 +92,6 @@ public class OrderService {
             orderProduct.setUnitPrice(unitPrice);
             return orderProduct;
         }).toList();
-        // Set the calculated total amount in the Order
         newOrder.setTotalAmount(totalAmount.get());
         // Set the list of OrderProduct entities in the Order
         newOrder.setOrderProducts(orderProductList);
@@ -100,6 +101,7 @@ public class OrderService {
 
 
     public void OrderConfirmation(int orderId) {
+
         // Find the order by its ID
         Order order = orderRepo.findById(orderId).orElse(null);
         if (order != null) {
@@ -107,51 +109,17 @@ public class OrderService {
             order.setStatus("active");
             // Save the updated order to the database
             orderRepo.save(order);
+            String agentPhone;
+            try {
+                agentPhone = order.getAgent().getPhone();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             System.out.println("Order status updated to active for order ID: " + orderId);
+            String managerSMS = "New order #" + orderId + " requires your confirmation. Please log in to confirm the order.";
+            whatsAppService.sendWhatsAppMessage(agentPhone, managerSMS);
         } else {
             System.out.println("Order not found for ID: " + orderId);
-        }
-    }
-
-
-    public void sendWhatsAppMessage(String phoneNumber, String message) {
-        /*
-                Agent agent = agentRepo.findAgentById(supplierId);
-        if (agent == null) {
-            throw new RuntimeException("Agent not found for the given supplier ID");
-        }
-        String agentPhone = agent.getPhone(); // Agent's phone number
-
-          // Send WhatsApp message to the manager after order creation
-        StringBuilder message = new StringBuilder();
-                message.append("הזמנה חדשה:")
-                        .append("\n");
-        // Loop through each item in the order and add product name and quantity to the message
-        orderItems.forEach(item -> {
-            Product product = productRepo.findById(item.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
-            message.append("מוצר: ").append(product.getProductName())
-                    .append(", כמות: ").append(item.getQuantity())
-                    .append("\n");
-        });
-        //sendWhatsAppMessage(agentPhone,  message.toString());
-         */
-
-
-        String apiEndpoint = "https://api.whatsapp.com/send";
-        String apiToken = "YOUR_API_TOKEN"; // Replace with your API token
-
-        // Prepare the message payload
-        String payload = "to=" + phoneNumber + "&message=" + message;
-
-        // Make an API call to send the message
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(apiEndpoint, HttpMethod.POST, null, String.class, payload);
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("WhatsApp message sent successfully!");
-        } else {
-            System.out.println("Failed to send WhatsApp message");
         }
     }
 
@@ -167,10 +135,10 @@ public class OrderService {
     public List<Integer> getPendingOrders() {
         // Fetch all orders with status "PENDING"
         List<Order> pendingOrders = orderRepo.findByStatus("pending");
-        List<Integer> pending_id= pendingOrders.stream()
+        List<Integer> pending_id = pendingOrders.stream()
                 .map(Order::getId)
                 .toList();
         System.out.println("Pending Order IDs: " + pending_id);
-       return pending_id;
+        return pending_id;
     }
 }
