@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
-import {useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../App';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../../App';
+import { StackNavigationProp } from '@react-navigation/stack';
 import styles from './Home.styles';
 import { globals } from '../../util/Globals';
 import { doGet } from '../../util/HTTPRequests';

@@ -121,7 +121,7 @@ public class OrderService {
             }
             System.out.println("Order status updated to active for order ID: " + orderId);
             String managerSMS = "New order #" + orderId + " requires your confirmation. Please log in to confirm the order.";
-            whatsAppService.sendWhatsAppMessage(agentPhone, managerSMS);
+            //whatsAppService.sendWhatsAppMessage(agentPhone, managerSMS);
         } else {
             System.out.println("Order not found for ID: " + orderId);
         }

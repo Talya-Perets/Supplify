@@ -17,17 +17,23 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
 
     @Query("""
                 SELECT new com.Supplify.Supplify.DTO.OrderProductDetails(
+                   \s
                     p.productName,
                     op.quantity,
                     op.unitPrice,
                     (op.quantity * op.unitPrice),
-                    o.status
+                    o.status,
+                    o.user.firstName,
+                    o.agent.supplier.companyName
                 )
                 FROM OrderProduct op
                 JOIN op.product p
                 JOIN Order o ON op.id.orderId = o.id
                 WHERE op.id.orderId = :orderId
-            """)
+           \s""")
     List<OrderProductDetails> findOrderProductDetailsByOrderId(@Param("orderId") int orderId);
+
+
+
 }
 
