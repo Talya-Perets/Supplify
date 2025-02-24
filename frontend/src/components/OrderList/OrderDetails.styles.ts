@@ -94,6 +94,22 @@ const styles = StyleSheet.create({
     color: '#111827',
     fontWeight: '500',
   },
+  sendOrderButton: {
+    backgroundColor: '#4A90E2',  
+    paddingVertical: 12,          
+    paddingHorizontal: 20,        
+    borderRadius: 8,            
+    alignItems: 'center',        
+    justifyContent: 'center',     
+    marginTop: 20,               
+  },
+
+  sendOrderButtonText: {
+    color: '#ffffff',            
+    fontSize: 16,                
+    fontWeight: 'bold',          
+    textAlign: 'center',          
+  },
   itemRow: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
@@ -110,6 +126,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     marginBottom: 4,
+  },
+  statusMessageContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: '#4CAF50',  
+    padding: 10,
+    borderRadius: 5,
+    zIndex: 9999,
+  },
+  statusMessage: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
   },
   itemQuantity: {
     fontSize: 14,

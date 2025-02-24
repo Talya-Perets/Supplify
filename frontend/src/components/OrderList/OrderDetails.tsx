@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import {useOrder} from '../../contexts/OrderContext';
-import {useNavigation} from '@react-navigation/native';
+import { useOrder } from '../../contexts/OrderContext';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
-import {doGet} from '../../util/HTTPRequests';
+import {doGet, doPost} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals';
 import styles from './OrderDetails.styles';
 import {LoginContext} from '../../contexts/LoginContext';
@@ -45,14 +45,13 @@ interface OrderDetails {
 }
 
 const OrderDetailsScreen = () => {
-  const {selectedOrderId} = useOrder();
+  const { selectedOrderId } = useOrder();
   const navigation = useNavigation();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const {userInfo} = useContext(LoginContext) as LoginContextType;
-  const [userRole] = useState<'manager' | 'employee'>('manager');
+  const { userInfo } = useContext(LoginContext) as LoginContextType;
 
   useEffect(() => {
     if (!selectedOrderId) {
@@ -65,25 +64,24 @@ const OrderDetailsScreen = () => {
         setLoading(true);
         setError(null);
 
-        const orderRequest: CreateOrderRequest = {orderId: selectedOrderId};
-        const response = await doGet(
-          `${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`,
-        );
+        const orderRequest: CreateOrderRequest = { orderId: selectedOrderId };
+        const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`);
 
-        console.log('API Response:', response);
+        const orderItems = response?.data || [];  // Assuming response has a `data` field
+        const order_status = orderItems.length > 0 ? orderItems[0].status : 'undefined';  // Extract the status from the first item if available
 
-        // Create a default order structure with the items from the response
         const formattedOrder: OrderDetails = {
           id: selectedOrderId,
-          user: {id: 1, name: 'user'},
-          business: {id: 1, name: 'Default Business'},
-          items: Array.isArray(response) ? response : [],
-          totalAmount: Array.isArray(response)
-            ? response.reduce((sum, item) => sum + item.subtotal, 0)
+          user: { id: 1, name: 'Default User' },
+          business: { id: 1, name: 'Default Business' },
+          items: Array.isArray(orderItems) ? orderItems : [],
+          totalAmount: Array.isArray(orderItems)
+            ? orderItems.reduce((sum, item) => sum + item.subtotal, 0)
             : 0,
-          status: 'active',
-          orderDate: new Date().toISOString(), // Set current date as default
+            status: order_status || 'Undefined', // Convert to string explicitly
+          orderDate: new Date().toISOString(),
         };
+        console.log('Order Status:', order_status);
 
         setOrderDetails(formattedOrder);
       } catch (err) {
@@ -110,8 +108,39 @@ const OrderDetailsScreen = () => {
     }
   };
 
-  if (!selectedOrderId) return null;
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [orderSent, setOrderSent] = useState(false); // Track if order was sent
 
+const handleSendOrder = async () => {
+  try {
+    const response = await doPost(
+      `${globals.ORDER.OrderConfirm}?orderId=${selectedOrderId}`,  // Pass orderId in the query string
+      {}
+    );
+
+    if (response.status === 200) {
+      // Success message
+      setStatusMessage('הזמנה בוצעה בהצלחה');
+      setOrderSent(true);
+    } else {
+      // Failure message
+      setStatusMessage('הזמנה לא בוצעה, אנא נסה שנית');
+    }
+
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, 2000);
+  } catch (err) {
+    setStatusMessage('הזמנה לא בוצעה, אנא נסה שנית');
+    console.error('Error updating order status:', err);
+
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, 2000);
+  }
+};
+
+  if (!selectedOrderId) return null;
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar />}
@@ -153,9 +182,7 @@ const OrderDetailsScreen = () => {
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>תאריך:</Text>
-                <Text style={styles.value}>
-                  {formatDate(orderDetails.orderDate)}
-                </Text>
+                <Text style={styles.value}>{formatDate(orderDetails.orderDate)}</Text>
               </View>
 
               <View style={styles.infoRow}>
@@ -180,9 +207,7 @@ const OrderDetailsScreen = () => {
                         כמות: {item.quantity}
                       </Text>
                     </View>
-                    <Text style={styles.itemPrice}>
-                      ₪{item.subtotal.toFixed(2)}
-                    </Text>
+                    <Text style={styles.itemPrice}>₪{item.subtotal.toFixed(2)}</Text>
                   </View>
                 ))
               ) : (
@@ -198,10 +223,25 @@ const OrderDetailsScreen = () => {
                 </Text>
               </View>
             )}
+
+            {orderDetails.status === 'pending' && userInfo.userRole === 'Manager' && !orderSent && (
+              <TouchableOpacity
+                style={styles.sendOrderButton}
+                onPress={handleSendOrder}  // Attach handleSendOrder here
+              >
+                <Text style={styles.sendOrderButtonText}>שלח הזמנה</Text>
+              </TouchableOpacity>
+            )}
           </ScrollView>
         ) : (
           <View style={styles.centerContent}>
             <Text style={styles.errorText}>לא נמצאו פרטי הזמנה</Text>
+          </View>
+        )}
+
+        {statusMessage && (
+          <View style={styles.statusMessageContainer}>
+            <Text style={styles.statusMessage}>{statusMessage}</Text>
           </View>
         )}
       </View>

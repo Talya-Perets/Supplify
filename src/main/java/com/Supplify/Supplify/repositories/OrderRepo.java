@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OrderRepo extends JpaRepository<Order, Integer> {
+
+    List<Order> findByStatus(String pending);
+
     @Query("SELECT o FROM Order o JOIN FETCH o.orderProducts WHERE o.business.id = :businessId AND o.id = :orderId")
     Order findByBusinessIdAndOrderId(@Param("businessId") int businessId, @Param("orderId") int orderId);
 
@@ -16,12 +19,17 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
 
     @Query("""
         SELECT new com.Supplify.Supplify.DTO.OrderProductDetails(
-            p.productName, op.quantity, op.unitPrice, (op.quantity * op.unitPrice)
-        )\s
+            p.productName,
+            op.quantity,
+            op.unitPrice,
+            (op.quantity * op.unitPrice),
+            o.status
+        )
         FROM OrderProduct op
         JOIN op.product p
+        JOIN Order o ON op.id.orderId = o.id
         WHERE op.id.orderId = :orderId
-   \s""")
+    """)
     List<OrderProductDetails> findOrderProductDetailsByOrderId(@Param("orderId") int orderId);
 }
 

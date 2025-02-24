@@ -9,4 +9,5 @@ public class OrderProductDetails {
     private int quantity;
     private double unitPrice;
     private double subtotal;
+    private String status;
 }

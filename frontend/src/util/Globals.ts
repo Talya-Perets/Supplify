@@ -54,5 +54,7 @@ export const globals = {
         CreateOrder: `${PRODUCTION_URL}${ORDER}/CreateOrder`,
         getOrders: `${PRODUCTION_URL}${ORDER}/getOrders`,
         getOrderInfo: `${PRODUCTION_URL}${ORDER}/getOrderInfo`,
+        getPendingOrders: `${PRODUCTION_URL}${ORDER}/getPendingOrders`,
+        OrderConfirm: `${PRODUCTION_URL}${ORDER}/OrderConfirm`,
     }
 };
