@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import com.Supplify.Supplify.DTO.OrderProductDetails;
 
@@ -28,10 +29,12 @@ public class OrderService {
     private final BusinessProductRepo businessproductRepo;
     private final UserRepo userRepo;
     private final WhatsAppService whatsAppService;
+    private final FirebaseService firebaseService;
 
     @Transactional
 
     public Order createOrder(CreateOrderRequest request) {
+        firebaseService.initializeFirebase();
         // Extract data from the request
         int userId = request.getUserId();
         int businessId = request.getBusinessId();
@@ -96,9 +99,20 @@ public class OrderService {
             return orderProduct;
         }).toList();
         preProcessedOrder.setTotalAmount(totalAmount.get());
-
         // Set the list of OrderProduct entities in the Order
         preProcessedOrder.setOrderProducts(new ArrayList<>(orderProductList));
+        List<User> managers = userRepo.findByRoleId(1); // Fetch all managers (assuming roleId 1 is for managers)
+        // Send notifications to all managers
+
+        for (User manager : managers) {
+            String deviceToken = manager.getDeviceToken();
+            if (deviceToken != null && !deviceToken.isEmpty()) {
+                System.out.println("📢 Notify Manager.");
+                // Send notification to each manager using Firebase service instance
+                firebaseService.sendNotification(deviceToken, "New Order", "You have a new order waiting for approval.");
+            }
+        }
+
         // Save the Order (cascading will save the OrderProduct entities)
         return orderRepo.saveAndFlush(preProcessedOrder);
     }
@@ -119,9 +133,18 @@ public class OrderService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("Order status updated to active for order ID: " + orderId);
-            String managerSMS = "New order #" + orderId + " requires your confirmation. Please log in to confirm the order.";
-            //whatsAppService.sendWhatsAppMessage(agentPhone, managerSMS);
+
+            StringBuilder AgentSMS = new StringBuilder(); // Initialize StringBuilder
+            AgentSMS.append("הזמנה חדשה:");
+            AgentSMS.append("\n");
+            for (OrderProduct item : order.getOrderProducts()) {
+                Product product = productRepo.findById(item.getProduct().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
+                AgentSMS.append(product.getProductName());
+                AgentSMS.append(": ")
+                        .append(item.getQuantity())
+                        .append("\n");
+            }
+            whatsAppService.sendWhatsAppMessage(agentPhone, AgentSMS.toString());
         } else {
             System.out.println("Order not found for ID: " + orderId);
         }

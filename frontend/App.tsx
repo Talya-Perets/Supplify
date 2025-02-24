@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -12,7 +12,7 @@ import SuppliersListScreen from './src/components/SuppliersList/SuppliersList';
 import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/EmployeeRegistration';
 import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
-//import ManagerApprovalScreen from './src/components/ManagerScreen/Managerscreen';
+import messaging from '@react-native-firebase/messaging';
 import {LoginProvider} from './src/contexts/LoginContext';
 import {CartProvider} from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
@@ -20,6 +20,8 @@ import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword
 import OrderListScreen from './src/components/OrderList/OrderList';
 import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
 import { OrderProvider } from './src/contexts/OrderContext';
+import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
@@ -41,7 +43,33 @@ export type RootStackParamList = {
 
 const Stack = createStackNavigator<RootStackParamList>();
 
+const requestUserPermission = async () => {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Notification permission granted.');
+  }
+};
+
 const App = () => {
+  useEffect(() => {
+    requestUserPermission();
+
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      Toast.show({
+        type: 'info', // You can use 'success', 'error', 'info', etc.
+        text1: remoteMessage.notification?.title || 'New Notification',
+        text2: remoteMessage.notification?.body || 'You have a new notification',
+      });
+    });
+
+
+    return unsubscribe; 
+  }, [])
+
   return ( 
     <LoginProvider>
       <CartProvider>
