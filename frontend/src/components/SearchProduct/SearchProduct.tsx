@@ -1,22 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
   FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import {RootStackParamList, API_BASE_URL} from '../../../App';
+import {RootStackParamList} from '../../../App';
 import styles from './SearchProduct.styles';
-import {doPost} from '../../util/HTTPRequests';
-import {globals} from '../../util/Globals';
 import Sidebar from '../Sidebar/sidebar';
+import useBusinessProducts from '../../hooks/useBusinessProducts';
+import ProductCard from '../ProductList/ProductCard/ProductCard';
+import {BusinessProduct} from '../../types/models';
+import {useCart} from '../../contexts/CartContext';
 
 type SearchProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -26,47 +27,77 @@ type SearchProductScreenNavigationProp = StackNavigationProp<
 const SearchProductScreen = () => {
   const navigation = useNavigation<SearchProductScreenNavigationProp>();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const {addToCart} = useCart();
 
-  const [productData, setProductData] = useState({
-    id: '',
-    productName: '',
-    productDescription: '',
-    supplierId: '',
-    stock: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState<any[]>([]); // List of products fetched from API
+  // 🔹 Fetch all products using the hook
+  const {businessProducts, isLoading} = useBusinessProducts();
 
-  const handleSearchProduct = async () => {
-    setIsLoading(true);
-    try {
-      const response = await doPost(globals.PRODUCT.fetchProduct, {
-        productName: productData.productName,
+  // 🔹 Manage product quantities
+  const [quantities, setQuantities] = useState<{[key: string]: number}>({});
+
+  const updateQuantity = (productId: string, increment: boolean) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(0, (prev[productId] || 0) + (increment ? 1 : -1)), // Ensure default value is 0
+    }));
+  };
+
+  const handleAddToCart = (businessProduct: BusinessProduct) => {
+    const quantity = quantities[businessProduct.product.id] || 0;
+    if (quantity > 0) {
+      addToCart({
+        businessProduct,
+        quantity,
       });
-
-      if (response) {
-        setProducts(response.data);
-      } else {
-        Alert.alert(
-          'No products found',
-          'No matching products found for your search.',
-        );
-      }
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      Alert.alert('Error', 'There was an issue fetching the product.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  // 🔹 Filter products dynamically based on searchText
+  const filteredProducts = businessProducts.filter(businessProduct => {
+    if (!searchText) return false; // Show no products initially
+    const name = businessProduct.product.productName.toLowerCase();
+    const query = searchText.toLowerCase();
+    return name.startsWith(query) || name.includes(query); // Prefix + Substring search
+  });
+
+  // 🔹 Render each product card
   const renderProductCard = ({item}: {item: any}) => (
-    <View style={styles.productCard}>
-      <Text style={styles.productName}>{item.productName}</Text>
-      <Text style={styles.productDescription}>{item.productDescription}</Text>
-      <Text style={styles.productStock}>Stock: {item.stock}</Text>
-    </View>
+    <ProductCard
+      key={item.product.id}
+      businessProduct={item}
+      quantity={quantities[item.product.id] || 0}
+      updateQuantity={updateQuantity}
+      handleAddToCart={handleAddToCart}
+    />
   );
+
+  useEffect(() => {
+    setQuantities(prevQuantities => {
+      const updatedQuantities: {[key: string]: number} = {};
+      let hasChanges = false;
+
+      filteredProducts.forEach(product => {
+        if (prevQuantities[product.product.id]) {
+          updatedQuantities[product.product.id] =
+            prevQuantities[product.product.id];
+        } else {
+          updatedQuantities[product.product.id] = 0; // Reset to zero if not in prevQuantities
+          hasChanges = true;
+        }
+      });
+
+      // Remove old quantities if products are no longer visible
+      if (
+        Object.keys(prevQuantities).length !==
+        Object.keys(updatedQuantities).length
+      ) {
+        hasChanges = true;
+      }
+
+      return hasChanges ? updatedQuantities : prevQuantities;
+    });
+  }, [filteredProducts]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,22 +114,21 @@ const SearchProductScreen = () => {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Search Product</Text>
         </View>
+
+        {/* 🔹 Search Input */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
             placeholder="Enter product name"
-            value={productData.productName}
-            onChangeText={text =>
-              setProductData({...productData, productName: text})
-            }
+            value={searchText}
+            onChangeText={setSearchText} // 🔹 Updates searchText state
           />
-          <TouchableOpacity
-            style={styles.searchButton}
-            onPress={handleSearchProduct}>
+          <TouchableOpacity style={styles.searchButton}>
             <Icon name="search" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
+        {/* 🔹 Show Loading Indicator */}
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#4A90E2" />
@@ -106,11 +136,13 @@ const SearchProductScreen = () => {
           </View>
         ) : (
           <FlatList
-            data={products}
+            data={filteredProducts}
             renderItem={renderProductCard}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => item.product.id.toString()}
             ListEmptyComponent={
-              <Text style={styles.noResultsText}>No products found.</Text>
+              searchText ? (
+                <Text style={styles.noResultsText}>No matching products.</Text>
+              ) : null
             }
           />
         )}

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,62 +7,34 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
-  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
-import {doGet} from '../../util/HTTPRequests';
-import {globals} from '../../util/Globals';
 import {useCart} from '../../contexts/CartContext';
 import styles from './ProductList.styles';
 import {BusinessProduct} from '../../types/models';
-import {LoginContext} from '../../contexts/LoginContext';
 import {LoginContextType} from '../../contexts/UserContext';
+import ProductCard from './ProductCard/ProductCard';
+import useBusinessProducts from '../../hooks/useBusinessProducts';
 
 const ProductList = () => {
-  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const {businessProducts, isLoading} = useBusinessProducts();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const {addToCart} = useCart();
-  const [businessProducts, setBusinessProducts] = useState<BusinessProduct[]>(
-    [],
-  );
-  const [isLoading, setIsLoading] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [quantities, setQuantities] = useState<{[key: string]: number}>({});
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await doGet(
-        `${globals.BUSINESS.getBusinessProducts}/${userInfo.businessId}`,
-      );
-
-      if (response.status === 200) {
-        setBusinessProducts(response.data);
-
-        // Initialize product quantities
-        const initialQuantities = response.data.reduce(
-          (acc: {[key: string]: number}, businessProduct: BusinessProduct) => {
-            acc[businessProduct.product.id] = 0;
-            return acc;
-          },
-          {},
-        );
-        setQuantities(initialQuantities);
-      } else {
-        throw new Error('No data received from API');
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      Alert.alert('שגיאה', 'אירעה שגיאה בטעינת רשימת המוצרים');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Initialize product quantities when products are fetched
+  React.useEffect(() => {
+    const initialQuantities = businessProducts.reduce(
+      (acc: {[key: string]: number}, businessProduct: BusinessProduct) => {
+        acc[businessProduct.product.id] = 0;
+        return acc;
+      },
+      {},
+    );
+    setQuantities(initialQuantities);
+  }, [businessProducts]);
 
   const updateQuantity = (productId: string, increment: boolean) => {
     setQuantities(prev => ({
@@ -123,6 +95,7 @@ const ProductList = () => {
             <Text style={styles.successMessageText}>{successMessage}</Text>
           </View>
         )}
+
         {businessProducts.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>אין מוצרים להצגה</Text>
@@ -131,56 +104,13 @@ const ProductList = () => {
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.productList}>
               {businessProducts.map(businessProduct => (
-                <View
+                <ProductCard
                   key={businessProduct.product.id}
-                  style={styles.productCard}>
-                  <View style={styles.cardContent}>
-                    <View style={styles.imageContainer}>
-                      <Image
-                        source={{
-                          uri: `${globals.PRODUCTION_URL}${businessProduct.imageUrl}`,
-                        }}
-                        style={styles.image}
-                      />
-                    </View>
-
-                    <View style={styles.detailsSection}>
-                      <View style={styles.productInfo}>
-                        <Text style={styles.productName}>
-                          {businessProduct.product.productName}
-                        </Text>
-                      </View>
-
-                      <View style={styles.actionsSection}>
-                        <View style={styles.quantityControls}>
-                          <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() =>
-                              updateQuantity(businessProduct.product.id, false)
-                            }>
-                            <Icon name="minus" size={16} color="#4A90E2" />
-                          </TouchableOpacity>
-                          <Text style={styles.quantityText}>
-                            {quantities[businessProduct.product.id] || 0}
-                          </Text>
-                          <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={() =>
-                              updateQuantity(businessProduct.product.id, true)
-                            }>
-                            <Icon name="plus" size={16} color="#4A90E2" />
-                          </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity
-                          style={styles.addToCartButton}
-                          onPress={() => handleAddToCart(businessProduct)}>
-                          <Icon name="shopping-cart" size={16} color="white" />
-                          <Text style={styles.addToCartText}>הוסף לסל</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </View>
+                  businessProduct={businessProduct}
+                  quantity={quantities[businessProduct.product.id] || 0}
+                  updateQuantity={updateQuantity}
+                  handleAddToCart={handleAddToCart}
+                />
               ))}
             </View>
           </ScrollView>

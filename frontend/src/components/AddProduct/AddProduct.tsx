@@ -21,6 +21,7 @@ import {LoginContextType} from '../../contexts/UserContext.tsx';
 import {Supplier} from '../../types/models.ts';
 import {Dropdown} from 'react-native-element-dropdown';
 import ImagePickerComponent from '../../util/ImagePickerComponent.tsx';
+import useBusinessProducts from '../../hooks/useBusinessProducts.ts';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -37,6 +38,7 @@ const AddProductScreen = () => {
   const [value, setValue] = useState(-1);
   const [productImageUri, setProductImageUri] = useState<string | null>(null);
   const [productImageData, setProductImageData] = useState<any>(null);
+  const {refetchProducts} = useBusinessProducts();
 
   const [productData, setProductData] = useState({
     id: '',
@@ -92,6 +94,7 @@ const AddProductScreen = () => {
         formData,
       );
       Alert.alert('Success', 'Product added successfully!');
+      refetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
       Alert.alert('Error', 'Failed to add product. Please try again.');

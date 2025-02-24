@@ -44,7 +44,7 @@ public class ProductService {
 
     public String saveImage(MultipartFile file) throws IOException {
 
-        String uploadDir = "src/main/resources/static/uploads/";
+        String uploadDir = "C:/Supplify/uploads/";
         File directory = new File(uploadDir);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -56,7 +56,7 @@ public class ProductService {
 
         Files.write(filePath, file.getBytes());
 
-        return "/uploads/" + filename;
+        return "/" + filename;
     }
 
     // Add a new product

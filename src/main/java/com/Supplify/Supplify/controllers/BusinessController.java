@@ -55,6 +55,7 @@ public class BusinessController {
 
     @GetMapping("getBusinessProducts/{businessId}")
     public ResponseEntity<List<BusinessProductDTO>> getBusinessProducts(@PathVariable int businessId) throws Exception {
+        logger.info("Started getBusinessProducts request for business with id: {}", businessId);
         return new ResponseEntity<>(businessService.getBusinessProducts(businessId), HttpStatus.OK);
     }
 }

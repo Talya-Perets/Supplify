@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
@@ -16,6 +17,7 @@ import {doPost} from '../../util/HTTPRequests';
 import {LoginContextType} from '../../contexts/UserContext';
 import {LoginContext} from '../../contexts/LoginContext';
 import {CartItem} from '../../contexts/CartContext';
+import ProductCard from '../ProductList/ProductCard/ProductCard';
 
 const validateCartItem = (item: CartItem): boolean => {
   if (!item.businessProduct.product.id) {
@@ -141,58 +143,16 @@ const ShoppingCartScreen = () => {
                   <Text style={styles.supplierName}>{group.supplierName}</Text>
                 </View>
                 {group.items.map(item => (
-                  <View
-                    key={item.businessProduct.product.id}
-                    style={styles.itemRow}>
-                    <View style={styles.itemControls}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          console.log(
-                            `Removing item: ${item.businessProduct.product.id}}`,
-                          );
-                          removeFromCart(item.businessProduct.product.id);
-                        }}>
-                        <Icon name="trash-2" size={20} color="red" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() =>
-                          updateQuantity(item.businessProduct.product.id, false)
-                        }
-                        disabled={item.quantity < 1}>
-                        <Icon
-                          name="minus"
-                          size={20}
-                          color={item.quantity < 1 ? '#ccc' : '#4A90E2'}
-                        />
-                      </TouchableOpacity>
-                      <Text style={styles.quantityText}>{item.quantity}</Text>
-                      <TouchableOpacity
-                        onPress={() =>
-                          updateQuantity(item.businessProduct.product.id, true)
-                        }
-                        disabled={item.quantity >= item.businessProduct.stock}>
-                        <Icon
-                          name="plus"
-                          size={20}
-                          color={
-                            item.quantity >= item.businessProduct.stock
-                              ? '#ccc'
-                              : '#4A90E2'
-                          }
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.itemDetails}>
-                      <Text style={styles.itemName}>
-                        {item.businessProduct.product.productName}
-                      </Text>
-                      <Text style={styles.itemId}>
-                        Product ID: {item.businessProduct.product.id}
-                      </Text>
-                      <Text style={styles.stockLabel}>
-                        מלאי: {item.businessProduct.stock}
-                      </Text>
-                    </View>
+                  <View key={item.businessProduct.product.id}>
+                    <ProductCard
+                      businessProduct={item.businessProduct}
+                      quantity={item.quantity}
+                      updateQuantity={updateQuantity}
+                      handleAddToCart={undefined} // Disable Add to Cart
+                      handleRemoveFromCart={() =>
+                        removeFromCart(item.businessProduct.product.id)
+                      } // Remove from cart function
+                    />
                   </View>
                 ))}
               </View>

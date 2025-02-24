@@ -66,8 +66,17 @@ const styles = StyleSheet.create({
   supplierSection: {
     backgroundColor: 'white',
     marginBottom: 12,
-    borderRadius: 8,
-    marginTop: 16, 
+    marginHorizontal: 10,  // Add some spacing from the screen edges
+    borderRadius: 12,  // More rounded corners for a modern look
+    padding: 8,  // Some internal padding to separate the supplier title from the products
+    marginTop: 16,
+  
+    // Shadow for floating effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,  // Android-specific shadow
   },
   supplierHeader: {
     flexDirection: 'row-reverse',
@@ -94,25 +103,39 @@ const styles = StyleSheet.create({
   },
   itemRow: {
     flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
   itemControls: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  quantityControls: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    gap: 16,
+  },
+  quantityButton: {
+    padding: 5,
   },
   quantityText: {
     fontSize: 16,
+    marginHorizontal: 10,
     fontWeight: 'bold',
   },
   itemDetails: {
-    alignItems: 'flex-end',
+    flex: 1,
+  },
+  itemInfo: {
+    flex: 1,
+    marginBottom: 10,
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
   },
   itemName: {
+    flexDirection: 'row-reverse',
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 8,
@@ -135,5 +158,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  imageContainer: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#f1f1f1',
+    marginLeft: 10,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover", 
+},
 });
 export default styles;

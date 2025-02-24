@@ -162,7 +162,23 @@ headerTitle: {
     backgroundColor: '#DDD',
     marginHorizontal: 8,
   },
-
+  removeFromCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E24A4A', // Red color for removal
+    paddingVertical: 6,
+    borderRadius: 5,
+    width: '90%', // Adjust width
+    transform: [{ scale: 0.9 }], // Slightly smaller
+  },
+  removeFromCartText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
+  
   
 });
 

@@ -2,7 +2,13 @@ import axios from 'axios';
 
 export const doGet = async (url: string, params?: any) => {
     try {
-        const response = await axios.get(url, { params });
+        const response = await axios.get(url, { 
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+          params });
         return response;
     } catch (error) {
         console.error('Error fetching data:', error);
