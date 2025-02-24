@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-  orderBusiness: {
+  orderSupplier: {
     fontSize: 14,
     color: '#555',
   },

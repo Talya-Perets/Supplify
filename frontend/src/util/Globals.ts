@@ -18,6 +18,7 @@ export const globals = {
         login: `${PRODUCTION_URL}${AUTH}/login`,
         forgotPassword: `${PRODUCTION_URL}${AUTH}/forgotPassword`,
         google: `${PRODUCTION_URL}${AUTH}/google`,
+        Token: `${PRODUCTION_URL}${AUTH}/updateDeviceToken`,
 
     },
 

@@ -30,19 +30,14 @@ interface OrderProductDetails {
 
 interface OrderDetails {
   id: number;
-  user: {
-    id: number;
-    name: string;
-  };
-  business: {
-    id: number;
-    name: string;
-  };
   items: OrderProductDetails[];
   totalAmount: number;
   status: string;
   orderDate: string;
+  userName: string;      
+  supplierName: string;  
 }
+
 
 const OrderDetailsScreen = () => {
   const { selectedOrderId } = useOrder();
@@ -63,26 +58,27 @@ const OrderDetailsScreen = () => {
       try {
         setLoading(true);
         setError(null);
-
+    
         const orderRequest: CreateOrderRequest = { orderId: selectedOrderId };
         const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`);
-
+    
         const orderItems = response?.data || [];  // Assuming response has a `data` field
         const order_status = orderItems.length > 0 ? orderItems[0].status : 'undefined';  // Extract the status from the first item if available
-
+        
         const formattedOrder: OrderDetails = {
           id: selectedOrderId,
-          user: { id: 1, name: 'Default User' },
-          business: { id: 1, name: 'Default Business' },
+          userName: orderItems?.[0]?.userName || 'לא ידוע',  // Fetch userName from the order item directly
+          supplierName: orderItems?.[0]?.supplierName || 'לא ידוע',  // Fetch supplierName from the order item directly
           items: Array.isArray(orderItems) ? orderItems : [],
           totalAmount: Array.isArray(orderItems)
             ? orderItems.reduce((sum, item) => sum + item.subtotal, 0)
             : 0,
-            status: order_status || 'Undefined', // Convert to string explicitly
+          status: order_status || 'Undefined', // Convert to string explicitly
           orderDate: new Date().toISOString(),
         };
+        
         console.log('Order Status:', order_status);
-
+    
         setOrderDetails(formattedOrder);
       } catch (err) {
         setError('Failed to load order details');
@@ -91,8 +87,9 @@ const OrderDetailsScreen = () => {
         setLoading(false);
       }
     };
-
+    
     fetchOrderDetails();
+    
   }, [selectedOrderId]);
 
   const formatDate = (dateString: string) => {
@@ -187,12 +184,12 @@ const handleSendOrder = async () => {
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>ספק:</Text>
-                <Text style={styles.value}>{orderDetails.business.name}</Text>
+                <Text style={styles.value}>{orderDetails.supplierName}</Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>מזמין:</Text>
-                <Text style={styles.value}>{orderDetails.user.name}</Text>
+                <Text style={styles.value}>{orderDetails.userName}</Text>
               </View>
             </View>
 

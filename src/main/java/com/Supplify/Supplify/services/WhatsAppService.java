@@ -1,11 +1,11 @@
 package com.Supplify.Supplify.services;
-
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
-import lombok.RequiredArgsConstructor;
+import com.twilio.type.PhoneNumber;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Service
 public class WhatsAppService {
 

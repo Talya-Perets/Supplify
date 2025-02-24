@@ -2,6 +2,7 @@ package com.Supplify.Supplify.controllers;
 import com.Supplify.Supplify.DTO.CreateOrderRequest;
 import com.Supplify.Supplify.DTO.GetOrderInfo;
 import com.Supplify.Supplify.DTO.OrderProductDetails;
+import com.Supplify.Supplify.DTO.OrderResponseDTO;
 import com.Supplify.Supplify.entities.Order;
 import com.Supplify.Supplify.services.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("orders")
@@ -28,17 +30,25 @@ public class OrderController {
     }
 
     @GetMapping("/getOrders")
-    public ResponseEntity<List<Order>> getOrdersByBusiness(@RequestParam int businessId) {
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersByBusiness(@RequestParam int businessId) {
         List<Order> orders = orderService.get(businessId);
+
         if (orders == null || orders.isEmpty()) {
             return ResponseEntity.ok(Collections.emptyList()); // Return an empty list if no orders
         }
-        return ResponseEntity.ok(orders); // Return the orders if found
+
+        // Convert to DTOs
+        List<OrderResponseDTO> orderDTOs = orders.stream()
+                .map(order -> new OrderResponseDTO(order, order.getAgent().getSupplier().getCompanyName())) // Assuming `agent` represents the supplier
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(orderDTOs);
     }
 
     @GetMapping("/getOrderInfo")
     public List<OrderProductDetails> getOrderProducts(@RequestParam int orderId) {
         logger.info("Fetching order details for order ID: {}",orderId);
+
         return orderService.getOrderProducts(orderId);
     }
 
@@ -54,10 +64,6 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    private static class ValidationException extends Exception {
-        public ValidationException(String message) {
-            super(message);
-        }
-    }
+
 
 }

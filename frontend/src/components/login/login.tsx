@@ -21,6 +21,7 @@ import {globals} from '../../util/Globals.ts';
 import styles from './login.styles';
 import {LoginContext} from '../../contexts/LoginContext.tsx';
 import {LoginContextType} from '../../contexts/UserContext.tsx';
+import messaging from '@react-native-firebase/messaging';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -105,6 +106,17 @@ const LoginScreen = () => {
           response.data.userId,
           response.data.role,
         );
+
+       // Get FCM token
+       const fcmToken = await messaging().getToken();
+       console.log('FCM Token:', fcmToken);
+
+       // Send FCM token to backend
+       await doPost(globals.AUTH.Token, {
+         userId: response.data.userId,
+         deviceToken: fcmToken,
+       });
+
 
         navigation.navigate('Home');
       } else {

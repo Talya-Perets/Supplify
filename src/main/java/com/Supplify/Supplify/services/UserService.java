@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @AllArgsConstructor
 @Service
 public class UserService {
@@ -94,6 +96,10 @@ public class UserService {
 
         logger.info("Password updated successfully for email: {}", email);
         return true;
+    }
+
+    public void updateDeviceToken(int userId, String deviceToken) {
+        userRepo.updateDeviceToken(userId, deviceToken);
     }
 
 }

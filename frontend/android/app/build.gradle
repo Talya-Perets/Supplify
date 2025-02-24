@@ -126,5 +126,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:rules:1.5.0'
     debugImplementation "androidx.test:monitor:1.6.1"
-
+    //Add Firebase dependencies 
+    implementation 'com.google.firebase:firebase-messaging:23.0.0' 
 }
+    apply plugin: 'com.google.gms.google-services'  

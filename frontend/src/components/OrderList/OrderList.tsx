@@ -33,6 +33,7 @@ interface Order {
     id: number;
     name: string;
   };
+  supplierName: string;
   totalAmount: number;
   status: string;
   orderDate: string;
@@ -47,7 +48,6 @@ const OrderListScreen = ({
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [userRole] = useState<'manager' | 'employee'>('manager');
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Track error messages
   const {userInfo} = useContext(LoginContext) as LoginContextType;
 
@@ -65,13 +65,34 @@ const OrderListScreen = ({
         const response = await doGet(`${globals.ORDER.getOrders}`, {
           businessId: businessId,
         });
-        console.log('Order Response:', response);
-
-        if (response.data && response.data.length > 0) {
-          setOrders(response.data); // Set orders if response is not empty
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          // Map the response data to match the Order interface structure
+          const formattedOrders = response.data.map((responseItem: any) => {
+            // Extract the order object and supplierName from the response
+            const { order, supplierName } = responseItem;
+            
+            // Create a formatted user object with a single name field
+            const user = order?.user ? {
+              id: order.user.id,
+              // Combine firstName and lastName into a single name field
+              name: `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'לא ידוע'
+            } : { id: 0, name: 'לא ידוע' };
+            
+            return {
+              id: order?.id || 0,
+              user: user,
+              business: order?.business || { id: 0, name: 'לא ידוע' },
+              supplierName: supplierName || "לא ידוע",
+              totalAmount: order?.totalAmount || 0,
+              status: order?.status || "לא ידוע",
+              orderDate: order?.orderDate || new Date().toISOString()
+            };
+          });
+        
+          setOrders(formattedOrders);
         } else {
-          setOrders([]); // Set orders to an empty array if no orders are returned
-          setErrorMessage('לא נמצאו הזמנות להצגה'); // Set message for no orders
+          setOrders([]);
+          setErrorMessage("לא נמצאו הזמנות להצגה");
         }
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -98,10 +119,10 @@ const OrderListScreen = ({
         <Text style={styles.orderDate}>
           תאריך: {new Date(item.orderDate).toLocaleDateString()}
         </Text>
-        <Text style={styles.orderStatus}>סטטוס: {item.status}</Text>
+        <Text style={styles.orderStatus}>סטטוס: {item.status || 'לא ידוע'}</Text>
         <Text style={styles.orderAmount}>סכום: ₪{item.totalAmount}</Text>
-        <Text style={styles.orderBusiness}>עסק: {item.business.name}</Text>
-        <Text style={styles.orderUser}>משתמש: {item.user.name}</Text>
+        <Text style={styles.orderSupplier}>ספק: {item.supplierName}</Text>
+        <Text style={styles.orderUser}>משתמש: {item.user?.name || 'לא ידוע'}</Text>
       </View>
       <Text>
         <Icon name="chevron-left" size={20} color="#4A90E2" />
@@ -149,7 +170,7 @@ const OrderListScreen = ({
           <FlatList
             data={orders}
             renderItem={renderOrderItem}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : `order-${index}`}
             contentContainerStyle={styles.orderList}
           />
         )}

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("auth")
@@ -149,6 +151,14 @@ public class AuthController {
                 """.formatted(user.getUsername()));
 
         return new ResponseEntity<>(userContextResponse, HttpStatus.CREATED);
-
+    }
+    @PostMapping("/updateDeviceToken")
+    public ResponseEntity<?> updateDeviceToken(@RequestBody DeviceTokenRequest request) {
+        try {
+            userService.updateDeviceToken(request.getUserId(), request.getDeviceToken());
+            return ResponseEntity.ok(Collections.singletonMap("message", "Device token updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("error", "Failed to update token"));
+        }
     }
 }

@@ -10,4 +10,6 @@ public class OrderProductDetails {
     private double unitPrice;
     private double subtotal;
     private String status;
+    private String userName;
+    private String supplierName;
 }
