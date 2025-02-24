@@ -19,7 +19,6 @@ public class SupplierController {
 
     private final Logger logger = LoggerFactory.getLogger(SupplierController.class);
     private final SupplierService supplierService;
-    private final RestTemplate restTemplate;
 
     @PostMapping("createSupplier")
     public ResponseEntity<?> createSupplier(@RequestBody CreateSupplierRequest request) {

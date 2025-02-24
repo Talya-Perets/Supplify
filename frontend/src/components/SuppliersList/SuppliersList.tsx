@@ -10,7 +10,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 import {API_BASE_URL, RootStackParamList} from '../../../App';
 import {Alert} from 'react-native';
 import styles from './SuppliersList.styles';

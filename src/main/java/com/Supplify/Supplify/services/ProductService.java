@@ -10,11 +10,17 @@ import com.Supplify.Supplify.repositories.BusinessRepo;
 import com.Supplify.Supplify.repositories.ProductRepo;
 import com.Supplify.Supplify.repositories.SupplierRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +30,7 @@ public class ProductService {
     private final SupplierRepo supplierRepo;
     private final BusinessRepo businessRepo;
     private final BusinessProductRepo businessProductRepo;
+
 
     // Retrieve all products
     public List<Product> getAllProducts() {
@@ -35,8 +42,25 @@ public class ProductService {
         return productRepository.findById(productId);
     }
 
+    public String saveImage(MultipartFile file) throws IOException {
+
+        String uploadDir = "src/main/resources/static/uploads/";
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+
+        String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, filename);
+
+        Files.write(filePath, file.getBytes());
+
+        return "/uploads/" + filename;
+    }
+
     // Add a new product
-    public Product addProduct(CreateProductRequest request) {
+    public void addProduct(CreateProductRequest request, String imageUrl) {
 
         // Check if product already exists
         if (productRepository.existsById(request.getId())) {
@@ -71,13 +95,12 @@ public class ProductService {
                 business,
                 product,
                 request.getPrice(),
-                request.getStock()
+                request.getStock(),
+                imageUrl
         );
 
         businessProductRepo.saveAndFlush(businessProduct);
-        return product;
     }
-
 
 
     // Delete a product by ID

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,12 @@ import {
 import {useOrder} from '../../contexts/OrderContext';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 import {doGet} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals';
 import styles from './OrderDetails.styles';
-import { LoginContext } from '../../contexts/LoginContext';
-import { LoginContextType } from '../../contexts/UserContext';
+import {LoginContext} from '../../contexts/LoginContext';
+import {LoginContextType} from '../../contexts/UserContext';
 
 interface CreateOrderRequest {
   orderId: number;
@@ -51,7 +51,7 @@ const OrderDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const { userInfo } = useContext(LoginContext) as LoginContextType;
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
   const [userRole] = useState<'manager' | 'employee'>('manager');
 
   useEffect(() => {
@@ -65,16 +65,18 @@ const OrderDetailsScreen = () => {
         setLoading(true);
         setError(null);
 
-        const orderRequest: CreateOrderRequest = { orderId: selectedOrderId };
-        const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`);
+        const orderRequest: CreateOrderRequest = {orderId: selectedOrderId};
+        const response = await doGet(
+          `${globals.ORDER.getOrderInfo}?orderId=${orderRequest.orderId}`,
+        );
 
         console.log('API Response:', response);
 
         // Create a default order structure with the items from the response
         const formattedOrder: OrderDetails = {
           id: selectedOrderId,
-          user: { id: 1, name: "user"},
-          business: { id: 1, name: 'Default Business' },
+          user: {id: 1, name: 'user'},
+          business: {id: 1, name: 'Default Business'},
           items: Array.isArray(response) ? response : [],
           totalAmount: Array.isArray(response)
             ? response.reduce((sum, item) => sum + item.subtotal, 0)
@@ -115,8 +117,13 @@ const OrderDetailsScreen = () => {
       {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
+          <TouchableOpacity
+            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon
+              name={isSidebarVisible ? 'x' : 'menu'}
+              size={24}
+              color="#4A90E2"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>פרטי הזמנה</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -133,8 +140,7 @@ const OrderDetailsScreen = () => {
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity
               style={styles.retryButton}
-              onPress={() => navigation.goBack()}
-            >
+              onPress={() => navigation.goBack()}>
               <Text style={styles.retryButtonText}>חזור אחורה</Text>
             </TouchableOpacity>
           </View>
@@ -154,16 +160,12 @@ const OrderDetailsScreen = () => {
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>ספק:</Text>
-                <Text style={styles.value}>
-                  {orderDetails.business.name}
-                </Text>
+                <Text style={styles.value}>{orderDetails.business.name}</Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>מזמין:</Text>
-                <Text style={styles.value}>
-                  {orderDetails.user.name}
-                </Text>
+                <Text style={styles.value}>{orderDetails.user.name}</Text>
               </View>
             </View>
 
@@ -174,7 +176,9 @@ const OrderDetailsScreen = () => {
                   <View key={index} style={styles.itemRow}>
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.productName}</Text>
-                      <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
+                      <Text style={styles.itemQuantity}>
+                        כמות: {item.quantity}
+                      </Text>
                     </View>
                     <Text style={styles.itemPrice}>
                       ₪{item.subtotal.toFixed(2)}

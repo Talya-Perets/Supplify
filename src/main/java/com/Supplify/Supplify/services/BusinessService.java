@@ -1,6 +1,7 @@
 package com.Supplify.Supplify.services;
 
 import com.Supplify.Supplify.DTO.AgentDTO;
+import com.Supplify.Supplify.DTO.BusinessProductDTO;
 import com.Supplify.Supplify.DTO.SupplierDetailsResponse;
 import com.Supplify.Supplify.entities.Agent;
 import com.Supplify.Supplify.entities.Product;
@@ -31,6 +32,10 @@ public class BusinessService {
     private final AgentRepo agentRepo;
     private final ProductRepo productRepo;
     final BusinessProductRepo businessProductRepo;
+
+    public Business getBusinessById(int id) {
+        return businessRepo.findById(id).orElse(null);
+    }
 
     public Business createBusiness(String name, String email, String address, String phone) {
         logger.info("Creating new Business");
@@ -122,6 +127,20 @@ public class BusinessService {
 
         business.setAgents(updatedAgents);
         businessRepo.saveAndFlush(business);
+    }
+
+    public List<BusinessProductDTO> getBusinessProducts(int businessId) throws Exception {
+        Business business = getBusinessById(businessId);
+        if (business == null) {
+            throw new Exception("Business not found");
+        }
+
+        return businessProductRepo.findByBusinessId(businessId).stream().map(bp -> new BusinessProductDTO(
+                bp.getProduct(),
+                bp.getPrice(),
+                bp.getStock(),
+                bp.getImageUrl()
+        )).collect(Collectors.toList());
     }
 }
 

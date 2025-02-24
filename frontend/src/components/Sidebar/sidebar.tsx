@@ -1,18 +1,13 @@
 import React, {useContext} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../../App';
+import {RootStackParamList} from '../../../App';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {LoginContext} from '../contexts/LoginContext';
-import {LoginContextType} from '../contexts/UserContext';
+import {LoginContext} from '../../contexts/LoginContext';
+import {LoginContextType} from '../../contexts/UserContext';
+import styles from './sidebar.styles';
+
 type SidebarNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const menuItems = [
@@ -32,7 +27,7 @@ const managerItems = [
 ];
 
 const Sidebar: React.FC = () => {
-  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const {userInfo, logout} = useContext(LoginContext) as LoginContextType;
 
   const navigation = useNavigation<SidebarNavigationProp>();
 
@@ -55,7 +50,7 @@ const Sidebar: React.FC = () => {
         <Text style={styles.logo}>Supplify</Text>
       </View>
 
-      <ScrollView style={styles.menuItems}>
+      <ScrollView contentContainerStyle={styles.menuItems}>
         {menuItems.map(item => (
           <TouchableOpacity
             key={item.id}
@@ -90,61 +85,24 @@ const Sidebar: React.FC = () => {
               <Text style={styles.menuText}>{item.title}</Text>
             </TouchableOpacity>
           ))}
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => {
+            logout();
+            navigation.navigate('Login');
+            navigation.reset({index: 0, routes: [{name: 'Login'}]});
+          }}>
+          <FontAwesome
+            name="sign-out"
+            size={20}
+            color="#4A90E2"
+            style={styles.menuIcon}
+          />
+          <Text style={styles.menuText}>התנתק</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  sidebar: {
-    width: 240,
-    backgroundColor: 'white',
-    borderRightWidth: 1,
-    borderRightColor: '#E1E1E1',
-    height: '100%',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E1E1D1',
-    alignItems: 'center',
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-  },
-  menuItems: {
-    padding: 16,
-  },
-  menuItem: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    backgroundColor: 'transparent',
-  },
-  menuIcon: {
-    marginLeft: 16,
-  },
-  menuText: {
-    fontSize: 16,
-    color: '#2E3A59',
-    textAlign: 'right',
-    flex: 1,
-  },
-});
 
 export default Sidebar;

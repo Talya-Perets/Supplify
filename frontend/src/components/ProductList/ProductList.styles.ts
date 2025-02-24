@@ -3,7 +3,8 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    flexDirection: 'row-reverse',
+    backgroundColor: '#F6F7FC',
   },
   loadingContainer: {
     flex: 1,
@@ -29,52 +30,66 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E1E1',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#4A90E2',
+    marginRight: 16,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    padding: 20,
   },
   productList: {
     marginTop: 10,
   },
   productCard: {
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    overflow: 'hidden',
+    backgroundColor: 'white',
+      borderRadius: 8,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
   },
   cardContent: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     padding: 10,
   },
   imageContainer: {
     width: 60,
     height: 60,
     backgroundColor: '#f1f1f1',
-    marginRight: 10,
+    marginLeft: 10,
   },
   detailsSection: {
     flex: 1,
   },
   productInfo: {
     marginBottom: 10,
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
   },
   productName: {
     fontSize: 16,
     fontWeight: 'bold',
+    flexDirection: 'row-reverse',
   },
   actionsSection: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   quantityControls: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   quantityButton: {
@@ -108,6 +123,11 @@ const styles = StyleSheet.create({
       color: 'white',
       fontSize: 16,
     },
+    image: {
+      width: "100%",
+      height: "100%",
+      resizeMode: "cover", 
+  },
   
 });
 export default styles;

@@ -21,5 +21,7 @@ public interface BusinessProductRepo extends JpaRepository<BusinessProduct, Busi
 
     void deleteByBusinessIdAndProductIn(int business_id, List<Product> product);
 
+    List<BusinessProduct> findByBusinessId(int businessId);
+
 }
 

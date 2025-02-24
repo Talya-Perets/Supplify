@@ -1,7 +1,11 @@
 package com.Supplify.Supplify.controllers;
 
 import com.Supplify.Supplify.DTO.*;
+import com.Supplify.Supplify.entities.Business;
+import com.Supplify.Supplify.entities.Role;
 import com.Supplify.Supplify.entities.User;
+import com.Supplify.Supplify.services.BusinessService;
+import com.Supplify.Supplify.services.RoleService;
 import com.Supplify.Supplify.services.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -20,6 +24,8 @@ public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
+    private final BusinessService businessService;
+    private final RoleService roleService;
 
     @GetMapping("getUser")
     public ResponseEntity<?> getUser(@PathVariable int id) {
@@ -36,6 +42,36 @@ public class UserController {
         } catch (Exception e) {
             logger.error("Error fetching user with ID: {}", id, e);
             return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("createUser")
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) throws Exception {
+        logger.info("Creating new user request received");
+
+        Business business = businessService.getBusinessById(request.getBusinessId());
+        if (business == null) {
+            throw new Exception("Business not found");
+        }
+
+        Role role = roleService.getRoleByName(request.getRole());
+        if (role == null) {
+            throw new Exception("Role not found");
+        }
+
+        try {
+            userService.createUser(
+                    request.getFirstName(),
+                    request.getLastName(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    request.getPhone(),
+                    business, role);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error creating new user: {}", e.getMessage());
+            throw new Exception(e);
         }
     }
 

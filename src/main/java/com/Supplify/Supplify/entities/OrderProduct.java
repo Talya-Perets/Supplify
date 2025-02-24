@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
+@Table(name = "order_product")
 public class OrderProduct {
 
     @EmbeddedId
@@ -24,18 +26,12 @@ public class OrderProduct {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Prevent serialization issues
     private Product product;
 
-    @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference // Prevent circular reference
-    private Order order;
-
-
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @Column(name = "unit_price", nullable = false)
     private double unitPrice;
+
     @Embeddable
     public static class OrderProductId implements Serializable {
         private int orderId;

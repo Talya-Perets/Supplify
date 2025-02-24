@@ -11,6 +11,7 @@ const BUSINESS = "/business";
 const ORDER = "/orders"
 // Globals Object
 export const globals = {
+    PRODUCTION_URL,
 
     AUTH: {
         register: `${PRODUCTION_URL}${AUTH}/register`,
@@ -23,12 +24,14 @@ export const globals = {
     BUSINESS: {
         getBusinessSuppliers: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliers`,
         getBusinessSuppliersAndAgents: `${PRODUCTION_URL}${BUSINESS}/getBusinessSuppliersAndAgents`,
+        getBusinessProducts: `${PRODUCTION_URL}${BUSINESS}/getBusinessProducts`,
         deleteSupplierFromBusiness: `${PRODUCTION_URL}${BUSINESS}/deleteSupplierFromBusiness`,
         updateAgent: `${PRODUCTION_URL}${BUSINESS}/updateAgent`,
     },
 
     USER: {
         resetPassword: `${PRODUCTION_URL}${USER}/resetPassword`,
+        createUser: `${PRODUCTION_URL}${USER}/createUser`,
     },
 
     SUPPLIERS:{

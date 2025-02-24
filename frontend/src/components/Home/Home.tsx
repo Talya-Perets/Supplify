@@ -7,7 +7,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../App';
 import {StackNavigationProp} from '@react-navigation/stack';

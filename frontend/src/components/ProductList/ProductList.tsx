@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,29 +7,25 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
-import {doGet, doPost} from '../../util/HTTPRequests';
+import Sidebar from '../Sidebar/sidebar';
+import {doGet} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals';
 import {useCart} from '../../contexts/CartContext';
 import styles from './ProductList.styles';
-
-interface Product {
-  id: string;
-  supplier: {
-    supplierId: number;
-    companyName: string;
-  };
-  productName: string;
-  description: string;
-  stock: number;
-}
+import {BusinessProduct} from '../../types/models';
+import {LoginContext} from '../../contexts/LoginContext';
+import {LoginContextType} from '../../contexts/UserContext';
 
 const ProductList = () => {
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const {addToCart} = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [businessProducts, setBusinessProducts] = useState<BusinessProduct[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [quantities, setQuantities] = useState<{[key: string]: number}>({});
@@ -41,15 +37,17 @@ const ProductList = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await doGet(globals.PRODUCT.displayProducts);
+      const response = await doGet(
+        `${globals.BUSINESS.getBusinessProducts}/${userInfo.businessId}`,
+      );
 
       if (response.status === 200) {
-        setProducts(response.data);
+        setBusinessProducts(response.data);
 
         // Initialize product quantities
         const initialQuantities = response.data.reduce(
-          (acc: {[key: string]: number}, product: Product) => {
-            acc[product.id] = 0;
+          (acc: {[key: string]: number}, businessProduct: BusinessProduct) => {
+            acc[businessProduct.product.id] = 0;
             return acc;
           },
           {},
@@ -73,19 +71,13 @@ const ProductList = () => {
     }));
   };
 
-  const handleAddToCart = (product: Product) => {
-    const quantity = quantities[product.id] || 0;
+  const handleAddToCart = (businessProduct: BusinessProduct) => {
+    const quantity = quantities[businessProduct.product.id] || 0;
     if (quantity > 0) {
       addToCart({
-        supplier: {
-          supplierId: product.supplier.supplierId,
-          companyName: product.supplier.companyName,
-        },
-        id: product.id,
-        productId: product.id, // Add this line - map the product.id to productId
-        name: product.productName,
-        stock: product.stock,
-      }, quantity);
+        businessProduct,
+        quantity,
+      });
 
       setSuccessMessage('מוצר נוסף לסל בהצלחה');
 
@@ -131,51 +123,66 @@ const ProductList = () => {
             <Text style={styles.successMessageText}>{successMessage}</Text>
           </View>
         )}
-        {products.length === 0 ? (
+        {businessProducts.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>אין מוצרים להצגה</Text>
           </View>
         ) : (
-          <ScrollView style={styles.productList}>
-            {products.map(product => (
-              <View key={product.id} style={styles.productCard}>
-                <View style={styles.cardContent}>
-                  <View style={styles.imageContainer} />
-
-                  <View style={styles.detailsSection}>
-                    <View style={styles.productInfo}>
-                      <Text style={styles.productName}>
-                        {product.productName}
-                      </Text>
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.productList}>
+              {businessProducts.map(businessProduct => (
+                <View
+                  key={businessProduct.product.id}
+                  style={styles.productCard}>
+                  <View style={styles.cardContent}>
+                    <View style={styles.imageContainer}>
+                      <Image
+                        source={{
+                          uri: `${globals.PRODUCTION_URL}${businessProduct.imageUrl}`,
+                        }}
+                        style={styles.image}
+                      />
                     </View>
 
-                    <View style={styles.actionsSection}>
-                      <View style={styles.quantityControls}>
-                        <TouchableOpacity
-                          style={styles.quantityButton}
-                          onPress={() => updateQuantity(product.id, false)}>
-                          <Icon name="minus" size={16} color="#4A90E2" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>
-                          {quantities[product.id] || 0}
+                    <View style={styles.detailsSection}>
+                      <View style={styles.productInfo}>
+                        <Text style={styles.productName}>
+                          {businessProduct.product.productName}
                         </Text>
+                      </View>
+
+                      <View style={styles.actionsSection}>
+                        <View style={styles.quantityControls}>
+                          <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() =>
+                              updateQuantity(businessProduct.product.id, false)
+                            }>
+                            <Icon name="minus" size={16} color="#4A90E2" />
+                          </TouchableOpacity>
+                          <Text style={styles.quantityText}>
+                            {quantities[businessProduct.product.id] || 0}
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() =>
+                              updateQuantity(businessProduct.product.id, true)
+                            }>
+                            <Icon name="plus" size={16} color="#4A90E2" />
+                          </TouchableOpacity>
+                        </View>
                         <TouchableOpacity
-                          style={styles.quantityButton}
-                          onPress={() => updateQuantity(product.id, true)}>
-                          <Icon name="plus" size={16} color="#4A90E2" />
+                          style={styles.addToCartButton}
+                          onPress={() => handleAddToCart(businessProduct)}>
+                          <Icon name="shopping-cart" size={16} color="white" />
+                          <Text style={styles.addToCartText}>הוסף לסל</Text>
                         </TouchableOpacity>
                       </View>
-                      <TouchableOpacity
-                        style={styles.addToCartButton}
-                        onPress={() => handleAddToCart(product)}>
-                        <Icon name="shopping-cart" size={16} color="white" />
-                        <Text style={styles.addToCartText}>הוסף לסל</Text>
-                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </ScrollView>
         )}
       </View>

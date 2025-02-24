@@ -32,6 +32,9 @@ public class BusinessProduct {
     @Column(name = "stock", nullable = false)
     private int stock;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Embeddable
     @NoArgsConstructor
     @AllArgsConstructor

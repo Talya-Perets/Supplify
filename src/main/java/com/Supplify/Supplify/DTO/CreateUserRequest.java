@@ -14,6 +14,6 @@ public class CreateUserRequest
     private String email;
     private String password;
     private String phone;
-    private Business business;
-    private Role role;
+    private int businessId;
+    private String role;
 }

@@ -11,15 +11,16 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar.tsx';
 import {RootStackParamList, API_BASE_URL} from '../../../App';
-import {doGet, doPost} from '../../util/HTTPRequests.ts';
+import {doGet, doPostAddProduct} from '../../util/HTTPRequests.ts';
 import {globals} from '../../util/Globals.ts';
 import styles from './AddProduct.styles';
 import {LoginContext} from '../../contexts/LoginContext.tsx';
 import {LoginContextType} from '../../contexts/UserContext.tsx';
 import {Supplier} from '../../types/models.ts';
 import {Dropdown} from 'react-native-element-dropdown';
+import ImagePickerComponent from '../../util/ImagePickerComponent.tsx';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -34,6 +35,8 @@ const AddProductScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [value, setValue] = useState(-1);
+  const [productImageUri, setProductImageUri] = useState<string | null>(null);
+  const [productImageData, setProductImageData] = useState<any>(null);
 
   const [productData, setProductData] = useState({
     id: '',
@@ -42,6 +45,11 @@ const AddProductScreen = () => {
     stock: '',
     price: '',
   });
+
+  const handleImageSelected = (imageUri: string, imageData: any) => {
+    setProductImageUri(imageUri);
+    setProductImageData(imageData);
+  };
 
   const handleAddProduct = async () => {
     if (
@@ -54,7 +62,8 @@ const AddProductScreen = () => {
       return;
     }
 
-    const payload = {
+    // Convert the payload object to JSON string
+    const payload = JSON.stringify({
       id: productData.id,
       productName: productData.productName,
       productDescription: productData.productDescription || '',
@@ -62,13 +71,27 @@ const AddProductScreen = () => {
       stock: parseInt(productData.stock, 10) || 0,
       price: parseFloat(productData.price),
       businessId: userInfo.businessId,
-    };
+    });
 
     console.log('Payload:', payload); // Log the payload
 
+    const formData = new FormData();
+    formData.append('request', payload); // Send JSON data as a string
+
+    if (productImageUri && productImageData) {
+      formData.append('file', {
+        uri: productImageUri,
+        name: productImageData.fileName || 'product.jpg',
+        type: productImageData.type || 'image/jpeg',
+      });
+    }
+
     try {
-      const response = await doPost(globals.PRODUCT.createProduct, payload);
-      // Handle success response
+      const response = await doPostAddProduct(
+        globals.PRODUCT.createProduct,
+        formData,
+      );
+      Alert.alert('Success', 'Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
       Alert.alert('Error', 'Failed to add product. Please try again.');
@@ -178,6 +201,7 @@ const AddProductScreen = () => {
                 keyboardType="numeric"
               />
             )}
+            <ImagePickerComponent onImageSelected={handleImageSelected} />
           </View>
           <TouchableOpacity style={styles.button} onPress={handleAddProduct}>
             <Text style={styles.buttonText}>הוסף מוצר</Text>

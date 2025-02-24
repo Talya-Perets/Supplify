@@ -16,10 +16,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E1E1',
   },
   footer: {
     backgroundColor: 'white',
@@ -45,15 +45,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4A90E2',
+    marginRight: 16,
   },
   content: {
     flex: 1,
   },
   emptyCart: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', // Centers vertically
+    alignItems: 'center', // Centers horizontally
     padding: 20,
+  },
+  
+  emptyCartText: {
+    fontSize: 24, // Bigger text
+    fontWeight: 'bold', // Bold text
+    color: '#333', // Darker color
+    textAlign: 'center', // Ensure it's centered properly
   },
   supplierSection: {
     backgroundColor: 'white',

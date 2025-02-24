@@ -1,13 +1,16 @@
 package com.Supplify.Supplify.controllers;
+
 import com.Supplify.Supplify.DTO.CreateProductRequest;
 import com.Supplify.Supplify.services.ProductService;
 import com.Supplify.Supplify.entities.Product;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,12 +20,13 @@ import java.util.List;
 public class ProductController {
     private final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
+    private final ObjectMapper objectMapper;
 
     // Get all products
     @GetMapping("displayProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
         logger.info("Fetching all products");
-         List<Product> products = productService.getAllProducts();
+        List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
@@ -36,14 +40,18 @@ public class ProductController {
 
     // Add a new product
     @PostMapping("createProduct")
-    public ResponseEntity<?> CreateProduct(@RequestBody CreateProductRequest request) {
+    public ResponseEntity<?> CreateProduct(@RequestParam("request") String requestJson, @RequestParam("file") MultipartFile file) {
         try {
-            productService.addProduct(request);
-            logger.info("New Product has added");
-            return new ResponseEntity<>(HttpStatus.OK);
+            logger.info("Creating a new product");
+            CreateProductRequest request = objectMapper.readValue(requestJson, CreateProductRequest.class);
+
+            String imageUrl = productService.saveImage(file);
+
+            productService.addProduct(request, imageUrl);
+
+            return ResponseEntity.ok("Product created successfully!");
         } catch (Exception e) {
-            logger.error("Error adding product: {}", e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 

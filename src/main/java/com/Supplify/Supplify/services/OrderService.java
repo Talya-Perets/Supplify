@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.services;
+
 import com.Supplify.Supplify.DTO.CreateOrderRequest;
 import com.Supplify.Supplify.DTO.OrderProductRequest;
 import com.Supplify.Supplify.entities.*;
@@ -8,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
 import com.Supplify.Supplify.DTO.OrderProductDetails;
 
 @RequiredArgsConstructor
@@ -72,13 +75,12 @@ public class OrderService {
             double itemTotal = unitPrice * item.getQuantity();
 
             // Accumulate the total order amount
-                totalAmount.updateAndGet(v -> v + itemTotal);
+            totalAmount.updateAndGet(v -> v + itemTotal);
 
 
             // Create the OrderProduct entity
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setId(new OrderProduct.OrderProductId(newOrder.getId(), item.getProductId())); // Set composite key
-            orderProduct.setOrder(newOrder);
             orderProduct.setProduct(product);
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);

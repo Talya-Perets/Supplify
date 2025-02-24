@@ -20,7 +20,7 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
         )\s
         FROM OrderProduct op
         JOIN op.product p
-        WHERE op.order.id = :orderId
+        WHERE op.id.orderId = :orderId
    \s""")
     List<OrderProductDetails> findOrderProductDetailsByOrderId(@Param("orderId") int orderId);
 }

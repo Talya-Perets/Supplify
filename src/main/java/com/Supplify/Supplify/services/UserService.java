@@ -5,10 +5,11 @@ import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.entities.Role;
 import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.repositories.UserRepo;
+import com.Supplify.Supplify.utils.EmailValidator;
+import com.Supplify.Supplify.utils.PhoneValidator;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -16,11 +17,28 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepo userRepo;
-    private final PasswordEncoder passwordEncoder;
 
     public User createUser(String firstName, String lastName, String username, String password, String phone, Business business, Role role) {
 
         logger.info("Creating new user");
+
+        if (!EmailValidator.isValidEmail(username)) {
+            logger.error("Invalid email format: {}", username);
+            throw new IllegalArgumentException("Email address is not valid.");
+        }
+
+        if (isEmailAlreadyUsed(username)) {
+            logger.error("Email already in use: {}", username);
+            throw new IllegalArgumentException("Email is already registered.");
+        }
+
+        if (phone != null && !phone.isEmpty()) {
+            if (!PhoneValidator.isValidLocalIsraeliMobile(phone)) {
+                logger.error("Invalid phone number format: {}", phone);
+                throw new IllegalArgumentException("Phone number is not valid.");
+            }
+        }
+
         return userRepo.saveAndFlush(new User(
                 firstName,
                 lastName,

@@ -1,7 +1,10 @@
 package com.Supplify.Supplify.controllers;
 
+import com.Supplify.Supplify.DTO.BusinessProductDTO;
+import com.Supplify.Supplify.DTO.CreateUserRequest;
 import com.Supplify.Supplify.DTO.SupplierDetailsResponse;
 import com.Supplify.Supplify.entities.Agent;
+import com.Supplify.Supplify.entities.Product;
 import com.Supplify.Supplify.entities.Supplier;
 import com.Supplify.Supplify.services.BusinessService;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +51,10 @@ public class BusinessController {
         businessService.updateAgent(businessId, updatedAgent);
         logger.info("Updating agent request finished successfully for business with id: {}", businessId);
         return ResponseEntity.ok("Agent updated successfully");
+    }
+
+    @GetMapping("getBusinessProducts/{businessId}")
+    public ResponseEntity<List<BusinessProductDTO>> getBusinessProducts(@PathVariable int businessId) throws Exception {
+        return new ResponseEntity<>(businessService.getBusinessProducts(businessId), HttpStatus.OK);
     }
 }

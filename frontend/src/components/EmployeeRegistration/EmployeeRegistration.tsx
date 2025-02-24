@@ -1,15 +1,20 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import {Picker} from '@react-native-picker/picker';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
+import {styles} from './EmployeeRegistration.styles';
+import {Dropdown} from 'react-native-element-dropdown';
+import {doPost} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals';
+import {LoginContext} from '../../contexts/LoginContext';
+import {LoginContextType} from '../../contexts/UserContext';
 
 const EmployeeRegistrationScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -18,7 +23,62 @@ const EmployeeRegistrationScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('employee');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('Employee');
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
+
+  const validateForm = () => {
+    if (!firstName.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם פרטי');
+      return false;
+    }
+    if (!lastName.trim()) {
+      Alert.alert('שגיאה', 'נא להזין שם משפחה');
+      return false;
+    }
+    if (!email.trim()) {
+      Alert.alert('שגיאה', 'נא להזין כתובת מייל');
+      return false;
+    }
+    if (!phone.trim()) {
+      Alert.alert('שגיאה', 'נא להזין מספר טלפון');
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert('שגיאה', 'סיסמה חייבת להכיל לפחות 6 תווים');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('שגיאה', 'סיסמאות לא תואמות');
+      return false;
+    }
+    return true;
+  };
+
+  const createUser = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const response = await doPost(globals.USER.createUser, {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password,
+        phone: phone,
+        businessId: userInfo.businessId,
+        role: role,
+      });
+      if (response.status === 200) {
+        Alert.alert('Success', 'עובד חדש נוסף בהצלחה');
+      } else {
+        Alert.alert('שגיאה', 'אירעה שגיאה בתהליך ההרשמה');
+      }
+    } catch (error: any) {
+      Alert.alert('שגיאה', error.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,6 +125,15 @@ const EmployeeRegistrationScreen = () => {
 
           <TextInput
             style={styles.input}
+            placeholder="פלאפון"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="numeric"
+            placeholderTextColor="#A0A0A0"
+            maxLength={10}
+          />
+          <TextInput
+            style={styles.input}
             placeholder="סיסמא"
             value={password}
             onChangeText={setPassword}
@@ -81,103 +150,33 @@ const EmployeeRegistrationScreen = () => {
             placeholderTextColor="#A0A0A0"
           />
 
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={role}
-              onValueChange={itemValue => setRole(itemValue)}
-              style={styles.picker}>
-              <Picker.Item label="עובד" value="employee" />
-              <Picker.Item label="מנהל" value="manager" />
-            </Picker>
-          </View>
+          <Dropdown
+            data={[
+              {label: 'עובד', value: 'Employee'},
+              {label: 'מנהל', value: 'Manager'},
+            ]}
+            labelField="label"
+            valueField="value"
+            placeholder="עובד"
+            value={role}
+            onChange={item => {
+              setRole(item.value);
+            }}
+            style={styles.dropdownContainer}
+            placeholderStyle={styles.placeholder}
+            selectedTextStyle={styles.selectedText}
+            itemTextStyle={{textAlign: 'right', writingDirection: 'rtl'}}
+          />
 
           <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>רשום עובד</Text>
+            <Text style={styles.buttonText} onPress={createUser}>
+              רשום עובד
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row-reverse',
-    backgroundColor: '#F6F7FC',
-  },
-  mainContent: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E1E1E1',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    marginRight: 16,
-  },
-  formContainer: {
-    padding: 24,
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  halfInput: {
-    width: '48%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#D1D1D1',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    textAlign: 'right',
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#D1D1D1',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    textAlign: 'right',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#D1D1D1',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#4A90E2',
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default EmployeeRegistrationScreen;

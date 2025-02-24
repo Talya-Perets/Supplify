@@ -16,7 +16,7 @@ import {RootStackParamList, API_BASE_URL} from '../../../App';
 import styles from './SearchProduct.styles';
 import {doPost} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals';
-import Sidebar from '../sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 
 type SearchProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,

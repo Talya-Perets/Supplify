@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 import {RootStackParamList} from '../../../App';
 import styles from './OrderList.styles';
 import {doGet, doPost} from '../../util/HTTPRequests';
@@ -89,9 +89,10 @@ const OrderListScreen = ({
     navigation.navigate('OrderDetails');
   };
 
-  const renderOrderItem = ({ item }: { item: Order }) => (
-
-    <TouchableOpacity style={styles.orderItem} onPress={() => handleOrderPress(item.id)}>
+  const renderOrderItem = ({item}: {item: Order}) => (
+    <TouchableOpacity
+      style={styles.orderItem}
+      onPress={() => handleOrderPress(item.id)}>
       <View style={styles.orderInfo}>
         <Text style={styles.orderId}>הזמנה #{item.id}</Text>
         <Text style={styles.orderDate}>
