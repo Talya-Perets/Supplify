@@ -14,16 +14,18 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E1E1',
+    marginBottom: 12, // Adds space between title and first card
+},
+headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginRight: 16,
+},
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -51,11 +53,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2E3A59',
-  },
   scrollView: {
     padding: 16,
   },
@@ -73,12 +70,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2E3A59',
+    color: '#4A90E2',
     marginBottom: 16,
     textAlign: 'right',
   },
   orderItem: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#F8F9FF',

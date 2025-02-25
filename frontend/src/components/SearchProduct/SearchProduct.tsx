@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   FlatList,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -29,6 +30,7 @@ const SearchProductScreen = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const {addToCart} = useCart();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // 🔹 Fetch all products using the hook
   const {businessProducts, isLoading} = useBusinessProducts();
@@ -50,6 +52,15 @@ const SearchProductScreen = () => {
         businessProduct,
         quantity,
       });
+
+      setSuccessMessage('מוצר נוסף לסל בהצלחה');
+
+      // Hide the message after 2 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 2000);
+    } else {
+      Alert.alert('שגיאה', 'נא לבחור כמות לפני הוספה לסל');
     }
   };
 
@@ -75,77 +86,77 @@ const SearchProductScreen = () => {
   useEffect(() => {
     setQuantities(prevQuantities => {
       const updatedQuantities: {[key: string]: number} = {};
-      let hasChanges = false;
 
       filteredProducts.forEach(product => {
-        if (prevQuantities[product.product.id]) {
-          updatedQuantities[product.product.id] =
-            prevQuantities[product.product.id];
-        } else {
-          updatedQuantities[product.product.id] = 0; // Reset to zero if not in prevQuantities
-          hasChanges = true;
-        }
+        updatedQuantities[product.product.id] =
+          prevQuantities[product.product.id] || 0;
       });
 
-      // Remove old quantities if products are no longer visible
-      if (
-        Object.keys(prevQuantities).length !==
-        Object.keys(updatedQuantities).length
-      ) {
-        hasChanges = true;
-      }
-
-      return hasChanges ? updatedQuantities : prevQuantities;
+      // Only update state if there are changes
+      return JSON.stringify(prevQuantities) !==
+        JSON.stringify(updatedQuantities)
+        ? updatedQuantities
+        : prevQuantities;
     });
   }, [filteredProducts]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar />}
-      <View style={styles.mainContent}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon
-              name={isSidebarVisible ? 'x' : 'menu'}
-              size={24}
-              color="#4A90E2"
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Search Product</Text>
-        </View>
-
-        {/* 🔹 Search Input */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter product name"
-            value={searchText}
-            onChangeText={setSearchText} // 🔹 Updates searchText state
-          />
-          <TouchableOpacity style={styles.searchButton}>
-            <Icon name="search" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* 🔹 Show Loading Indicator */}
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4A90E2" />
-            <Text>Loading products...</Text>
+      <View style={styles.content}>
+        {isSidebarVisible && <Sidebar />}
+        <View style={styles.mainContent}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+              <Icon
+                name={isSidebarVisible ? 'x' : 'menu'}
+                size={24}
+                color="#4A90E2"
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>חיפוש מוצר</Text>
           </View>
-        ) : (
-          <FlatList
-            data={filteredProducts}
-            renderItem={renderProductCard}
-            keyExtractor={item => item.product.id.toString()}
-            ListEmptyComponent={
-              searchText ? (
-                <Text style={styles.noResultsText}>No matching products.</Text>
-              ) : null
-            }
-          />
-        )}
+
+          {/* 🔹 Search Input */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="הכנס שם מוצר"
+              value={searchText}
+              onChangeText={setSearchText} // 🔹 Updates searchText state
+            />
+            <TouchableOpacity style={styles.searchButton}>
+              <Icon name="search" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {/* Success message */}
+          {successMessage && (
+            <View style={styles.successMessage}>
+              <Text style={styles.successMessageText}>{successMessage}</Text>
+            </View>
+          )}
+
+          {/* 🔹 Show Loading Indicator */}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4A90E2" />
+              <Text>טוען מוצרים...</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredProducts}
+              renderItem={renderProductCard}
+              keyExtractor={item => item.product.id.toString()}
+              ListEmptyComponent={
+                searchText ? (
+                  <Text style={styles.noResultsText}>
+                    לא נמצאו מוצרים תואמים
+                  </Text>
+                ) : null
+              }
+            />
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );

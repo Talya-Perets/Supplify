@@ -3,46 +3,53 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F6F7FC',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row-reverse', // שינוי לימין לשמאל
   },
   mainContent: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 20,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  headerTitle: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E1E1',
+    marginBottom: 12, // Adds space between title and first card
+},
+headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4A90E2',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingLeft: 10,
-    fontSize: 16,
-  },
-  searchButton: {
-    marginLeft: 10,
-    padding: 8,
-    backgroundColor: '#4A90E2',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+    marginRight: 16,
+},
+searchContainer: {
+  flexDirection: 'row-reverse',
+  alignItems: 'center',
+  marginBottom: 20,
+},
+input: {
+  flex: 0.85, // Reduce stretch
+  height: 40,
+  borderColor: '#ddd',
+  borderWidth: 1,
+  borderRadius: 8,
+  paddingHorizontal: 10, // Balanced padding
+  fontSize: 16,
+  marginRight: 10,
+},
+searchButton: {
+  marginRight: 12, // More space between input and button
+  paddingVertical: 8,
+  paddingHorizontal: 10, // More balanced padding
+  backgroundColor: '#4A90E2',
+  borderRadius: 8,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -76,6 +83,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: '#999',
+  },
+  successMessage: {
+    backgroundColor: '#D4EDDA',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 8,
+  },
+  successMessageText: {
+    color: '#155724',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 

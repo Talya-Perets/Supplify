@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.services;
+
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -12,14 +13,14 @@ public class WhatsAppService {
     // Twilio credentials
     public static final String ACCOUNT_SID = "";
     public static final String AUTH_TOKEN = "";
-    public static final String TWILIO_PHONE_NUMBER = ""; // Your Twilio WhatsApp number
+    public static final String TWILIO_PHONE_NUMBER = "";
 
     static {
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
     }
 
     public void sendWhatsAppMessage(String phoneNumber, String message) {
-        String recipientPhone = "";
+        String recipientPhone = "+972547865605";
 
         try {
             // Send message via Twilio WhatsApp API

@@ -140,7 +140,7 @@ public class OrderService {
             for (OrderProduct item : order.getOrderProducts()) {
                 Product product = productRepo.findById(item.getProduct().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
                 AgentSMS.append(product.getProductName());
-                AgentSMS.append(": ")
+                AgentSMS.append("כמות: ")
                         .append(item.getQuantity())
                         .append("\n");
             }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -19,9 +19,8 @@ import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
 import OrderListScreen from './src/components/OrderList/OrderList';
 import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
-import { OrderProvider } from './src/contexts/OrderContext';
-import { Alert } from 'react-native';
-import Toast from 'react-native-toast-message';
+import {OrderProvider} from './src/contexts/OrderContext';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
@@ -38,7 +37,7 @@ export type RootStackParamList = {
   ShoppingCart: undefined;
   EmployeeRegistration: undefined;
   SearchProduct: undefined;
-  OrderDetails: undefined; 
+  OrderDetails: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -54,50 +53,78 @@ const requestUserPermission = async () => {
   }
 };
 
+const setupNotificationChannel = async () => {
+  await notifee.createChannel({
+    id: 'default',
+    name: 'Default Channel',
+    importance: AndroidImportance.HIGH,
+  });
+};
+
 const App = () => {
   useEffect(() => {
-    requestUserPermission();
-
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Toast.show({
-        type: 'info', // You can use 'success', 'error', 'info', etc.
-        text1: remoteMessage.notification?.title || 'New Notification',
-        text2: remoteMessage.notification?.body || 'You have a new notification',
+      console.log('Foreground message received:', remoteMessage);
+
+      // Display a push notification even when the app is open
+      await notifee.requestPermission(); // Ensure permission is granted
+
+      await notifee.displayNotification({
+        title: remoteMessage.notification?.title || 'New Notification',
+        body: remoteMessage.notification?.body || 'You have a new message',
+        android: {
+          channelId: 'default',
+          importance: AndroidImportance.HIGH,
+        },
       });
     });
 
+    return unsubscribe; // Cleanup on unmount
+  }, []);
 
-    return unsubscribe; 
-  }, [])
-
-  return ( 
+  return (
     <LoginProvider>
       <CartProvider>
         <OrderProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Login"
-            screenOptions={{
-              headerShown: false,
-            }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-            <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
-            <Stack.Screen name="AddProduct" component={AddProductScreen} />
-            <Stack.Screen name="ProductList" component={ProductListScreen} />
-            <Stack.Screen name="OrderList" component={OrderListScreen} />
-            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
-            <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
-            <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
-            <Stack.Screen
-              name="EmployeeRegistration"
-              component={EmployeeRegistrationScreen}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{
+                headerShown: false,
+              }}>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen
+                name="ForgotPassword"
+                component={ForgotPasswordScreen}
+              />
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
+              <Stack.Screen
+                name="SuppliersList"
+                component={SuppliersListScreen}
+              />
+              <Stack.Screen name="AddProduct" component={AddProductScreen} />
+              <Stack.Screen name="ProductList" component={ProductListScreen} />
+              <Stack.Screen name="OrderList" component={OrderListScreen} />
+              <Stack.Screen
+                name="OrderDetails"
+                component={OrderDetailsScreen}
+              />
+              <Stack.Screen
+                name="SearchProduct"
+                component={SearchProductScreen}
+              />
+              <Stack.Screen
+                name="ShoppingCart"
+                component={ShoppingCartScreen}
+              />
+              <Stack.Screen
+                name="EmployeeRegistration"
+                component={EmployeeRegistrationScreen}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
         </OrderProvider>
       </CartProvider>
     </LoginProvider>
