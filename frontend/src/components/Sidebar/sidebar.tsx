@@ -22,7 +22,7 @@ const menuItems = [
 ];
 
 const managerItems = [
-  {id: 'ManagerApproval', title: 'מסך ניהול', icon: 'cog'},
+  {id: 'Managerscreen', title: 'מסך ניהול', icon: 'cog'},
   {id: 'EmployeeRegistration', title: 'הרשמת עובד', icon: 'user-plus'},
 ];
 
@@ -39,9 +39,9 @@ const Sidebar: React.FC = () => {
       navigation.navigate(route);
     } else {
       console.warn(`Screen ${route} is not yet implemented`);
-
       console.warn(`Route ${route} is not defined in the navigator`);
     }
+   
   };
 
   return (

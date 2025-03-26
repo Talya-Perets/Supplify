@@ -1,6 +1,6 @@
-import React, {useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import LoginScreen from './src/components/login/login';
 import RegisterScreen from './src/components/registration/registration';
@@ -13,15 +13,16 @@ import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
 import messaging from '@react-native-firebase/messaging';
 import ConfirmOrderScreen from './src/components/ConfirmOrder/ConfirmOrder';
-import {LoginProvider} from './src/contexts/LoginContext';
-import {CartProvider} from './src/contexts/CartContext';
+import { LoginProvider } from './src/contexts/LoginContext';
+import { CartProvider } from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
 import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword';
 import OrderListScreen from './src/components/OrderList/OrderList';
 import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
-import {OrderProvider} from './src/contexts/OrderContext';
+import { OrderProvider } from './src/contexts/OrderContext';
+import Managerscreen from './src/components/ManagerScreen/Managerscreen';
 
-import notifee, {AndroidImportance} from '@notifee/react-native';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
 
@@ -49,11 +50,13 @@ export type RootStackParamList = {
   ShoppingCart: undefined;
   EmployeeRegistration: undefined;
   SearchProduct: undefined;
+  Managerscreen: undefined; 
   OrderDetails: { orderId?: number };
   ConfirmOrder: { 
-    orderDetails: OrderProductDetails[],
-    orderId: number
-  };};
+    orderDetails: OrderProductDetails[];
+    orderId: number;
+  };
+};
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -108,42 +111,24 @@ const App = () => {
               initialRouteName="Login"
               screenOptions={{
                 headerShown: false,
-              }}>
+              }}
+            >
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="Register" component={RegisterScreen} />
-              <Stack.Screen
-                name="ForgotPassword"
-                component={ForgotPasswordScreen}
-              />
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="AddSupplier" component={AddSupplierScreen} />
-              <Stack.Screen
-                name="SuppliersList"
-                component={SuppliersListScreen}
-              />
+              <Stack.Screen name="SuppliersList" component={SuppliersListScreen} />
               <Stack.Screen name="AddProduct" component={AddProductScreen} />
               <Stack.Screen name="ProductList" component={ProductListScreen} />
               <Stack.Screen name="OrderList" component={OrderListScreen} />
-              <Stack.Screen
-                name="OrderDetails"
-                component={OrderDetailsScreen}
-              />
-              <Stack.Screen
-                name="SearchProduct"
-                component={SearchProductScreen}
-              />
-              <Stack.Screen
-                name="ShoppingCart"
-                component={ShoppingCartScreen}
-              />
-              <Stack.Screen
-                name="EmployeeRegistration"
-                component={EmployeeRegistrationScreen}
-              />
-              <Stack.Screen
-                name="ConfirmOrder"
-                component={ConfirmOrderScreen} 
-              />
+              <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+              <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
+              <Stack.Screen name="ShoppingCart" component={ShoppingCartScreen} />
+              <Stack.Screen name="EmployeeRegistration" component={EmployeeRegistrationScreen} />
+              <Stack.Screen name="ConfirmOrder" component={ConfirmOrderScreen} />
+              <Stack.Screen name="Managerscreen" component={Managerscreen} />
+
             </Stack.Navigator>
           </NavigationContainer>
         </OrderProvider>

@@ -54,11 +54,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#777',
   },
-  itemBarcode: {
-    fontSize: 14,
-    color: '#333',
-  },
-  
   orderStatus: {
     fontSize: 14,
     color: '#4A90E2',
@@ -84,6 +79,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#777',
   },
+  
   // New styles for loading and error state
   loadingIndicator: {
     flex: 1,
@@ -98,6 +94,28 @@ const styles = StyleSheet.create({
   errorStateText: {
     fontSize: 16,
     color: '#FF0000', // Red color for error messages
+  },
+
+  // New styles for category headers
+  categoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    marginBottom: 5,
+    backgroundColor: '#f1f1f1',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+  },
+  categoryIcon: {
+    fontSize: 18,
+    color: '#4A90E2',
   },
 });
 
