@@ -94,6 +94,11 @@ const styles = StyleSheet.create({
     color: '#111827',
     fontWeight: '500',
   },
+  itemBarcode: {
+    fontSize: 14,
+    color: '#333',
+  },
+  
   sendOrderButton: {
     backgroundColor: '#4A90E2',  
     paddingVertical: 12,          

@@ -13,9 +13,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar.tsx';
 import {RootStackParamList, API_BASE_URL} from '../../../App';
-import {doGet, doPostAddProduct} from '../../util/HTTPRequests.ts';
+import {doGet, doPostAddProduct} from '../../util/HTTPRequests';
 import {globals} from '../../util/Globals.ts';
-import styles from './AddProduct.styles';
+import styles from './AddProduct.styls';
 import {LoginContext} from '../../contexts/LoginContext.tsx';
 import {LoginContextType} from '../../contexts/UserContext.tsx';
 import {Supplier} from '../../types/models.ts';
@@ -110,6 +110,8 @@ const AddProductScreen = () => {
         );
         if (response.data) {
           setSuppliers(response.data);
+          console.log('Suppliers:', response.data); 
+          
         } else {
           throw new Error('No data received from API');
         }

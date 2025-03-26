@@ -40,20 +40,24 @@ public class ProductController {
 
     // Add a new product
     @PostMapping("createProduct")
-    public ResponseEntity<?> CreateProduct(@RequestParam("request") String requestJson, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> CreateProduct(@RequestParam("request") String requestJson, @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             logger.info("Creating a new product");
             CreateProductRequest request = objectMapper.readValue(requestJson, CreateProductRequest.class);
 
-            String imageUrl = productService.saveImage(file);
+            String imageUrl = null;
+            if (file != null) {
+                imageUrl = productService.saveImage(file); // Save the image if it exists
+            }
 
-            productService.addProduct(request, imageUrl);
+            productService.addProduct(request, imageUrl); // Add product, with or without image URL
 
             return ResponseEntity.ok("Product created successfully!");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
 
     /*
     // Update a product

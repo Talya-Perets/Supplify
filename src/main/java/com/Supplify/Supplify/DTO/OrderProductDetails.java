@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 
 public class OrderProductDetails {
+    private String productId;
     private String productName;
     private int quantity;
     private double unitPrice;
@@ -12,4 +13,6 @@ public class OrderProductDetails {
     private String status;
     private String userName;
     private String supplierName;
+
 }
+

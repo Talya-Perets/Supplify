@@ -9,6 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.Supplify.Supplify.repositories.OrderProductRepo;
+import com.Supplify.Supplify.repositories.OrderRepo;
+import com.Supplify.Supplify.DTO.OrderProductUpdateDTO;
+import com.Supplify.Supplify.DTO.OrderConfirmationDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +28,8 @@ import com.Supplify.Supplify.DTO.OrderProductDetails;
 public class OrderService {
     private final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepo orderRepo;
+    private final OrderProductRepo orderProductRepo;
+
     private final ProductRepo productRepo;
     private final BusinessRepo businessRepo;
     private final BusinessProductRepo businessproductRepo;
@@ -155,17 +161,63 @@ public class OrderService {
         return orderRepo.findOrderProductDetailsByOrderId(orderId);
     }
 
+
     public List<Order> get(int businessId) {
         return orderRepo.findByBusinessId(businessId);
     }
 
-    public List<Integer> getPendingOrders() {
-        // Fetch all orders with status "PENDING"
-        List<Order> pendingOrders = orderRepo.findByStatus("pending");
-        List<Integer> pending_id = pendingOrders.stream()
+    public List<Integer> getPendingOrders(Integer businessId) {
+        // Fetch all orders with status "PENDING" and businessId
+        List<Order> pendingOrders = orderRepo.findByStatusAndBusinessIdPending(businessId);
+        List<Integer> pendingIds = pendingOrders.stream()
                 .map(Order::getId)
-                .toList();
-        System.out.println("Pending Order IDs: " + pending_id);
-        return pending_id;
+                .collect(Collectors.toList());
+        System.out.println("Pending Order IDs for businessId " + businessId + ": " + pendingIds);
+        return pendingIds;
     }
+    public List<Integer> getActiveOrders(Integer businessId) {
+        // Fetch all orders with status "PENDING" and businessId
+        List<Order> pendingOrders = orderRepo.findByStatusAndBusinessIdActive(businessId);
+        List<Integer> pendingIds = pendingOrders.stream()
+                .map(Order::getId)
+                .collect(Collectors.toList());
+        System.out.println("Pending Order IDs for businessId " + businessId + ": " + pendingIds);
+        return pendingIds;
+    }
+
+    @Transactional
+    public void updateOrderReceived(OrderConfirmationDTO orderConfirmation) {
+
+        Order order = orderRepo.findById(orderConfirmation.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderConfirmation.getOrderId()));
+
+        // עדכון סטטוס ההזמנה להושלמה
+        order.setStatus("COMPLETED");
+
+        // עדכון הסכום ששולם בפועל
+        order.setTotalPaid(orderConfirmation.getTotalPaid());
+
+        // שמירת תמונת החשבונית
+        order.setInvoiceImage(orderConfirmation.getInvoiceImage());
+
+        orderRepo.save(order);
+
+        // עדכון הכמויות שהתקבלו בפועל וסה"כ מחיר לכל מוצר
+        for (OrderProductUpdateDTO product : orderConfirmation.getReceivedProducts()) {
+            OrderProduct orderProduct = orderProductRepo
+                    .findByIdOrderIdAndIdProductId(order.getId(), product.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Order product not found for order " +
+                            order.getId() + " and product " + product.getProductId()));
+
+            // עדכון כמות בפועל
+            orderProduct.setActualQuantity(product.getActualQuantity());
+
+            // חישוב ועדכון סה"כ תשלום עבור המוצר
+            double totalProductPrice = product.getActualQuantity() * product.getUnitPrice();
+            orderProduct.setTotalProductPrice(totalProductPrice);
+
+            orderProductRepo.save(orderProduct);
+        }
+    }
+
 }

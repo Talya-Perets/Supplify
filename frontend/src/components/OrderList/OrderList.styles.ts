@@ -54,6 +54,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#777',
   },
+  itemBarcode: {
+    fontSize: 14,
+    color: '#333',
+  },
+  
   orderStatus: {
     fontSize: 14,
     color: '#4A90E2',

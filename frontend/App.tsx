@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {StackNavigationProp} from '@react-navigation/stack';
 
 import LoginScreen from './src/components/login/login';
 import RegisterScreen from './src/components/registration/registration';
@@ -13,6 +12,7 @@ import EmployeeRegistrationScreen from './src/components/EmployeeRegistration/Em
 import ProductListScreen from './src/components/ProductList/ProductList';
 import ShoppingCartScreen from './src/components/ShoppingCart/ShoppingCart';
 import messaging from '@react-native-firebase/messaging';
+import ConfirmOrderScreen from './src/components/ConfirmOrder/ConfirmOrder';
 import {LoginProvider} from './src/contexts/LoginContext';
 import {CartProvider} from './src/contexts/CartContext';
 import SearchProductScreen from './src/components/SearchProduct/SearchProduct';
@@ -20,9 +20,21 @@ import ForgotPasswordScreen from './src/components/ForgotPassword/ForgotPassword
 import OrderListScreen from './src/components/OrderList/OrderList';
 import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
 import {OrderProvider} from './src/contexts/OrderContext';
+
 import notifee, {AndroidImportance} from '@notifee/react-native';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
+
+// Define OrderProductDetails interface for better type safety across the app
+export interface OrderProductDetails {
+  productName: string;
+  barcode: string;
+  imageUrl: string;
+  orderedQuantity: number;
+  deliveredQuantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
 
 export type RootStackParamList = {
   Login: undefined;
@@ -37,8 +49,11 @@ export type RootStackParamList = {
   ShoppingCart: undefined;
   EmployeeRegistration: undefined;
   SearchProduct: undefined;
-  OrderDetails: undefined;
-};
+  OrderDetails: { orderId?: number };
+  ConfirmOrder: { 
+    orderDetails: OrderProductDetails[],
+    orderId: number
+  };};
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -63,12 +78,14 @@ const setupNotificationChannel = async () => {
 
 const App = () => {
   useEffect(() => {
+    // Setup notification permissions and channels
+    requestUserPermission();
+    setupNotificationChannel();
+    
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log('Foreground message received:', remoteMessage);
 
       // Display a push notification even when the app is open
-      await notifee.requestPermission(); // Ensure permission is granted
-
       await notifee.displayNotification({
         title: remoteMessage.notification?.title || 'New Notification',
         body: remoteMessage.notification?.body || 'You have a new message',
@@ -122,6 +139,10 @@ const App = () => {
               <Stack.Screen
                 name="EmployeeRegistration"
                 component={EmployeeRegistrationScreen}
+              />
+              <Stack.Screen
+                name="ConfirmOrder"
+                component={ConfirmOrderScreen} 
               />
             </Stack.Navigator>
           </NavigationContainer>

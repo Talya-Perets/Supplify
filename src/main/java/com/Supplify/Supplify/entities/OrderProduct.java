@@ -31,6 +31,13 @@ public class OrderProduct {
     @Column(name = "unit_price", nullable = false)
     private double unitPrice;
 
+    @Column(name = "actual_quantity")
+    private Integer actualQuantity;
+
+    @Column(name = "total_product_price")
+    private Double totalProductPrice;
+
+
     @Embeddable
     public static class OrderProductId implements Serializable {
         private int orderId;
@@ -58,4 +65,3 @@ public class OrderProduct {
         }
     }
 }
-

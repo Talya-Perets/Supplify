@@ -14,24 +14,30 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
 
     @Query("SELECT DISTINCT o FROM Order o WHERE o.business.id = :businessId")
     List<Order> findByBusinessId(@Param("businessId") int businessId);
-
     @Query("""
-                SELECT new com.Supplify.Supplify.DTO.OrderProductDetails(
-                   \s
-                    p.productName,
-                    op.quantity,
-                    op.unitPrice,
-                    (op.quantity * op.unitPrice),
-                    o.status,
-                    o.user.firstName,
-                    o.agent.supplier.companyName
-                )
-                FROM OrderProduct op
-                JOIN op.product p
-                JOIN Order o ON op.id.orderId = o.id
-                WHERE op.id.orderId = :orderId
-           \s""")
+        SELECT new com.Supplify.Supplify.DTO.OrderProductDetails(
+           p.id,
+           p.productName,
+           op.quantity,
+           op.unitPrice,
+           (op.quantity * op.unitPrice),
+           o.status,
+           o.user.firstName,
+           o.agent.supplier.companyName
+        )
+        FROM OrderProduct op
+        JOIN op.product p
+        JOIN Order o ON op.id.orderId = o.id
+        WHERE op.id.orderId = :orderId
+       """)
     List<OrderProductDetails> findOrderProductDetailsByOrderId(@Param("orderId") int orderId);
+
+
+    @Query("SELECT o FROM Order o WHERE o.status = 'pending' AND o.business.id = :businessId")
+    List<Order> findByStatusAndBusinessIdPending(@Param("businessId") Integer businessId);
+
+    @Query("SELECT o FROM Order o WHERE o.status = 'active' AND o.business.id = :businessId")
+    List<Order> findByStatusAndBusinessIdActive(@Param("businessId") Integer businessId);
 
 
 

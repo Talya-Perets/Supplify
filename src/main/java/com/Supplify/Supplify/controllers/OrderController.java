@@ -1,8 +1,5 @@
 package com.Supplify.Supplify.controllers;
-import com.Supplify.Supplify.DTO.CreateOrderRequest;
-import com.Supplify.Supplify.DTO.GetOrderInfo;
-import com.Supplify.Supplify.DTO.OrderProductDetails;
-import com.Supplify.Supplify.DTO.OrderResponseDTO;
+import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.Order;
 import com.Supplify.Supplify.services.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.Supplify.Supplify.DTO.OrderResponseDTO;
+
 
 @RestController
 @RequestMapping("orders")
@@ -47,15 +47,21 @@ public class OrderController {
 
     @GetMapping("/getOrderInfo")
     public List<OrderProductDetails> getOrderProducts(@RequestParam int orderId) {
-        logger.info("Fetching order details for order ID: {}",orderId);
-
         return orderService.getOrderProducts(orderId);
     }
 
+
+
     @GetMapping("/getPendingOrders")
-    public List<Integer> getPendingOrderProducts() {
+    public List<Integer> getPendingOrderProducts(@RequestParam int businessId) {
         logger.info("Fetching all pending orders:");
-        return orderService.getPendingOrders();
+        return orderService.getPendingOrders(businessId);
+    }
+
+    @GetMapping("/getActiveOrders")
+    public List<Integer> getPendingActiveOrderProducts(@RequestParam int businessId) {
+        logger.info("Fetching all active orders:");
+        return orderService.getActiveOrders(businessId);
     }
 
     @PostMapping("/OrderConfirm")
@@ -65,5 +71,23 @@ public class OrderController {
     }
 
 
+    @PostMapping("/updateOrderReceived")
+    public ResponseEntity<?> updateOrderReceived(
+            @RequestBody OrderConfirmationDTO orderConfirmation) {
+        try {
+            logger.info("Received orderConfirmation: {}", orderConfirmation.toString());
+
+            logger.info("Updating order {} as received with {} products",
+                    orderConfirmation.getOrderId(),
+                    orderConfirmation.getReceivedProducts().size());
+
+            orderService.updateOrderReceived(orderConfirmation);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("Error updating order received status: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to update order: " + e.getMessage());
+        }
+    }
 
 }

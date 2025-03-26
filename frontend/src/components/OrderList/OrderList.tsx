@@ -106,8 +106,7 @@ const OrderListScreen = ({
   }, [userInfo]);
 
   const handleOrderPress = (id: number) => {
-    setSelectedOrderId(id);
-    navigation.navigate('OrderDetails');
+    navigation.navigate('OrderDetails',{ orderId: id });
   };
 
   const renderOrderItem = ({item}: {item: Order}) => (
@@ -132,50 +131,38 @@ const OrderListScreen = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Sidebar */}
+    <View style={{flex: 1, flexDirection: 'row-reverse'}}>
       {isSidebarVisible && <Sidebar />}
-
-      {/* Main Content */}
       <View style={styles.mainContent}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
-            <Icon
-              name={isSidebarVisible ? 'x' : 'menu'}
-              size={24}
-              color="#4A90E2"
-            />
-          </TouchableOpacity>
           <Text style={styles.headerTitle}>רשימת הזמנות</Text>
+          <TouchableOpacity onPress={() => setIsSidebarVisible(!isSidebarVisible)}>
+            <Icon name={isSidebarVisible ? 'x' : 'menu'} size={24} color="#4A90E2" />
+          </TouchableOpacity>
         </View>
-
-        {/* Loading Spinner */}
+  
         {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color="#4A90E2"
-            style={styles.loadingIndicator}
-          />
+          <ActivityIndicator size="large" color="#4A90E2" />
         ) : errorMessage ? (
           <View style={styles.errorState}>
             <Text style={styles.errorStateText}>{errorMessage}</Text>
           </View>
-        ) : // Order List
-        orders.length === 0 ? (
+        ) : orders.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>אין הזמנות להצגה</Text>{' '}
-            {/* No orders to display */}
+            <Text style={styles.emptyStateText}>אין הזמנות להצגה</Text>
           </View>
         ) : (
           <FlatList
             data={orders}
             renderItem={renderOrderItem}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : `order-${index}`}
+            keyExtractor={(item, index) => item.id.toString()}
             contentContainerStyle={styles.orderList}
           />
         )}
       </View>
-    </SafeAreaView>
+    </View>
+  </SafeAreaView>
+  
   );
 };
 

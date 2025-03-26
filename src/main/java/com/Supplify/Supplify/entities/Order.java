@@ -36,6 +36,13 @@ public class Order {
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
+    @Column(name = "total_paid")
+    private Double totalPaid;
+
+    @Column(name = "invoice_image")
+    private String invoiceImage;
+
+
     @OneToMany(mappedBy = "id.orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
 
