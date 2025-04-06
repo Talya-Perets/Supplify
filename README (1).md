@@ -124,10 +124,8 @@ To make this documentation more user-friendly, we’ve included screenshots of t
 
 ### 1️⃣ Login & Registration
 
-<p align="center">
- <img src="Figure/Login.png" width="45%" style="display: inline-block; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 10px;" />
- <img src="Figure/NewBusiness.png" width="45%" style="display: inline-block; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 10px;" /> 
-</p>
+![image](https://github.com/user-attachments/assets/27145425-cf68-49f8-a216-98ded23ee0a5)
+
 
 
 ### 2️⃣ Home Page & SideBar
