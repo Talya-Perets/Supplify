@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -116,6 +117,57 @@ public class UserController {
         } catch (Exception e) {
             logger.error("Error during password reset", e);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @DeleteMapping("deleteUser/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable int id) {
+        logger.info("Received request to delete user with ID: {}", id);
+
+        try {
+            // Check if user exists
+            User user = userService.findUserByID(id);
+            if (user == null) {
+                logger.warn("User not found with ID: {}", id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            // Delete the user
+            userService.deleteUser(id);
+            logger.info("User successfully deleted, ID: {}", id);
+
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (Exception e) {
+            logger.error("Error deleting user with ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error: " + e.getMessage());
+        }
+    }
+    /**
+     * Get all users of a specific business
+     * @param businessId ID of the business
+     * @return List of users belonging to the business
+     */
+    @GetMapping("getBusinessUsers/{businessId}")
+    public ResponseEntity<?> getBusinessUsers(@PathVariable int businessId) {
+        logger.info("Received request to fetch all users for business ID: {}", businessId);
+
+        try {
+            // Check if business exists
+            Business business = businessService.getBusinessById(businessId);
+            if (business == null) {
+                logger.warn("Business not found with ID: {}", businessId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Business not found");
+            }
+
+            // Get all users for this business
+            List<User> users = userService.findUsersByBusinessId(businessId);
+            logger.info("Found {} users for business ID: {}", users.size(), businessId);
+
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            logger.error("Error fetching users for business with ID: {}", businessId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error: " + e.getMessage());
         }
     }
 

@@ -20,8 +20,8 @@ public class FirebaseService {
     public void initializeFirebase() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                FileInputStream serviceAccount = new FileInputStream(
-                        "C:/Supplify/src/main/resources/supplify-24691-firebase-adminsdk-fbsvc-70daf57774.json");
+                FileInputStream serviceAccount = new FileInputStream("C:/Supplify/src/main/resources/supplify-ef643-firebase-adminsdk-fbsvc-2c2920f4fa.json");
+
                 FirebaseOptions options = new FirebaseOptions.Builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();

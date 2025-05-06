@@ -17,13 +17,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E1E1E1',
     marginBottom: 12, // Adds space between title and first card
-},
-headerTitle: {
+  },
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4A90E2',
     marginRight: 16,
-},
+  },
   successMessage: {
     backgroundColor: '#D4EDDA',
     padding: 10,
@@ -59,7 +59,6 @@ headerTitle: {
   },
   cardContent: {
     flexDirection: 'row-reverse',
-    
   },
   imageContainer: {
     width: 100,
@@ -92,17 +91,40 @@ headerTitle: {
     textAlign: 'right',
   },
   actionsSection: {
-    flex:7,
+    flex: 7,
     alignItems: 'center', // Align to the left
-  justifyContent: 'flex-end',
-  marginTop: 10,
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
+  // New container for order controls
+  orderControlsContainer: {
+    marginVertical: 4,
+    alignItems: 'center',
+  },
+  // New container for return controls
+  returnControlsContainer: {
+    marginVertical: 4,
+    alignItems: 'center',
+  },
+  // New labels for order and return
+  orderLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginBottom: 2,
+  },
+  returnLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#E24A4A',
+    marginBottom: 2,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6, // Reduce spacing
-  transform: [{ scale: 0.8 }], // Make smaller
+    transform: [{ scale: 0.8 }], // Make smaller
   },
   quantityButton: {
     backgroundColor: '#E0E0E0',
@@ -124,7 +146,7 @@ headerTitle: {
     paddingVertical: 6,
     borderRadius: 5,
     width: '90%', // Adjust width
-  transform: [{ scale: 0.9 }], // Slightly smaller
+    transform: [{ scale: 0.9 }], // Slightly smaller
   },
   addToCartText: {
     color: 'white',
@@ -153,9 +175,9 @@ headerTitle: {
   },
   productDetail: {
     fontSize: 12, // Reduce font size for a smoother look
-  color: '#888', // Slightly lighter color for subtle contrast
-  marginTop: 1, // Reduce spacing for a compact feel
-  lineHeight: 16, // Adjust line spacing for better readability
+    color: '#888', // Slightly lighter color for subtle contrast
+    marginTop: 1, // Reduce spacing for a compact feel
+    lineHeight: 16, // Adjust line spacing for better readability
   },
   divider: {
     width: 1,
@@ -178,8 +200,6 @@ headerTitle: {
     fontWeight: 'bold',
     marginLeft: 5,
   },
-  
-  
 });
 
 export default styles;

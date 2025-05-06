@@ -8,7 +8,9 @@ import styles from './ProductCard.styles';
 interface ProductCardProps {
   businessProduct: BusinessProduct;
   quantity: number;
+  returnQuantity?: number; // New prop for return quantity
   updateQuantity: (productId: string, increment: boolean) => void;
+  updateReturnQuantity?: (productId: string, increment: boolean) => void; // New function for return quantity
   handleAddToCart?: (businessProduct: BusinessProduct) => void;
   handleRemoveFromCart?: (businessProduct: BusinessProduct) => void;
 }
@@ -16,7 +18,9 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   businessProduct,
   quantity,
+  returnQuantity = 0, // Default to 0 if not provided
   updateQuantity,
+  updateReturnQuantity,
   handleAddToCart,
   handleRemoveFromCart,
 }) => {
@@ -54,19 +58,45 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <Text style={styles.priceText}>
             מחיר: {businessProduct.price.toFixed(2)} ₪
           </Text>
-          <View style={styles.quantityControls}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateQuantity(businessProduct.product.id, false)}>
-              <Icon name="minus" size={16} color="#4A90E2" />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateQuantity(businessProduct.product.id, true)}>
-              <Icon name="plus" size={16} color="#4A90E2" />
-            </TouchableOpacity>
+          
+          {/* Order quantity controls */}
+          <View style={styles.orderControlsContainer}>
+            <Text style={styles.orderLabel}>הזמנה:</Text>
+            <View style={styles.quantityControls}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => updateQuantity(businessProduct.product.id, false)}>
+                <Icon name="minus" size={16} color="#4A90E2" />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{quantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => updateQuantity(businessProduct.product.id, true)}>
+                <Icon name="plus" size={16} color="#4A90E2" />
+              </TouchableOpacity>
+            </View>
           </View>
+          
+          {/* Return quantity controls - only show if updateReturnQuantity is provided */}
+          {updateReturnQuantity && (
+            <View style={styles.returnControlsContainer}>
+              <Text style={styles.returnLabel}>החזרה:</Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => updateReturnQuantity(businessProduct.product.id, false)}>
+                  <Icon name="minus" size={16} color="#E24A4A" />
+                </TouchableOpacity>
+                <Text style={styles.quantityText}>{returnQuantity}</Text>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => updateReturnQuantity(businessProduct.product.id, true)}>
+                  <Icon name="plus" size={16} color="#E24A4A" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          
           {handleRemoveFromCart ? (
             <TouchableOpacity
               style={styles.removeFromCartButton}

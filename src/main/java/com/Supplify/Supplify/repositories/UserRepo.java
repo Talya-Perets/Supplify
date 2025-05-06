@@ -20,4 +20,6 @@ public interface UserRepo extends JpaRepository<User, Integer> {
     @Query
             ("UPDATE User u SET u.deviceToken = :deviceToken WHERE u.id = :userId")
     void updateDeviceToken(@Param("userId") int userId, @Param("deviceToken") String deviceToken);
+    List<User> findByBusinessId(int businessId);
+
 }

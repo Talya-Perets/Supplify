@@ -2,6 +2,7 @@ package com.Supplify.Supplify.controllers;
 import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.Order;
 import com.Supplify.Supplify.services.OrderService;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ public class OrderController {
 
     @GetMapping("/getOrderInfo")
     public List<OrderProductDetails> getOrderProducts(@RequestParam int orderId) {
+        List<OrderProductDetails> orderProducts =orderService.getOrderProducts(orderId);
+        System.out.println("🟢 JSON Response: " + new Gson().toJson(orderProducts));
         return orderService.getOrderProducts(orderId);
     }
 

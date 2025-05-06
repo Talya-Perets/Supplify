@@ -67,107 +67,57 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: 12,
     marginHorizontal: 10,  // Add some spacing from the screen edges
-    borderRadius: 12,  // More rounded corners for a modern look
-    padding: 8,  // Some internal padding to separate the supplier title from the products
-    marginTop: 16,
-  
-    // Shadow for floating effect
-    shadowColor: '#000',
+    borderRadius: 8,       // Rounded corners for a more modern look
+    shadowColor: '#000',   // Add some shadow to make sections pop
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4,  // Android-specific shadow
+    elevation: 5,         // For Android shadow
   },
   supplierHeader: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    padding: 10,
+    backgroundColor: '#F1F1F1',  // Light background color for supplier header
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   supplierName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4A90E2',
+    color: '#333',
   },
-  approveButton: {
-    backgroundColor: '#E6F2FF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  approveButtonText: {
-    color: '#4A90E2',
-    fontSize: 14,
-  },
-  itemRow: {
-    flexDirection: 'row-reverse',
-    padding: 10,
+  cartItemContainer: {
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#E1E1E1',
   },
-  itemControls: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
+  orderSummary: {
+    marginTop: 12,
   },
-  quantityControls: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    padding: 5,
-  },
-  quantityText: {
-    fontSize: 16,
-    marginHorizontal: 10,
-    fontWeight: 'bold',
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemInfo: {
-    flex: 1,
-    marginBottom: 10,
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-  },
-  itemName: {
-    flexDirection: 'row-reverse',
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  itemStats: {
-    alignItems: 'flex-end',
-  },
-  itemStatLabel: {
-    fontSize: 13,
-    color: '#6B7280',
+  orderSummaryText: {
+    fontSize: 14,
+    color: '#4A90E2',
     marginBottom: 4,
+  },
+  returnSummaryText: {
+    fontSize: 14,
+    color: '#F44336',  // Red for return quantities
   },
   finalSubmitButton: {
     backgroundColor: '#4A90E2',
-    padding: 16,
+    padding: 14,
+    borderRadius: 8,
+    margin: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  finalSubmitButtonDisabled: {
+    backgroundColor: '#B3D4FC',
   },
   finalSubmitText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  imageContainer: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#f1f1f1',
-    marginLeft: 10,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover", 
-},
 });
+
 export default styles;

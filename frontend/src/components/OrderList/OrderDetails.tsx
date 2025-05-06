@@ -32,6 +32,8 @@ interface OrderProductDetails {
   supplierName?: string;
   imageUrl?: string;
   productId: number;
+  returnQuantity: number;
+  return_approved: number;
 }
 
 interface OrderDetails {
@@ -46,9 +48,9 @@ interface OrderDetails {
 
 const OrderDetailsScreen = () => {
   const route = useRoute();
-  const navigation = useNavigation<OrderDetailsScreenNavigationProp>(); 
+  const navigation = useNavigation<OrderDetailsScreenNavigationProp>();
   const { userInfo } = useContext(LoginContext) as LoginContextType;
-  
+
   const { orderId } = route.params as { orderId: number };
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,15 +67,15 @@ const OrderDetailsScreen = () => {
       try {
         setLoading(true);
         setError(null);
-    
+
         const response = await doGet(`${globals.ORDER.getOrderInfo}?orderId=${orderId}`);
         const orderItems: OrderProductDetails[] = response?.data || [];
-    
+
         // Debug logging
         console.log("📦 Order details received from the server:");
         console.log("🆔 Order ID:", orderId);
         console.log("🛒 Products in this order:", orderItems);
-    
+
         // Enhanced logging for product details
         orderItems.forEach((item: OrderProductDetails) => {
           console.log("📋 Product ID:", item.productId);
@@ -81,8 +83,9 @@ const OrderDetailsScreen = () => {
           console.log("📦 Product Name:", item.productName);
           console.log("🔢 Quantity:", item.quantity);
           console.log("💰 Unit Price:", item.unitPrice);
+          console.log("return qontity " + item.returnQuantity);
         });
-    
+
         const formattedOrder: OrderDetails = {
           id: orderId,
           userName: orderItems?.[0]?.userName || 'Unknown',
@@ -94,7 +97,7 @@ const OrderDetailsScreen = () => {
           status: orderItems?.[0]?.status || 'Undefined',
           orderDate: new Date().toISOString(),
         };
-    
+
         setOrderDetails(formattedOrder);
       } catch (err) {
         setError('Failed to load order details');
@@ -117,8 +120,11 @@ const OrderDetailsScreen = () => {
         deliveredQuantity: item.quantity,
         unitPrice: item.unitPrice,
         subtotal: item.subtotal,
+        return_requested: item.returnQuantity,
+        return_approved:item.returnQuantity 
+        
       }));
-      
+
       navigation.navigate('ConfirmOrder', {
         orderDetails: transformedItems,
         orderId: orderId,
@@ -157,11 +163,12 @@ const OrderDetailsScreen = () => {
               <View key={index} style={styles.itemRow}>
                 <Text style={styles.itemName}>{item.productName}</Text>
                 <Text style={styles.itemQuantity}>כמות: {item.quantity}</Text>
-                <Text style={styles.itemBarcode}>
-                  ברקוד: {item.barcode || String(item.productId)}
-                </Text>
+                {item.returnQuantity > 0 && (
+                <Text style={styles.itemReturn}>כמות להחזרה: {item.returnQuantity}</Text>)}
+                <Text style={styles.itemBarcode}>ברקוד: {item.barcode || String(item.productId)}</Text>
               </View>
             ))}
+
             <TouchableOpacity style={styles.sendOrderButton} onPress={handleConfirmOrder}>
               <Text style={styles.sendOrderButtonText}>אשר הזמנה</Text>
             </TouchableOpacity>

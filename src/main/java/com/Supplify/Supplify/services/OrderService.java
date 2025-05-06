@@ -102,6 +102,7 @@ public class OrderService {
             orderProduct.setProduct(product);
             orderProduct.setQuantity(item.getQuantity());
             orderProduct.setUnitPrice(unitPrice);
+            orderProduct.setReturnRequested(item.getReturnQuantity());
             return orderProduct;
         }).toList();
         preProcessedOrder.setTotalAmount(totalAmount.get());
@@ -115,7 +116,7 @@ public class OrderService {
             if (deviceToken != null && !deviceToken.isEmpty()) {
                 System.out.println("📢 Notify Manager.");
                 // Send notification to each manager using Firebase service instance
-                firebaseService.sendNotification(deviceToken, "New Order", "You have a new order waiting for approval.");
+                //  firebaseService.sendNotification(deviceToken, "New Order", "You have a new order waiting for approval.");
             }
         }
 

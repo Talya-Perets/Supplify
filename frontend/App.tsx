@@ -21,6 +21,8 @@ import OrderListScreen from './src/components/OrderList/OrderList';
 import OrderDetailsScreen from './src/components/OrderList/OrderDetails';
 import { OrderProvider } from './src/contexts/OrderContext';
 import Managerscreen from './src/components/ManagerScreen/Managerscreen';
+import ApprovalOrderScreen from './src/components/ApprovalOrder';
+
 
 import notifee, { AndroidImportance } from '@notifee/react-native';
 
@@ -35,6 +37,9 @@ export interface OrderProductDetails {
   deliveredQuantity: number;
   unitPrice: number;
   subtotal: number;
+  return_requested: number;
+  return_approved:number;
+
 }
 
 export type RootStackParamList = {
@@ -52,6 +57,7 @@ export type RootStackParamList = {
   SearchProduct: undefined;
   Managerscreen: undefined; 
   OrderDetails: { orderId?: number };
+  ApprovalOrder: { orderId: number };
   ConfirmOrder: { 
     orderDetails: OrderProductDetails[];
     orderId: number;
@@ -128,6 +134,8 @@ const App = () => {
               <Stack.Screen name="EmployeeRegistration" component={EmployeeRegistrationScreen} />
               <Stack.Screen name="ConfirmOrder" component={ConfirmOrderScreen} />
               <Stack.Screen name="Managerscreen" component={Managerscreen} />
+              <Stack.Screen name="ApprovalOrder" component={ApprovalOrderScreen} />
+
 
             </Stack.Navigator>
           </NavigationContainer>

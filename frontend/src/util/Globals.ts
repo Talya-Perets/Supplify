@@ -33,6 +33,10 @@ export const globals = {
     USER: {
         resetPassword: `${PRODUCTION_URL}${USER}/resetPassword`,
         createUser: `${PRODUCTION_URL}${USER}/createUser`,
+        getUser: `${PRODUCTION_URL}${USER}/getUser`,
+        getBusinessUsers: `${PRODUCTION_URL}${USER}/getBusinessUsers`,
+        deleteUser: `${PRODUCTION_URL}${USER}/deleteUser`,
+    
     },
 
     SUPPLIERS:{

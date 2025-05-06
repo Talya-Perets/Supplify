@@ -50,7 +50,7 @@ const groupItemsBySupplier = (items: CartItem[]) => {
 };
 
 const ShoppingCartScreen = () => {
-  const {cartItems, updateQuantity, removeFromCart} = useCart();
+  const {cartItems, updateQuantity, updateReturnQuantity, removeFromCart} = useCart();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {userInfo} = useContext(LoginContext) as LoginContextType;
@@ -78,6 +78,7 @@ const ShoppingCartScreen = () => {
               const orderItem = {
                 productId: item.businessProduct.product.id,
                 quantity: item.quantity,
+                returnQuantity: item.returnQuantity || 0, // Include return quantity
               };
 
               return orderItem;
@@ -143,16 +144,33 @@ const ShoppingCartScreen = () => {
                   <Text style={styles.supplierName}>{group.supplierName}</Text>
                 </View>
                 {group.items.map(item => (
-                  <View key={item.businessProduct.product.id}>
+                  <View key={item.businessProduct.product.id} style={styles.cartItemContainer}>
                     <ProductCard
                       businessProduct={item.businessProduct}
                       quantity={item.quantity}
-                      updateQuantity={updateQuantity}
-                      handleAddToCart={undefined} // Disable Add to Cart
+                      returnQuantity={item.returnQuantity || 0}
+                      updateQuantity={(productId, increment) => updateQuantity(productId, increment)}
+                      updateReturnQuantity={(productId, increment) => updateReturnQuantity(productId, increment)}
                       handleRemoveFromCart={() =>
                         removeFromCart(item.businessProduct.product.id)
-                      } // Remove from cart function
+                      }
                     />
+                    
+                    {/* Add a summary of the order if needed */}
+                    {(item.quantity > 0 || (item.returnQuantity && item.returnQuantity > 0)) && (
+                      <View style={styles.orderSummary}>
+                        {item.quantity > 0 && (
+                          <Text style={styles.orderSummaryText}>
+                            הזמנה: {item.quantity} יחידות
+                          </Text>
+                        )}
+                        {item.returnQuantity && item.returnQuantity > 0 && (
+                          <Text style={styles.returnSummaryText}>
+                            החזרה: {item.returnQuantity} יחידות
+                          </Text>
+                        )}
+                      </View>
+                    )}
                   </View>
                 ))}
               </View>

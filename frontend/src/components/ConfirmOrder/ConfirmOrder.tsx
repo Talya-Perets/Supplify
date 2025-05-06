@@ -32,6 +32,8 @@ interface OrderProductDetails {
   unitPrice: number;
   subtotal: number;
   productId?: number;
+  return_requested: number;
+  return_approved:number;
 }
 
 interface OrderProductUpdateDTO {

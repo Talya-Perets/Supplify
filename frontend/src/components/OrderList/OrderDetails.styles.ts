@@ -151,6 +151,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
+  itemReturn: {
+    fontSize: 14,
+    color: '#D97706', 
+    fontWeight: '500',
+  },
+  
   itemPrice: {
     fontSize: 15,
     fontWeight: '500',

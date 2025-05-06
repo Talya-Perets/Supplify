@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -101,5 +102,42 @@ public class UserService {
     public void updateDeviceToken(int userId, String deviceToken) {
         userRepo.updateDeviceToken(userId, deviceToken);
     }
+    public boolean deleteUser(int id) {
+        logger.info("Deleting user with ID: {}", id);
 
+        try {
+            // Check if user exists
+            User user = userRepo.findById(id).orElse(null);
+            if (user == null) {
+                logger.warn("Cannot delete - user with ID {} not found", id);
+                return false;
+            }
+
+            // Delete the user
+            userRepo.deleteById(id);
+            logger.info("User with ID {} successfully deleted", id);
+
+            return true;
+        } catch (Exception e) {
+            logger.error("Error deleting user with ID: {}", id, e);
+            throw new RuntimeException("Failed to delete user: " + e.getMessage(), e);
+        }
+    }
+    /**
+     * Find all users that belong to a specific business
+     * @param businessId ID of the business
+     * @return List of users in the business
+     */
+    public List<User> findUsersByBusinessId(int businessId) {
+        logger.info("Finding all users for business ID: {}", businessId);
+
+        try {
+            List<User> users = userRepo.findByBusinessId(businessId);
+            logger.info("Found {} users for business ID: {}", users.size(), businessId);
+            return users;
+        } catch (Exception e) {
+            logger.error("Error finding users for business ID: {}", businessId, e);
+            throw new RuntimeException("Failed to retrieve users for business: " + e.getMessage(), e);
+        }
+    }
 }

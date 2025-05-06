@@ -1,69 +1,102 @@
 import React, {createContext, useState, useContext, ReactNode} from 'react';
 import {BusinessProduct} from '../types/models';
 
-export type CartItem = {
+// Update the CartItem interface to include returnQuantity
+export interface CartItem {
   businessProduct: BusinessProduct;
   quantity: number;
-};
+  returnQuantity?: number; // Optional for backward compatibility
+}
 
-type CartContextType = {
+interface CartContextProps {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  updateQuantity: (id: string, isIncrement: boolean) => void;
-  removeFromCart: (id: string) => void;
-};
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, increment: boolean) => void;
+  updateReturnQuantity: (productId: string, increment: boolean) => void; // New function
+  clearCart: () => void;
+}
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartContext = createContext<CartContextProps | undefined>(undefined);
 
-export const CartProvider = ({children}: {children: ReactNode}) => {
+interface CartProviderProps {
+  children: ReactNode;
+}
+
+export const CartProvider: React.FC<CartProviderProps> = ({children}) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (item: CartItem) => {
-    setCartItems(prev => {
-      // Check if the item already exists in the cart
-      const existingItem = prev.find(
-        i => i.businessProduct.product.id === item.businessProduct.product.id,
+  const addToCart = (newItem: CartItem) => {
+    setCartItems(prevItems => {
+      // Check if the product is already in the cart
+      const existingItemIndex = prevItems.findIndex(
+        item => item.businessProduct.product.id === newItem.businessProduct.product.id,
       );
 
-      if (existingItem) {
-        // If the item exists, update its quantity
-        return prev.map(i =>
-          i.businessProduct.product.id === item.businessProduct.product.id
-            ? {...i, quantity: i.quantity + item.quantity}
-            : i,
-        );
+      if (existingItemIndex !== -1) {
+        // Update existing item
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: newItem.quantity,
+          returnQuantity: newItem.returnQuantity || 0,
+        };
+        return updatedItems;
       } else {
-        // If the item doesn't exist, add it to the cart with the specified quantity
-        return [...prev, item];
+        // Add new item
+        return [...prevItems, {...newItem, returnQuantity: newItem.returnQuantity || 0}];
       }
     });
   };
 
-  const updateQuantity = (id: string, isIncrement: boolean) => {
-    setCartItems(
-      prev =>
-        prev
-          .map(i =>
-            i.businessProduct.product.id === id
-              ? {
-                  ...i,
-                  quantity: isIncrement
-                    ? i.quantity + 1
-                    : Math.max(0, i.quantity - 1),
-                }
-              : i,
-          )
-          .filter(i => i.quantity > 0), // Remove items with quantity 0
+  const removeFromCart = (productId: string) => {
+    setCartItems(prevItems =>
+      prevItems.filter(item => item.businessProduct.product.id !== productId),
     );
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems(prev => prev.filter(i => i.businessProduct.product.id !== id));
+  const updateQuantity = (productId: string, increment: boolean) => {
+    setCartItems(prevItems =>
+      prevItems.map(item => {
+        if (item.businessProduct.product.id === productId) {
+          return {
+            ...item,
+            quantity: Math.max(0, item.quantity + (increment ? 1 : -1)),
+          };
+        }
+        return item;
+      }),
+    );
+  };
+
+  const updateReturnQuantity = (productId: string, increment: boolean) => {
+    setCartItems(prevItems =>
+      prevItems.map(item => {
+        if (item.businessProduct.product.id === productId) {
+          return {
+            ...item,
+            returnQuantity: Math.max(0, (item.returnQuantity || 0) + (increment ? 1 : -1)),
+          };
+        }
+        return item;
+      }),
+    );
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   return (
     <CartContext.Provider
-      value={{cartItems, addToCart, updateQuantity, removeFromCart}}>
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        updateReturnQuantity,
+        clearCart,
+      }}>
       {children}
     </CartContext.Provider>
   );
@@ -71,7 +104,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;

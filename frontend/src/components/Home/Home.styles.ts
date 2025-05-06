@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    flexDirection: 'row-reverse', // שינוי לימין לשמאל
+    flexDirection: 'row-reverse', // RTL layout
   },
   mainContent: {
     flex: 1,
@@ -15,17 +15,18 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E1E1E1',
-    marginBottom: 12, // Adds space between title and first card
-},
-headerTitle: {
+    marginBottom: 12,
+  },
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4A90E2',
     marginRight: 16,
-},
+  },
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -34,7 +35,7 @@ headerTitle: {
     marginLeft: 16,
     position: 'relative',
   },
-  cartButton: {  
+  cartButton: {
     padding: 8,
   },
   badge: {
@@ -110,7 +111,7 @@ headerTitle: {
     fontWeight: '500',
   },
   quickActionsContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 16,
@@ -126,12 +127,25 @@ headerTitle: {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    marginBottom: 16,
   },
   quickActionText: {
     marginTop: 8,
     fontSize: 14,
     color: '#2E3A59',
     textAlign: 'center',
+  },
+  showMoreButton: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    padding: 8,
+  },
+  showMoreText: {
+    color: '#4A90E2',
+    fontSize: 14,
+    marginLeft: 5,
   },
 });
 

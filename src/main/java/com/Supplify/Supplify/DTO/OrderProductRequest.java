@@ -12,4 +12,5 @@ import lombok.Setter;
 public class OrderProductRequest {
     private String productId; // Ensure this matches Product entity's ID type
     private int quantity;
+    private int returnQuantity;
 }

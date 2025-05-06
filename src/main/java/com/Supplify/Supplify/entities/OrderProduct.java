@@ -37,6 +37,12 @@ public class OrderProduct {
     @Column(name = "total_product_price")
     private Double totalProductPrice;
 
+    @Column(name = "return_requested", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int returnRequested = 0;
+
+    @Column(name = "return_approved", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int returnApproved = 0;
+
 
     @Embeddable
     public static class OrderProductId implements Serializable {

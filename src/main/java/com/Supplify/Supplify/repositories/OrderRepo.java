@@ -23,7 +23,8 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
            (op.quantity * op.unitPrice),
            o.status,
            o.user.firstName,
-           o.agent.supplier.companyName
+           o.agent.supplier.companyName,
+           op.returnRequested
         )
         FROM OrderProduct op
         JOIN op.product p

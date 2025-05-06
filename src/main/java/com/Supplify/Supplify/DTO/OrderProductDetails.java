@@ -13,6 +13,7 @@ public class OrderProductDetails {
     private String status;
     private String userName;
     private String supplierName;
+    private int returnQuantity;
 
 }
 
