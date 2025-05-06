@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,21 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-  Image,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar.tsx';
 import {RootStackParamList, API_BASE_URL} from '../../../App';
-import {launchImageLibrary} from 'react-native-image-picker';
-import styles from './AddProduct.styles';
-import {doPost} from "../../util/HTTPRequests.ts";
-import { globals } from '../../util/Globals.ts';
+import {doGet, doPostAddProduct} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals.ts';
+import styles from './AddProduct.styls';
+import {LoginContext} from '../../contexts/LoginContext.tsx';
+import {LoginContextType} from '../../contexts/UserContext.tsx';
+import {Supplier} from '../../types/models.ts';
+import {Dropdown} from 'react-native-element-dropdown';
+import ImagePickerComponent from '../../util/ImagePickerComponent.tsx';
+import useBusinessProducts from '../../hooks/useBusinessProducts.ts';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,82 +32,102 @@ const AddProductScreen = () => {
   const navigation = useNavigation<AddProductScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const [isLoading, setIsLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [value, setValue] = useState(-1);
+  const [productImageUri, setProductImageUri] = useState<string | null>(null);
+  const [productImageData, setProductImageData] = useState<any>(null);
+  const {refetchProducts} = useBusinessProducts();
 
   const [productData, setProductData] = useState({
     id: '',
     productName: '',
     productDescription: '',
-    supplierId: '',
     stock: '',
+    price: '',
   });
 
+  const handleImageSelected = (imageUri: string, imageData: any) => {
+    setProductImageUri(imageUri);
+    setProductImageData(imageData);
+  };
+
   const handleAddProduct = async () => {
-    // Validate input fields
-    if (!productData.id || !productData.productName  || !productData.supplierId) {
+    if (
+      !productData.id ||
+      !productData.productName ||
+      value == -1 ||
+      !productData.price
+    ) {
       Alert.alert('Error', 'Please fill in all required product details');
       return;
     }
 
-    try {
-      const response = await doPost(globals.PRODUCT.createProduct, {
-        id: productData.id,
-        productName: productData.productName,
-        productDescription: productData.productDescription || '',
-        supplierId: productData.supplierId,
-        stock: productData.stock || 0,
-      });
+    // Convert the payload object to JSON string
+    const payload = JSON.stringify({
+      id: productData.id,
+      productName: productData.productName,
+      productDescription: productData.productDescription || '',
+      supplierId: value,
+      stock: parseInt(productData.stock, 10) || 0,
+      price: parseFloat(productData.price),
+      businessId: userInfo.businessId,
+    });
 
-      if (response.status === 201) {
-        Alert.alert(
-          'Success',
-          'Product added successfully',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Reset form fields
-                setProductData({
-                  id: '',
-                  productName: '',
-                  productDescription: '',
-                  supplierId: '',
-                  stock: ''
-                });
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          'Error',
-          response.data?.message || 'Failed to add product'
-        );
-      }
+    console.log('Payload:', payload); // Log the payload
+
+    const formData = new FormData();
+    formData.append('request', payload); // Send JSON data as a string
+
+    if (productImageUri && productImageData) {
+      formData.append('file', {
+        uri: productImageUri,
+        name: productImageData.fileName || 'product.jpg',
+        type: productImageData.type || 'image/jpeg',
+      });
+    }
+
+    try {
+      const response = await doPostAddProduct(
+        globals.PRODUCT.createProduct,
+        formData,
+      );
+      Alert.alert('Success', 'Product added successfully!');
+      refetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
-
-      Alert.alert(
-        'Error',
-        'Network error. Please try again.'
-      );
+      Alert.alert('Error', 'Failed to add product. Please try again.');
     }
   };
 
-  const handleImagePicker = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets[0].uri) {
-        // setProductData({ ...productData, image: response.assets[0].uri });
+  useEffect(() => {
+    const getBusinessSuppliers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await doGet(
+          `${globals.BUSINESS.getBusinessSuppliers}/${userInfo.businessId}`,
+        );
+        if (response.data) {
+          setSuppliers(response.data);
+          console.log('Suppliers:', response.data); 
+          
+        } else {
+          throw new Error('No data received from API');
+        }
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        Alert.alert('שגיאה', 'אירעה שגיאה בטעינת רשימת הספקים');
+      } finally {
+        setIsLoading(false);
       }
-    });
-  };
+    };
+    getBusinessSuppliers();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -118,13 +142,31 @@ const AddProductScreen = () => {
         </View>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.inputContainer}>
+            <Dropdown
+              data={[
+                {label: 'בחר ספק', value: -1},
+                ...suppliers.map(supplier => ({
+                  label: supplier.companyName,
+                  value: supplier.supplierId,
+                })),
+              ]}
+              labelField="label"
+              valueField="value"
+              placeholder="בחר ספק"
+              value={value}
+              onChange={item => {
+                setValue(item.value);
+              }}
+              style={styles.dropdownContainer}
+              placeholderStyle={styles.placeholder}
+              selectedTextStyle={styles.selectedText}
+              itemTextStyle={{textAlign: 'right', writingDirection: 'rtl'}}
+            />
             <TextInput
               style={styles.input}
               placeholder="ברקוד"
               value={productData.id}
-              onChangeText={text =>
-                setProductData({...productData, id: text})
-              }
+              onChangeText={text => setProductData({...productData, id: text})}
               keyboardType="numeric"
             />
             <TextInput
@@ -135,8 +177,6 @@ const AddProductScreen = () => {
                 setProductData({...productData, productName: text})
               }
             />
-
-
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="תיאור מוצר"
@@ -148,13 +188,13 @@ const AddProductScreen = () => {
             />
             <TextInput
               style={styles.input}
-              placeholder="שם ספק"
-              value={productData.supplierId}
+              placeholder="מחיר מוצר"
+              value={productData.price}
               onChangeText={text =>
-                setProductData({...productData, supplierId: text})
+                setProductData({...productData, price: text})
               }
+              keyboardType="numeric"
             />
-
             {userRole === 'manager' && (
               <TextInput
                 style={styles.input}
@@ -166,6 +206,7 @@ const AddProductScreen = () => {
                 keyboardType="numeric"
               />
             )}
+            <ImagePickerComponent onImageSelected={handleImageSelected} />
           </View>
           <TouchableOpacity style={styles.button} onPress={handleAddProduct}>
             <Text style={styles.buttonText}>הוסף מוצר</Text>

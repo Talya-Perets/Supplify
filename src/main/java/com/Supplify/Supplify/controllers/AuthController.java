@@ -1,18 +1,15 @@
 package com.Supplify.Supplify.controllers;
 
-import com.Supplify.Supplify.DTO.GoogleRequest;
-import com.Supplify.Supplify.DTO.LoginRequest;
-import com.Supplify.Supplify.DTO.RegisterRequest;
+import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.entities.User;
 import com.Supplify.Supplify.enums.UserRoleEnum;
 import com.Supplify.Supplify.services.BusinessService;
 import com.Supplify.Supplify.services.RoleService;
 import com.Supplify.Supplify.services.UserService;
-import com.Supplify.Supplify.utils.EmailValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,19 +17,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("auth")
 public class AuthController {
 
-    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final Logger logger = LogManager.getLogger(AuthController.class);
     private final BusinessService businessService;
     private final UserService userService;
     private final RoleService roleService;
 
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    @PostMapping("register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws Exception {
         logger.info("Registering new business");
         Business business = null;
 
@@ -46,6 +44,7 @@ public class AuthController {
 
         } catch (Exception e) {
             logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         User user = userService.createUser(
@@ -60,15 +59,20 @@ public class AuthController {
 
         logger.info("Registered new business successfully");
 
-        return new ResponseEntity<>("""
+        String message = """
                 New business created successfully.
                 Your login details are:
                 Username: %s
                 Password: %s
-                """.formatted(user.getUsername(), user.getPassword()), HttpStatus.CREATED);
+                """.formatted(user.getUsername(), user.getPassword());
+
+        UserContextResponse userContextResponse = userService.getUserContext(user.getUsername());
+        userContextResponse.setMessage(message);
+
+        return new ResponseEntity<>(userContextResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         logger.info("Received login request for username: {}", loginRequest.getUsername());
 
@@ -80,9 +84,11 @@ public class AuthController {
 
             if (isAuthenticated) {
                 logger.info("User authenticated successfully: {}", loginRequest.getUsername());
-                return new ResponseEntity<>(HttpStatus.OK);
+
+                UserContextResponse userLoginContext = userService.getUserContext(loginRequest.getUsername());
+                return new ResponseEntity<>(userLoginContext, HttpStatus.OK);
             } else {
-                logger.warn("Authentication failed for username: {}", loginRequest.getUsername());
+                logger.error("Authentication failed for username: {}", loginRequest.getUsername());
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
@@ -91,14 +97,35 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/google")
+    @PostMapping("forgotPassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        logger.info("Received forgotPassword request for email: {}", forgotPasswordRequest.getEmail());
+
+        try {
+            boolean isEmailRegistered = userService.isEmailAlreadyUsed(forgotPasswordRequest.getEmail());
+
+            if (isEmailRegistered) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Email not found
+            }
+        } catch (Exception e) {
+            logger.error("Error processing forgotPassword request", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("google")
     public ResponseEntity<?> google(@RequestBody GoogleRequest googleRequest) {
         logger.info("Received google request for username: {}", googleRequest.getUsername());
 
 
         if (userService.isEmailAlreadyUsed(googleRequest.getUsername())) {
             logger.info("User authenticated successfully: {}", googleRequest.getUsername());
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            UserContextResponse userContextResponse = userService.getUserContext(googleRequest.getUsername());
+            return new ResponseEntity<>(userContextResponse, HttpStatus.OK);
         }
         logger.info("Registering new business from google sign in");
 
@@ -116,11 +143,22 @@ public class AuthController {
 
         logger.info("Registered new business through google sign in successfully");
 
-        return new ResponseEntity<>("""
+        UserContextResponse userContextResponse = userService.getUserContext(user.getUsername());
+        userContextResponse.setMessage("""
                 New business created successfully.
                 Your details are:
                 Username: %s
-                """.formatted(user.getUsername()), HttpStatus.CREATED);
+                """.formatted(user.getUsername()));
 
+        return new ResponseEntity<>(userContextResponse, HttpStatus.CREATED);
+    }
+    @PostMapping("/updateDeviceToken")
+    public ResponseEntity<?> updateDeviceToken(@RequestBody DeviceTokenRequest request) {
+        try {
+            userService.updateDeviceToken(request.getUserId(), request.getDeviceToken());
+            return ResponseEntity.ok(Collections.singletonMap("message", "Device token updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("error", "Failed to update token"));
+        }
     }
 }

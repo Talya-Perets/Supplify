@@ -1,145 +1,143 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   SafeAreaView,
   FlatList,
+  TextInput,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
+import Sidebar from '../Sidebar/sidebar';
 import {API_BASE_URL, RootStackParamList} from '../../../App';
 import {Alert} from 'react-native';
 import styles from './SuppliersList.styles';
+import {doGet, doPost} from '../../util/HTTPRequests';
+import {globals} from '../../util/Globals';
+import {LoginContext} from '../../contexts/LoginContext';
+import {LoginContextType} from '../../contexts/UserContext';
+import {SupplierDetails, Agent} from '../../types/models';
 
 type SuppliersListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'SuppliersList'
 >;
 
-interface Supplier {
-  supplierId: number; // שינוי מ-id ל-supplierId להתאמה למודל בשרת
-  companyName: string; // שינוי מ-name ל-companyName להתאמה למודל בשרת
-  contactPerson: string;
-  phone: string;
-  email: string;
-}
-
 const SuppliersListScreen = () => {
   const navigation = useNavigation<SuppliersListScreenNavigationProp>();
-  const [userRole] = useState<'manager' | 'employee'>('manager');
+  const {userInfo} = useContext(LoginContext) as LoginContextType;
+  const [suppliers, setSuppliers] = useState<SupplierDetails[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]); // הוספת state לספקים
-  const [isLoading, setIsLoading] = useState(false); // הוספת state לטעינה
+  const [editingAgent, setEditingAgent] = useState<string | null>(null);
+  const [editedAgent, setEditedAgent] = useState<Agent>();
 
   useEffect(() => {
-    const fetchSuppliers = async () => {
+    const getBusinessSuppliersAndAgents = async () => {
       setIsLoading(true);
       try {
-        console.log('Attempting to fetch suppliers for business ID: 20');
-        const response = await fetch(
-          `${API_BASE_URL}/api/suppliers/business/20`,
-        ); // Use the base URL here
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Response:', data);
-          setSuppliers(data);
+        const response = await doGet(
+          `${globals.BUSINESS.getBusinessSuppliersAndAgents}/${userInfo.businessId}`,
+        );
+        if (response.data) {
+          setSuppliers(response.data);
         } else {
-          const errorData = await response.json();
-          console.error('Error fetching suppliers:', errorData);
-          Alert.alert(
-            'שגיאה',
-            errorData.message || 'אירעה שגיאה בטעינת רשימת הספקים',
-            [{text: 'אישור'}],
-          );
+          throw new Error('No data received from API');
         }
       } catch (error) {
         console.error('Error fetching suppliers:', error);
-        Alert.alert('שגיאה', 'אירעה שגיאה בטעינת רשימת הספקים', [
-          {text: 'אישור'},
-        ]);
+        Alert.alert('שגיאה', 'אירעה שגיאה בטעינת רשימת הספקים');
       } finally {
         setIsLoading(false);
       }
     };
+    getBusinessSuppliersAndAgents();
+  }, []);
 
-    fetchSuppliers();
-  }, []); // הפונקציה תרוץ פעם אחת כשהקומפוננטה נטענת
-  const handleEditSupplier = (supplier: Supplier) => {
-    // Navigate to edit screen with supplier data
-    console.log('עריכת ספק:', supplier);
+  const handleEditAgent = (supplier: SupplierDetails) => {
+    setEditingAgent(supplier.companyName);
+    setEditedAgent({...supplier.agent});
   };
 
-  const handleDeleteSupplier = async (supplierId: number) => {
+  const handleSaveAgent = async (supplier: SupplierDetails) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/suppliers/${supplierId}`,
+      const response = await doPost(
+        `${globals.BUSINESS.updateAgent}/${userInfo.businessId}`,
         {
-          method: 'DELETE', // Use DELETE method
+          id: supplier.agent.id,
+          name: editedAgent?.name,
+          phone: editedAgent?.phone,
+          email: editedAgent?.email,
         },
       );
 
-      if (response.ok) {
-        // Filter the suppliers list to remove the deleted supplier
-        setSuppliers(
-          suppliers.filter(supplier => supplier.supplierId !== supplierId),
+      if (response.status === 200) {
+        setSuppliers(prevSuppliers =>
+          prevSuppliers.map(s =>
+            s.companyName === supplier.companyName
+              ? {
+                  ...s,
+                  agent: {
+                    id: supplier.agent?.id ?? 0,
+                    name: editedAgent?.name ?? supplier.agent.name,
+                    email: editedAgent?.email ?? supplier.agent.email,
+                    phone: editedAgent?.phone ?? supplier.agent.phone,
+                  },
+                }
+              : s,
+          ),
         );
-        console.log('Supplier deleted successfully');
+        setEditingAgent(null);
       } else {
-        const errorData = await response.json();
-        console.error('Error deleting supplier:', errorData);
-        Alert.alert('שגיאה', errorData.message || 'אירעה שגיאה במחיקת הספק', [
-          {text: 'אישור'},
-        ]);
+        throw new Error(response.data.message || 'Failed to update supplier');
       }
     } catch (error) {
-      console.error('Error deleting supplier:', error);
-      Alert.alert('שגיאה', 'אירעה שגיאה במחיקת הספק', [{text: 'אישור'}]);
+      console.error('Error updating supplier:', error);
+      Alert.alert('שגיאה', 'אירעה שגיאה בעדכון הספק');
     }
   };
 
-  const renderSupplierCard = ({item: supplier}: {item: Supplier}) => (
-    <View style={styles.supplierCard}>
-      <View style={styles.supplierHeader}>
-        <Text style={styles.supplierName}>{supplier.companyName}</Text>
-        {userRole === 'manager' && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              onPress={() => handleEditSupplier(supplier)}
-              style={styles.actionButton}>
-              <Icon name="edit-2" size={20} color="#4A90E2" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDeleteSupplier(supplier.supplierId)}
-              style={styles.actionButton}>
-              <Icon name="trash-2" size={20} color="#FF4444" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      <View style={styles.supplierDetails}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>איש קשר:</Text>
-          <Text style={styles.detailText}>{supplier.contactPerson}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>טלפון:</Text>
-          <Text style={styles.detailText}>{supplier.phone}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>מייל:</Text>
-          <Text style={styles.detailText}>{supplier.email}</Text>
-        </View>
-      </View>
-    </View>
-  );
+  const handleDeleteSupplier = async (supplier: SupplierDetails) => {
+    Alert.alert('אישור הסרת ספק', 'האם אתה בטוח שברצונך להסיר ספק זה?', [
+      {
+        text: 'לא',
+        style: 'cancel',
+      },
+      {
+        text: 'כן',
+        onPress: async () => {
+          console.log('מחיקת ספק:', supplier);
+          try {
+            const response = await doPost(
+              `${globals.BUSINESS.deleteSupplierFromBusiness}${userInfo.businessId}`,
+              {agentid: supplier.agent.id},
+            );
+
+            if (response.status === 200) {
+              setSuppliers(prevSuppliers =>
+                prevSuppliers.filter(
+                  s => s.companyName !== supplier.companyName,
+                ),
+              );
+            } else {
+              throw new Error(
+                response.data.message || 'Failed to delete supplier',
+              );
+            }
+          } catch (error) {
+            console.error('Error deleting supplier:', error);
+            Alert.alert('שגיאה', 'אירעה שגיאה במחיקת הספק');
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -151,7 +149,7 @@ const SuppliersListScreen = () => {
             />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>רשימת ספקים</Text>
-          {userRole === 'manager' && (
+          {userInfo.userRole === 'Manager' && (
             <TouchableOpacity
               style={styles.addButton}
               onPress={() => navigation.navigate('AddSupplier')}>
@@ -159,18 +157,87 @@ const SuppliersListScreen = () => {
             </TouchableOpacity>
           )}
         </View>
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <Text>טוען...</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={suppliers}
-            renderItem={renderSupplierCard}
-            keyExtractor={item => item.supplierId.toString()}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
+        <FlatList
+          data={suppliers}
+          renderItem={({item}) => (
+            <View style={styles.supplierCard}>
+              <View style={styles.supplierHeader}>
+                <Text style={styles.supplierName}>{item.companyName}</Text>
+                {userInfo.userRole === 'Manager' && (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      onPress={
+                        () =>
+                          editingAgent === item.companyName
+                            ? handleSaveAgent(item) // Save when already editing
+                            : handleEditAgent(item) // Edit otherwise
+                      }
+                      style={styles.actionButton}>
+                      <Icon
+                        name={
+                          editingAgent === item.companyName ? 'save' : 'edit-2'
+                        }
+                        size={20}
+                        color="#4A90E2"
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteSupplier(item)}
+                      style={styles.actionButton}>
+                      <Icon name="trash-2" size={20} color="#4A90E2" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+              <View style={styles.supplierDetails}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>סוכן :</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.name ?? item.agent.name}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, name: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.name}</Text>
+                  )}
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>טלפון:</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.phone ?? item.agent.phone}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, phone: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.phone}</Text>
+                  )}
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>מייל:</Text>
+                  {editingAgent === item.companyName ? (
+                    <TextInput
+                      style={styles.input}
+                      value={editedAgent?.email ?? item.agent.email}
+                      onChangeText={text =>
+                        setEditedAgent(prev => ({...prev!, email: text}))
+                      }
+                    />
+                  ) : (
+                    <Text style={styles.detailText}>{item.agent.email}</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
+          keyExtractor={item => item.companyName.toString()}
+          contentContainerStyle={styles.listContent}
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import {RootStackParamList} from '../../../App.tsx';
 import {doPost} from '../../util/HTTPRequests.ts';
 import {globals} from '../../util/Globals.ts';
 import styles from './registration.styles';
+import {LoginContext} from '../../contexts/LoginContext.tsx';
+import {LoginContextType} from '../../contexts/UserContext.tsx';
 
 type RegisterScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -31,6 +33,7 @@ const SignUpScreen = () => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const {login} = useContext(LoginContext) as LoginContextType;
 
   const validateForm = () => {
     if (!firstName.trim()) {
@@ -87,9 +90,11 @@ const SignUpScreen = () => {
       });
       const data = response?.data;
       if (response.status === 201) {
-        Alert.alert('Success', data, [
+        Alert.alert('Success', data.message, [
           {text: 'OK', onPress: () => navigation.navigate('Login')},
         ]);
+
+        login(data.businessId, data.userId, data.role);
       } else {
         Alert.alert('Error', data || 'אירעה שגיאה בתהליך ההרשמה');
       }

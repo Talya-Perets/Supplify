@@ -1,5 +1,6 @@
 package com.Supplify.Supplify.services;
 
+import com.Supplify.Supplify.DTO.CreateAgentRequest;
 import com.Supplify.Supplify.DTO.CreateSupplierRequest;
 import com.Supplify.Supplify.entities.BusinessSupplier;
 import com.Supplify.Supplify.repositories.BusinessSupplierRepo;
@@ -21,24 +22,28 @@ public class SupplierService {
 
     private final SupplierRepo supplierRepo;
     private final BusinessSupplierRepo businessSupplierRepo;
+    private final AgentService agentService;
 
     @Transactional
-    public Supplier createSupplier(CreateSupplierRequest request) {
-        // Step 1: Save the supplier locally
-        Supplier savedSupplier = supplierRepo.saveAndFlush(new Supplier(request.getSupplierName()));
+    public void createSupplier(CreateSupplierRequest request) throws Exception {
+        Supplier newSupplier = new Supplier(request.getCompanyName());
+        supplierRepo.saveAndFlush(newSupplier);
 
-        // Step 2: Link the supplier to the business
-        BusinessSupplier businessSupplier = new BusinessSupplier(request.getBusinessId(), savedSupplier.getSupplierId());
-        businessSupplierRepo.save(businessSupplier);
-        return savedSupplier;
+        CreateAgentRequest agentRequest = new CreateAgentRequest();
+        agentRequest.setSupplierId(newSupplier.getSupplierId());
+        agentRequest.setBusinessId(request.getBusinessId());
+        agentRequest.setName(request.getName());
+        agentRequest.setEmail(request.getEmail());
+        agentRequest.setPhone(request.getPhone());
+
+        agentService.createAgent(agentRequest);
+
     }
 
     public List<Supplier> getAllSuppliers() {
         return supplierRepo.findAll();
     }
 
-    //public List<Supplier> getAllSuppliersbyBusinessId(Integer businessId) {
-    // }
 
     public Supplier getSupplierById(Integer id) {
         return supplierRepo.findById(id)
@@ -46,9 +51,10 @@ public class SupplierService {
     }
 
     public List<Supplier> getSuppliersByBusinessId(Integer businessId) {
-        List<Integer> supplierIds = businessSupplierRepo.findSupplierIdsByBusinessId(businessId);
-        return supplierIds.stream()
-                .map(supplierId -> supplierRepo.findById(supplierId)
+        List<BusinessSupplier> businessSuppliers = businessSupplierRepo.findByBusinessId(businessId);
+
+        return businessSuppliers.stream()
+                .map(bs -> supplierRepo.findById(bs.getSupplierId())
                         .orElseThrow(() -> new RuntimeException("Supplier not found")))
                 .collect(Collectors.toList());
     }

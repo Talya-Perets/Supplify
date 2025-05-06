@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     },
     supplierDetails: {
       gap: 8,
+      textAlign: 'right',
     },
     detailRow: {
       flexDirection: 'row-reverse',
@@ -70,18 +71,36 @@ const styles = StyleSheet.create({
     detailLabel: {
       fontSize: 14,
       color: '#666',
-      marginLeft: 8,
-      width: 70,
+      marginLeft: 0,
+      width: 50,
+      textAlign: 'right',
     },
     detailText: {
       fontSize: 14,
       color: '#333',
+      textAlign: 'right',
     },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center'
-    }
+    },
+    input: {
+      backgroundColor: 'white',
+      borderWidth: 1,
+      borderColor: '#E1E1E1',
+      borderRadius: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      fontSize: 14,
+      color: '#333',
+      textAlign: 'right', 
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2, 
+    },
   });  
 
   export default styles;
