@@ -12,14 +12,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Sidebar from '../Sidebar/sidebar';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../../../App';
+import {RootStackParamList} from '../../types/models';
 import styles from './Home.styles';
-import {globals} from '../../util/Globals';
 import {LoginContext} from '../../contexts/LoginContext';
 import {LoginContextType} from '../../contexts/UserContext';
-import {doGet} from '../../util/HTTPRequests';
 import {useOrder} from '../../contexts/OrderContext';
 import ShoppingCartIcon from '../../contexts/ShoppingCartIcon';
+import useOrders from '../../hooks/useOrders';
+
 
 // Define navigation type
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -29,70 +29,23 @@ const HomeScreen = () => {
   const {userInfo} = useContext(LoginContext) as LoginContextType;
   const {setSelectedOrderId} = useOrder();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [pendingOrders, setPendingOrders] = useState<number[]>([]);
-  const [activeOrders, setActiveOrders] = useState<number[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [showAllPending, setShowAllPending] = useState(false);
   const [showAllActive, setShowAllActive] = useState(false);
+  const { pendingOrders, activeOrders, loading, error, refreshOrders } = useOrders();
+
 
   // Number of orders to show initially
   const initialOrdersToShow = 4;
 
-  // Fetch pending orders
-  const fetchPendingOrders = async () => {
-    try {
-      console.log("Fetching pending orders");
-      const response = await doGet(`${globals.ORDER.getPendingOrders}?businessId=${userInfo.businessId}`);
-      console.log("API Response:", response.data);
-
-      if (!response || !response.data || !Array.isArray(response.data)) {
-        throw new Error('Invalid response from server');
-      }
-
-      setPendingOrders([...new Set(response.data)]); // Remove duplicate order IDs
-    } catch (err) {
-      console.error('Error fetching pending orders:', err);
-      setError('Failed to fetch pending orders. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch active orders
-  const fetchActiveOrders = async () => {
-    try {
-      console.log("Fetching active orders");
-      const response = await doGet(`${globals.ORDER.getActiveOrders}?businessId=${userInfo.businessId}`);
-      console.log("API Response:", response.data);
-
-      if (!response || !response.data || !Array.isArray(response.data)) {
-        throw new Error('Invalid response from server');
-      }
-
-      setActiveOrders([...new Set(response.data)]); // Remove duplicate order IDs
-    } catch (err) {
-      console.error('Error fetching active orders:', err);
-      setError('Failed to fetch active orders. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  useEffect(() => {
-    fetchPendingOrders();
-    fetchActiveOrders();
-  }, []);
-
   // Handle click on pending order item - navigate to ApprovalOrder screen
   const handlePendingOrderPress = (id: number) => {
-    console.log("🔵 handlePendingOrderPress הופעל עם ID:", id);
+    console.log("🔵 handlePendingOrderPress with ID:", id);
     navigation.navigate('ApprovalOrder', { orderId: id });
   };
 
   // Handle click on active order item - navigate to OrderDetails screen
   const handleActiveOrderPress = (id: number) => {
-    console.log("🔵 handleActiveOrderPress הופעל עם ID:", id);
+    console.log("🔵 handleActiveOrderPress with ID:", id);
     navigation.navigate('OrderDetails', { orderId: id });
   };
 
@@ -102,7 +55,7 @@ const HomeScreen = () => {
   };
 
   // Function to get the orders to display based on show all state
-  const getOrdersToDisplay = (orders, showAll) => {
+const getOrdersToDisplay = (orders: number[], showAll: boolean): number[] => {
     if (showAll || orders.length <= initialOrdersToShow) {
       return orders;
     }

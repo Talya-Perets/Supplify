@@ -10,87 +10,31 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
-import {useCart} from '../../contexts/CartContext';
 import styles from './ProductList.styles';
-import {BusinessProduct} from '../../types/models';
-import {LoginContextType} from '../../contexts/UserContext';
 import ProductCard from './ProductCard/ProductCard';
-import useBusinessProducts from '../../hooks/useBusinessProducts';
 import ShoppingCartIcon from '../../contexts/ShoppingCartIcon'; // Import the ShoppingCartIcon
 import {useNavigation} from '@react-navigation/native';
+import {useProductList}  from '../../hooks/useProducts'; 
+import {RootStackParamList} from '../../types/models';
+import { StackNavigationProp } from '@react-navigation/stack';
+
 
 const ProductList = () => {
-  const {businessProducts, isLoading} = useBusinessProducts();
-  console.log('Fetched Products:', businessProducts);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const {addToCart} = useCart();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [quantities, setQuantities] = useState<{[key: string]: number}>({});
-  const [returnQuantities, setReturnQuantities] = useState<{[key: string]: number}>({});
-  const navigation = useNavigation();
+  
+  // Use our product hook
+  const {
+    businessProducts,
+    isLoading,
+    successMessage,
+    quantities,
+    returnQuantities,
+    updateQuantity,
+    updateReturnQuantity,
+    handleAddToCart
+  } = useProductList();
 
-  // Initialize product quantities when products are fetched
-  React.useEffect(() => {
-    const initialQuantities = businessProducts.reduce(
-      (acc: {[key: string]: number}, businessProduct: BusinessProduct) => {
-        acc[businessProduct.product.id] = 0;
-        return acc;
-      },
-      {},
-    );
-    setQuantities(initialQuantities);
-    setReturnQuantities(initialQuantities); // Initialize return quantities as well
-  }, [businessProducts]);
-
-  const updateQuantity = (productId: string, increment: boolean) => {
-    setQuantities(prev => ({
-      ...prev,
-      [productId]: Math.max(0, prev[productId] + (increment ? 1 : -1)),
-    }));
-  };
-
-  const updateReturnQuantity = (productId: string, increment: boolean) => {
-    setReturnQuantities(prev => ({
-      ...prev,
-      [productId]: Math.max(0, prev[productId] + (increment ? 1 : -1)),
-    }));
-  };
-
-  const handleAddToCart = (businessProduct: BusinessProduct) => {
-    const quantity = quantities[businessProduct.product.id] || 0;
-    const returnQuantity = returnQuantities[businessProduct.product.id] || 0;
-    
-    // Check if at least one of quantity or returnQuantity is greater than 0
-    if (quantity > 0 || returnQuantity > 0) {
-      addToCart({
-        businessProduct,
-        quantity,
-        returnQuantity, // Add return quantity to cart item
-      });
-
-      setSuccessMessage('מוצר נוסף לסל בהצלחה');
-
-      // Reset quantities after adding to cart
-      setQuantities(prev => ({
-        ...prev,
-        [businessProduct.product.id]: 0,
-      }));
-      
-      setReturnQuantities(prev => ({
-        ...prev,
-        [businessProduct.product.id]: 0,
-      }));
-
-      // Hide the message after 2 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 2000);
-    } else {
-      Alert.alert('שגיאה', 'נא לבחור כמות להזמנה או החזרה לפני הוספה לסל');
-    }
-  };
-
-  // Function to navigate to ShoppingCart screen
   const navigateToShoppingCart = () => {
     navigation.navigate('ShoppingCart');
   };
@@ -105,7 +49,6 @@ const ProductList = () => {
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar />}

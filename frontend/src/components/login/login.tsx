@@ -10,7 +10,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import {API_BASE_URL, RootStackParamList} from '../../../App.tsx';
+import { RootStackParamList} from '../../types/models.ts';
 import {
   GoogleSignin,
   GoogleSigninButton,

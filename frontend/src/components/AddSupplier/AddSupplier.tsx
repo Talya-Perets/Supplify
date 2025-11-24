@@ -11,15 +11,11 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import Sidebar from '../Sidebar/sidebar';
-import {API_BASE_URL, RootStackParamList} from '../../../App';
-import {Alert} from 'react-native';
+import { RootStackParamList} from '../../types/models';
 import styles from './AddSupplier.styles';
-import {doGet, doPost} from '../../util/HTTPRequests';
-import {globals} from '../../util/Globals';
-import {Supplier} from '../../types/models';
-import {LoginContext} from '../../contexts/LoginContext';
-import {LoginContextType} from '../../contexts/UserContext';
 import {Dropdown} from 'react-native-element-dropdown';
+import useSuppliers from '../../hooks/useSuppliers';
+
 
 type AddSupplierScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -27,106 +23,21 @@ type AddSupplierScreenNavigationProp = StackNavigationProp<
 >;
 const AddSupplierScreen = () => {
   const navigation = useNavigation<AddSupplierScreenNavigationProp>();
-  const {userInfo} = useContext(LoginContext) as LoginContextType;
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState(-1);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [value, setValue] = useState(null);
-  const [suppliersUpdated, setSuppliersUpdated] = useState(false);
 
-  const [supplierData, setSupplierData] = useState({
-    companyName: '',
-    name: '',
-    email: '',
-    phone: '',
-  });
+  const {
+    suppliers,
+    supplierData,
+    setSupplierData,
+    selectedSupplierId,
+    handleSupplierChange,
+    handleAddSupplier,
+    loading,
+    error
+  } = useSuppliers();
 
-  const handleSupplierChange = (value: number) => {
-    setSelectedSupplierId(value);
-
-    if (value !== -1) {
-      setSupplierData(prev => ({...prev, companyName: ''}));
-    }
-  };
-
-  const handleAddSupplier = async () => {
-    if (!supplierData.name || !supplierData.email || !supplierData.phone) {
-      Alert.alert('Error', 'Please fill in all required details');
-      return;
-    }
-    try {
-      //If a supplier is selected but companyName is empty → Add Agent
-      if (selectedSupplierId !== -1) {
-        const response = await doPost(globals.AGENTS.addAgent, {
-          supplierId: selectedSupplierId,
-          businessId: userInfo.businessId,
-          name: supplierData.name,
-          email: supplierData.email,
-          phone: supplierData.phone,
-        });
-
-        if (response.status === 200) {
-          Alert.alert('Success', 'Agent added successfully', [{text: 'OK'}]);
-          resetForm();
-        } else {
-          throw new Error(response.data.message || 'Failed to add agent');
-        }
-        return;
-      }
-
-      //If companyName is not empty → Add Supplier
-      if (supplierData.companyName) {
-        const response = await doPost(globals.SUPPLIERS.createSupplier, {
-          companyName: supplierData.companyName,
-          name: supplierData.name,
-          email: supplierData.email,
-          phone: supplierData.phone,
-          businessId: userInfo.businessId,
-        });
-
-        if (response.status === 200) {
-          Alert.alert('Success', 'Supplier added successfully', [{text: 'OK'}]);
-          resetForm();
-          setSuppliersUpdated(prev => !prev);
-        } else {
-          throw new Error(response.data.message || 'Failed to add supplier');
-        }
-        return;
-      }
-
-      Alert.alert('Error', 'Please fill in all supplier details');
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Network error. Please try again.');
-    }
-  };
-
-  // Helper function to reset form fields
-  const resetForm = () => {
-    setSupplierData({
-      companyName: '',
-      name: '',
-      email: '',
-      phone: '',
-    });
-    setSelectedSupplierId(-1);
-  };
-
-  useEffect(() => {
-    const getAllSuppliers = async () => {
-      try {
-        const response = await doGet(globals.SUPPLIERS.getAllSuppliers);
-        if (response.status === 200) {
-          setSuppliers(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching suppliers:', error);
-      }
-    };
-
-    getAllSuppliers();
-  }, [suppliersUpdated]);
-
+  
   return (
     <SafeAreaView style={styles.container}>
       {isSidebarVisible && <Sidebar />}

@@ -62,6 +62,10 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: 'bold',
     },
+    disabledButton: {
+  backgroundColor: '#cccccc',
+  opacity: 0.7,
+},
     imagePickerButton: {
       backgroundColor: '#E1E1E1',
       padding: 10,

@@ -23,46 +23,11 @@ import { OrderProvider } from './src/contexts/OrderContext';
 import Managerscreen from './src/components/ManagerScreen/Managerscreen';
 import ApprovalOrderScreen from './src/components/ApprovalOrder';
 
+import { RootStackParamList } from './src/types/models';
 
 import notifee, { AndroidImportance } from '@notifee/react-native';
 
 export const API_BASE_URL = 'http://10.0.2.2:8080';
-
-// Define OrderProductDetails interface for better type safety across the app
-export interface OrderProductDetails {
-  productName: string;
-  barcode: string;
-  imageUrl: string;
-  orderedQuantity: number;
-  deliveredQuantity: number;
-  unitPrice: number;
-  subtotal: number;
-  return_requested: number;
-  return_approved:number;
-
-}
-
-export type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  ForgotPassword: undefined;
-  Home: undefined;
-  AddSupplier: undefined;
-  AddProduct: undefined;
-  SuppliersList: undefined;
-  ProductList: undefined;
-  OrderList: undefined;
-  ShoppingCart: undefined;
-  EmployeeRegistration: undefined;
-  SearchProduct: undefined;
-  Managerscreen: undefined; 
-  OrderDetails: { orderId?: number };
-  ApprovalOrder: { orderId: number };
-  ConfirmOrder: { 
-    orderDetails: OrderProductDetails[];
-    orderId: number;
-  };
-};
 
 const Stack = createStackNavigator<RootStackParamList>();
 

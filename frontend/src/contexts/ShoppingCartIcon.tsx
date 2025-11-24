@@ -1,21 +1,23 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useEffect, useState} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {useNavigation} from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types/models';
 
-// You can import your cart context here if you have one
-// import {CartContext} from '../../contexts/CartContext';
 
 interface ShoppingCartIconProps {
   onPress?: () => void;
 }
 
 const ShoppingCartIcon: React.FC<ShoppingCartIconProps> = ({onPress}) => {
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
   // Use your actual cart context
   // For example:
   // import {CartContext} from '../../contexts/CartContext';
@@ -23,7 +25,6 @@ const ShoppingCartIcon: React.FC<ShoppingCartIconProps> = ({onPress}) => {
   // 
   // For now, let's use a dummy state that you can replace with your real implementation
   const [itemCount, setItemCount] = useState(0);
-  const navigation = useNavigation();
 
   // You would update this effect to listen to your actual cart
   useEffect(() => {

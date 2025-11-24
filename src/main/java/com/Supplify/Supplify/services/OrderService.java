@@ -203,17 +203,14 @@ public class OrderService {
 
         orderRepo.save(order);
 
-        // עדכון הכמויות שהתקבלו בפועל וסה"כ מחיר לכל מוצר
         for (OrderProductUpdateDTO product : orderConfirmation.getReceivedProducts()) {
             OrderProduct orderProduct = orderProductRepo
                     .findByIdOrderIdAndIdProductId(order.getId(), product.getProductId())
                     .orElseThrow(() -> new RuntimeException("Order product not found for order " +
                             order.getId() + " and product " + product.getProductId()));
 
-            // עדכון כמות בפועל
             orderProduct.setActualQuantity(product.getActualQuantity());
 
-            // חישוב ועדכון סה"כ תשלום עבור המוצר
             double totalProductPrice = product.getActualQuantity() * product.getUnitPrice();
             orderProduct.setTotalProductPrice(totalProductPrice);
 

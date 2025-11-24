@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../App';
+import { RootStackParamList } from '../types/models';
 import { LoginContext } from '../contexts/LoginContext';
 import { LoginContextType } from '../contexts/UserContext';
 import { doGet, doPost } from '../util/HTTPRequests';

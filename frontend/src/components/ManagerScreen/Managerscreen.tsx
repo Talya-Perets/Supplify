@@ -13,10 +13,10 @@ import Sidebar from '../Sidebar/sidebar';
 import styles from './ManagerScreen.styles';
 import { LoginContext } from '../../contexts/LoginContext';
 import { LoginContextType } from '../../contexts/UserContext';
-import { doGetBusinessUsers, doDeleteUser } from '../../util/HTTPRequests';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../../App';
+import { RootStackParamList } from '../../types/models';
+import {useUser} from '../../hooks/authHooks'
 
 // Define navigation type for this screen
 type ManagerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Managerscreen'>;
