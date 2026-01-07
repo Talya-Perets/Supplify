@@ -48,6 +48,9 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "fk_role"))
     private Role role;
 
+    @Column(name = "device_token", length = 255)  // New field for FCM token
+    private String deviceToken;
+
     public User(String firstName, String lastName, String username, String password, String phone, Business business, Role role) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -57,4 +60,5 @@ public class User {
         this.business = business;
         this.role = role;
     }
+
 }

@@ -1,4 +1,5 @@
 package com.Supplify.Supplify.entities;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,14 +25,10 @@ public class Product {
     @Column(name = "description", nullable = false, length = 45)
     private String description;
 
-    @Column(name = "stock", nullable = false, length = 45)
-    private int stock;
-
-    public Product(String id,Supplier supplier, String productName, String description, int stock) {
+    public Product(String id, Supplier supplier, String productName, String description) {
         this.id = id;
         this.supplier = supplier;
         this.productName = productName;
         this.description = description;
-        this.stock = stock;
     }
 }

@@ -1,92 +1,96 @@
 package com.Supplify.Supplify.controllers;
-
+import com.Supplify.Supplify.DTO.*;
 import com.Supplify.Supplify.entities.Order;
-import com.Supplify.Supplify.entities.User;
-import com.Supplify.Supplify.entities.Business;
 import com.Supplify.Supplify.services.OrderService;
-import lombok.Getter;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.Supplify.Supplify.DTO.OrderResponseDTO;
+
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("orders")
 @RequiredArgsConstructor
 public class OrderController {
     private final Logger logger = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<?> createOrder(
-            @RequestBody OrderRequest orderRequest) {
 
+    @PostMapping("/CreateOrder")
+    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request) {
+        Order newOrder = orderService.createOrder(request);
+        return ResponseEntity.ok(newOrder);
+    }
+
+    @GetMapping("/getOrders")
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersByBusiness(@RequestParam int businessId) {
+        List<Order> orders = orderService.get(businessId);
+
+        if (orders == null || orders.isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList()); // Return an empty list if no orders
+        }
+
+        // Convert to DTOs
+        List<OrderResponseDTO> orderDTOs = orders.stream()
+                .map(order -> new OrderResponseDTO(order, order.getAgent().getSupplier().getCompanyName())) // Assuming `agent` represents the supplier
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(orderDTOs);
+    }
+
+    @GetMapping("/getOrderInfo")
+    public List<OrderProductDetails> getOrderProducts(@RequestParam int orderId) {
+        List<OrderProductDetails> orderProducts =orderService.getOrderProducts(orderId);
+        System.out.println("🟢 JSON Response: " + new Gson().toJson(orderProducts));
+        return orderService.getOrderProducts(orderId);
+    }
+
+
+
+    @GetMapping("/getPendingOrders")
+    public List<Integer> getPendingOrderProducts(@RequestParam int businessId) {
+        logger.info("Fetching all pending orders:");
+        return orderService.getPendingOrders(businessId);
+    }
+
+    @GetMapping("/getActiveOrders")
+    public List<Integer> getPendingActiveOrderProducts(@RequestParam int businessId) {
+        logger.info("Fetching all active orders:");
+        return orderService.getActiveOrders(businessId);
+    }
+
+    @PostMapping("/OrderConfirm")
+    public ResponseEntity<?> updateOrderStatus(@RequestParam int orderId) {
+        orderService.OrderConfirmation(orderId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/updateOrderReceived")
+    public ResponseEntity<?> updateOrderReceived(
+            @RequestBody OrderConfirmationDTO orderConfirmation) {
         try {
-            validateOrderRequest(orderRequest);
+            logger.info("Received orderConfirmation: {}", orderConfirmation.toString());
 
-            Order createdOrder = orderService.createOrder(
-                    orderRequest.getUser(),
-                    orderRequest.getBusiness(),
-                    orderRequest.getTotalAmount(),
-                    orderRequest.getStatus()
-            );
+            logger.info("Updating order {} as received with {} products",
+                    orderConfirmation.getOrderId(),
+                    orderConfirmation.getReceivedProducts().size());
 
-            return ResponseEntity.status(201).body(createdOrder);
+            orderService.updateOrderReceived(orderConfirmation);
 
-        } catch (ValidationException e) {
-            logger.warn("Validation failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error("Error processing order creation", e);
-            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+            logger.error("Error updating order received status: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to update order: " + e.getMessage());
         }
     }
 
-    @GetMapping("/business/{businessId}")
-    public ResponseEntity<List<Order>> getOrdersByBusiness(@PathVariable int businessId) {
-        logger.info("Fetching orders for business ID: {}", businessId);
-        List<Order> orders = orderService.getOrdersByBusinessId(businessId);
-        return ResponseEntity.ok(orders);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable int userId) {
-        logger.info("Fetching orders for user ID: {}", userId);
-        List<Order> orders = orderService.getOrdersByUserId(userId);
-        return ResponseEntity.ok(orders);
-    }
-
-    private void validateOrderRequest(OrderRequest orderRequest) throws ValidationException {
-        if (orderRequest.getUser() == null) {
-            throw new ValidationException("User is required");
-        }
-        if (orderRequest.getBusiness() == null) {
-            throw new ValidationException("Business is required");
-        }
-        if (orderRequest.getTotalAmount() <= 0) {
-            throw new ValidationException("Total amount must be greater than zero");
-        }
-        if (orderRequest.getStatus() == null || orderRequest.getStatus().isEmpty()) {
-            throw new ValidationException("Order status is required");
-        }
-    }
-
-    private static class ValidationException extends Exception {
-        public ValidationException(String message) {
-            super(message);
-        }
-    }
-
-    @Getter
-    @Setter
-    public static class OrderRequest {
-        private User user;
-        private Business business;
-        private int totalAmount;
-        private String status;
-    }
 }

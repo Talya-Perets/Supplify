@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+// src/components/AddProduct/AddProduct.tsx
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,18 +7,21 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Alert,
-  Image,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
-import Sidebar from '../../components/sidebar-component';
-import {RootStackParamList, API_BASE_URL} from '../../../App';
-import {launchImageLibrary} from 'react-native-image-picker';
-import styles from './AddProduct.styles';
-import {doPost} from "../../util/HTTPRequests.ts";
-import { globals } from '../../util/Globals.ts';
+import Sidebar from '../Sidebar/sidebar.tsx';
+import { RootStackParamList } from '../../types/models.ts';
+import styles from './AddProduct.styls';
+import { LoginContext } from '../../contexts/LoginContext.tsx';
+import { LoginContextType } from '../../contexts/UserContext.tsx';
+import { Dropdown } from 'react-native-element-dropdown';
+import ImagePickerComponent from '../../util/ImagePickerComponent.tsx';
+
+// Import the hooks we need
+import useSupplierList from '../../hooks/useSuppliers';
+import { useProductForm } from '../../hooks/useProducts.ts';
 
 type AddProductScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,82 +32,28 @@ const AddProductScreen = () => {
   const navigation = useNavigation<AddProductScreenNavigationProp>();
   const [userRole] = useState<'manager' | 'employee'>('manager');
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const { userInfo } = useContext(LoginContext) as LoginContextType;
+  
+  // Use suppliers hook to get suppliers list
+  const { suppliers, loading: suppliersLoading } = useSupplierList();
+  
+  // Use products hook for product management
+  const {
+    productData,
+    setProductData,
+    selectedSupplierId,
+    setSelectedSupplierId,
+    loading: productLoading,
+    handleImageSelected,
+    handleAddProduct
+  } =  useProductForm();
 
-  const [productData, setProductData] = useState({
-    id: '',
-    productName: '',
-    productDescription: '',
-    supplierId: '',
-    stock: '',
-  });
-
-  const handleAddProduct = async () => {
-    // Validate input fields
-    if (!productData.id || !productData.productName  || !productData.supplierId) {
-      Alert.alert('Error', 'Please fill in all required product details');
-      return;
-    }
-
-    try {
-      const response = await doPost(globals.PRODUCT.createProduct, {
-        id: productData.id,
-        productName: productData.productName,
-        productDescription: productData.productDescription || '',
-        supplierId: productData.supplierId,
-        stock: productData.stock || 0,
-      });
-
-      if (response.status === 201) {
-        Alert.alert(
-          'Success',
-          'Product added successfully',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Reset form fields
-                setProductData({
-                  id: '',
-                  productName: '',
-                  productDescription: '',
-                  supplierId: '',
-                  stock: ''
-                });
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          'Error',
-          response.data?.message || 'Failed to add product'
-        );
-      }
-    } catch (error) {
-      console.error('Error adding product:', error);
-
-      Alert.alert(
-        'Error',
-        'Network error. Please try again.'
-      );
-    }
-  };
-
-  const handleImagePicker = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets[0].uri) {
-        // setProductData({ ...productData, image: response.assets[0].uri });
-      }
-    });
-  };
+  // Dropdown selected value
+  const [value, setValue] = useState(-1);
 
   return (
     <SafeAreaView style={styles.container}>
-      {isSidebarVisible && <Sidebar userRole={userRole} />}
+      {isSidebarVisible && <Sidebar />}
       <View style={styles.mainContent}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -118,13 +68,32 @@ const AddProductScreen = () => {
         </View>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.inputContainer}>
+            <Dropdown
+              data={[
+                { label: 'בחר ספק', value: -1 },
+                ...suppliers.map(supplier => ({
+                  label: supplier.companyName,
+                  value: supplier.supplierId,
+                })),
+              ]}
+              labelField="label"
+              valueField="value"
+              placeholder="בחר ספק"
+              value={value}
+              onChange={item => {
+                setValue(item.value);
+                setSelectedSupplierId(item.value);
+              }}
+              style={styles.dropdownContainer}
+              placeholderStyle={styles.placeholder}
+              selectedTextStyle={styles.selectedText}
+              itemTextStyle={{ textAlign: 'right', writingDirection: 'rtl' }}
+            />
             <TextInput
               style={styles.input}
               placeholder="ברקוד"
               value={productData.id}
-              onChangeText={text =>
-                setProductData({...productData, id: text})
-              }
+              onChangeText={text => setProductData({ ...productData, id: text })}
               keyboardType="numeric"
             />
             <TextInput
@@ -132,43 +101,48 @@ const AddProductScreen = () => {
               placeholder="שם מוצר"
               value={productData.productName}
               onChangeText={text =>
-                setProductData({...productData, productName: text})
+                setProductData({ ...productData, productName: text })
               }
             />
-
-
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="תיאור מוצר"
               value={productData.productDescription}
               onChangeText={text =>
-                setProductData({...productData, productDescription: text})
+                setProductData({ ...productData, productDescription: text })
               }
               multiline
             />
             <TextInput
               style={styles.input}
-              placeholder="שם ספק"
-              value={productData.supplierId}
+              placeholder="מחיר מוצר"
+              value={productData.price}
               onChangeText={text =>
-                setProductData({...productData, supplierId: text})
+                setProductData({ ...productData, price: text })
               }
+              keyboardType="numeric"
             />
-
             {userRole === 'manager' && (
               <TextInput
                 style={styles.input}
                 placeholder="מלאי מתבקש"
                 value={productData.stock}
                 onChangeText={text =>
-                  setProductData({...productData, stock: text})
+                  setProductData({ ...productData, stock: text })
                 }
                 keyboardType="numeric"
               />
             )}
+            <ImagePickerComponent onImageSelected={handleImageSelected} />
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleAddProduct}>
-            <Text style={styles.buttonText}>הוסף מוצר</Text>
+          <TouchableOpacity 
+            style={[styles.button, (suppliersLoading || productLoading) && styles.disabledButton]} 
+            onPress={handleAddProduct}
+            disabled={suppliersLoading || productLoading}
+          >
+            <Text style={styles.buttonText}>
+              {(suppliersLoading || productLoading) ? 'טוען...' : 'הוסף מוצר'}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </View>

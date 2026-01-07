@@ -18,4 +18,8 @@ public class RoleService {
     public Role getRoleById(UserRoleEnum roleId) {
         return roleRepo.findById(roleId.getValue()).orElse(null);
     }
+
+    public Role getRoleByName(String roleName) {
+        return roleRepo.findByName(roleName);
+    }
 }
